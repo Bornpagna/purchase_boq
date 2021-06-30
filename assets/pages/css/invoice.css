@@ -1,0 +1,61 @@
+/* Cubic Bezier Transition */
+/***
+Invoice page
+***/
+
+@font-face{
+  font-family: KhmerBTT;
+  src:url('../../kh-font/KhmerOSbattambang.woff');
+}
+
+.invoice .row .col-xs-12{
+  font-family: KhmerBTT !important;
+  /*padding-bottom: 12px !important;*/
+}
+
+.invoice {
+  font-family: KhmerBTT !important;
+  margin: 0;
+  padding: 0;}
+.invoice table {
+  width:100% !important;
+    margin: 0px 0 0px 0; }
+
+.invoice .invoice-logo {
+  margin-bottom: 20px; }
+
+.invoice .invoice-logo p {
+  padding: 5px 0;
+  font-size: 26px;
+  line-height: 28px;
+  text-align: right; }
+
+.invoice .invoice-logo p span {
+  display: block;
+  font-size: 14px; }
+
+.invoice .invoice-logo-space {
+  margin-bottom: 15px; }
+
+.invoice .invoice-payment strong {
+  margin-right: 5px; }
+
+.invoice .invoice-block {
+  text-align: right; }
+
+.invoice .invoice-block .amounts {
+  margin-top: 20px;
+  font-size: 14px; 
+ }
+.table-report > thead > tr > th {
+  background: #3598dc !important;
+  color: white !important;
+} 
+
+.table-report > tbody > tr >th,.table-report > tbody > tr > td, .table-report > tfoot > tr > td, .table-report > tfoot > tr > th, .table-report > thead > tr > td, .table-report > thead > tr > th {
+  padding: 2px 5px 3px 5px !important;
+  line-height: 1.42857 !important;
+  vertical-align: top !important;
+  /*border-top: 1px solid #e7ecf1 !important;*/
+  border: 1px solid #090909 !important;
+}

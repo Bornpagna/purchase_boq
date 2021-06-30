@@ -1,0 +1,16 @@
+@font-face {
+   font-family: myKhHanuman;
+   src: url('<?=base_url('assets/kh-font/Hanuman.woff') ?>');
+}
+@font-face {
+   font-family: myKhFreehand;
+   src: url('<?=base_url('assets/kh-font/Kh-Freehand.woff') ?>');
+}
+@font-face {
+   font-family: myKhBattambang;
+   src: url('<?=base_url('assets/kh-font/KhmerOSbattambang.woff') ?>');
+}
+@font-face {
+   font-family: myKhMetal;
+   src: url('<?=base_url('assets/kh-font/Kh-Metal-Chrieng.woff') ?>');
+}
