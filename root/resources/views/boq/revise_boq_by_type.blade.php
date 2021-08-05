@@ -158,7 +158,7 @@
 								</div>
 							</div>
 						</div> --}}
-						<div class="row">
+						{{-- <div class="row">
 							<div class="col-md-5">
 							</div>
 							<div class="col-md-6">
@@ -178,7 +178,7 @@
 							<div class="col-md-1">
 								<button type="button" class="btn btn-success boq-button-add-working-type" >{{trans('lang.add')}}</button>
 							</div>
-						</div>
+						</div> --}}
 						<table class="table table-hover no-footer" id="table_boq">
 							<thead>
 								<tr>

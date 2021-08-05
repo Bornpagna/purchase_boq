@@ -109,12 +109,13 @@ class OrderController extends Controller
 						'caption' 	=> trans('lang.order'),
 				],
 			],			
-			'rounte'		=> url("purch/order/dt"),
+			'rounte'			=> url("purch/order/dt"),
+			'rounte_request'	=> url("purch/request/dt"),
 		];
 		
-		// if(hasRole('purchase_order_add')){
+		if(hasRole('purchase_order_add')){
 			$data = array_merge($data, ['rounteAdd'=> url('purch/order/add')]);
-		// }
+		}
 		return view('purch.order.index',$data);
 	}
 	
@@ -141,7 +142,8 @@ class OrderController extends Controller
 			'rounteBack'	=> url('purch/order'),
 		];
 		if($cid){
-			$id = decrypt($cid);
+			// $id = decrypt($cid);
+			$id = $cid;
 			$head = Order::find($id);
 			$data = array_merge($data, ['head'=>$head]);
 			$body = OrderItem::where(['po_id'=>$id])->get();
@@ -181,6 +183,38 @@ class OrderController extends Controller
 			return redirect()->back();
 		}
 	}
+
+	public function makeOrder(Request $request, $id){
+		$id = $id;
+		$obj = Requests::find($id);
+		if($obj){
+			$data = [
+				'title'			=> trans('lang.order'),
+				'icon'			=> 'fa fa-edit',
+				'small_title'	=> trans('lang.edit'),
+				'background'	=> '',
+				'link'			=> [
+					'home'	=> [
+							'url' 		=> url('/'),
+							'caption' 	=> trans('lang.home'),
+					],
+					'index'	=> [
+							'url' 		=> url('purch/order'),
+							'caption' 	=> trans('lang.order'),
+					],
+					'edit'	=> [
+							'caption' 	=> trans('lang.edit'),
+					],
+				],
+				'rounteSave'	=> url('purch/order/save'),
+				'rounteBack'	=> url('purch/order'),
+				'obj'	=> $obj,
+			];
+			return view('purch.order.make_order',$data);
+		}else{
+			return redirect()->back();
+		}
+	}
 	
 	public function getDt(Request $order)
     {
@@ -193,7 +227,7 @@ class OrderController extends Controller
 			DB::raw("(SELECT {$prefix}requests.`ref_no` FROM {$prefix}requests WHERE {$prefix}requests.`id` = {$prefix}orders.pr_id) AS pr_no"),
 			DB::raw("(SELECT CONCAT({$prefix}warehouses.`address`, ' (',{$prefix}warehouses.`name`,')')AS `name` FROM {$prefix}warehouses WHERE {$prefix}warehouses.`id` = {$prefix}orders.delivery_address) AS warehouse"),
 			DB::raw("(SELECT CONCAT({$prefix}suppliers.`desc`,' (',`{$prefix}suppliers`.`name`,')') AS `name` FROM {$prefix}suppliers WHERE {$prefix}suppliers.`id` = {$prefix}orders.sup_id) AS supplier"),
-			DB::raw("(SELECT {$prefix}users.`name` FROM {$prefix}users WHERE {$prefix}users.`id` = {$prefix}orders.ordered_by)AS ordered_by"),
+			DB::raw("(SELECT {$prefix}users.`name` FROM {$prefix}users WHERE {$prefix}users.`id` = {$prefix}orders.ordered_by) AS ordered_by"),
 		];
 		$orders  = Order::select($columns)->where('pro_id',$pro_id)->where('trans_status','>',0);
 
@@ -299,6 +333,7 @@ class OrderController extends Controller
 	}
 
     public function save(Request $request){
+		// print_r($request->all());
 		$rules = [
 			'reference_no' 		=>'required|max:20|unique_order',
 			'trans_date' 		=>'required|max:20',
@@ -326,8 +361,9 @@ class OrderController extends Controller
 				$rules['line_grend_total.'.$i]	= 'required';
 			}
 		}
-		Validator::make($request->all(),$rules)->validate();
 		
+		// Validator::make($request->all(),$rules)->validate();
+		// exit;
 		try {
 			DB::beginTransaction();
 			$trans_date = date("Y-m-d", strtotime($request->trans_date));
@@ -373,8 +409,10 @@ class OrderController extends Controller
 
 			if(!$id = DB::table('orders')->insertGetId($data)){
 				throw new \Exception("Order not insert");
+				print_r(1);exit;
 			}
-
+			// exit;
+			$is_remain_qty = 1;
 			if(count($request['line_index']) > 0){
 				for($i=0;$i<count($request['line_index']);$i++){
 					$details[] = [
@@ -420,8 +458,19 @@ class OrderController extends Controller
 					$new_qty = (floatval($stock_qty_po) / floatval($stock_qty_pr)) + floatval($pr_ordered_qty);
 					
 					DB::table('request_items')->where(['pr_id'=>$request->pr_no,'line_no'=>$request['line_index'][$i],'item_id'=>$request['line_item'][$i]])->update(['ordered_qty'=>$new_qty]);
+					$remainItem = RequestItem::where(['pr_id'=>$request->pr_no,'line_no'=>$request['line_index'][$i],'item_id'=>$request['line_item'][$i]])->first();
+					// print_r($remainItem->ordered_qty+$remainItem->closed_qty."-".$remainItem->qty."=".(($remainItem->ordered_qty + $remainItem->closed_qty) - $remainItem->qty."<br />"));
+					if((($remainItem->ordered_qty + $remainItem->closed_qty) - $remainItem->qty) <= 0){
+						$is_remain_qty = 0;
+					}
 				}
 			}
+			// print_r($is_remain_qty);
+			// exit;
+			if($is_remain_qty == 0){
+				DB::table("requests")->where('id',$request->pr_no)->update(["is_ordered"=>1]);
+			}
+			
 			DB::table('order_items')->insert($details);
 			DB::commit();
 			if($request->btnSubmit==1){

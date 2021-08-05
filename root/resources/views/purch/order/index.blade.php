@@ -9,8 +9,35 @@
         tr.shown td.details-control {
             background: url("{{url("assets/upload/temps/details_close.png")}}") no-repeat center center !important;
         }
+
+		td.request-details-control {
+            background: url("{{url("assets/upload/temps/details_open.png")}}") no-repeat center center !important;
+            cursor: pointer !important;
+        }
+        tr.shown td.request-details-control {
+            background: url("{{url("assets/upload/temps/details_close.png")}}") no-repeat center center !important;
+        }
 		.label-draft {
 			background-color: #7236d3;
+		}
+		.upload_boq_tab{
+			border-top: 0px !important;
+    		border: #ddd solid 1px;
+		}
+		.upload-nav-tab {
+			margin-bottom: 0px !important;
+		}
+		.padding-content-20{
+			padding:20px;
+		}
+		.padding-20{
+			padding:10px;
+		}
+		a.disabled {
+		/* Make the disabled links grayish*/
+		color: gray;
+		/* And disable the pointer events */
+		pointer-events: none;
 		}
 	</style>
 @endsection
@@ -42,32 +69,71 @@
 				</div>
 			</div>
 			<div class="portlet-body">
-				<?php if(Session::has('success')):?>
-					<div class="alert alert-success display-show">
-						<button class="close" data-close="alert"></button><strong>{{trans('lang.success')}}!</strong> {{Session::get('success')}} 
+				<ul class="nav nav-tabs upload-nav-tab" id="myTab" role="tablist">
+					<li class="nav-item active">
+						<a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">{{ trans('lang.pr_list') }}</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">{{ trans('lang.po_list') }}</a>
+					</li>
+				</ul>
+				<div class="tab-content upload_boq_tab padding-20" id="myTabContent">
+					<div class="tab-pane fade active in padding-20" id="home" role="tabpanel" aria-labelledby="home-tab">
+						<?php if(Session::has('success')):?>
+							<div class="alert alert-success display-show">
+								<button class="close" data-close="alert"></button><strong>{{trans('lang.success')}}!</strong> {{Session::get('success')}} 
+							</div>
+						<?php elseif(Session::has('error')):?>
+							<div class="alert alert-danger display-show">
+								<button class="close" data-close="alert"></button><strong>{{trans('lang.error')}}!</strong> {{Session::get('error')}} 
+							</div>
+						<?php endif; ?>
+						<table class="table table-striped table-bordered table-hover" id="request-table">
+							<thead>
+								<tr>
+									<th style="width: 3%;" class="all"></th>
+									<th width="10%" class="text-center all">{{ trans('lang.reference_no') }}</th>
+									<th width="5%" class="text-center all">{{ trans('lang.trans_date') }}</th>
+									<th width="5%" class="text-center all">{{ trans('lang.delivery_date') }}</th>
+									<th width="10%" class="text-center all">{{ trans('lang.request_by') }}</th>
+									<th width="15%" class="text-center all">{{ trans('lang.department') }}</th>
+									<th width="5%" class="text-center all">{{ trans('lang.status') }}</th>
+									<th width="25%" class="text-center">{{ trans('lang.desc') }}</th>
+									<th width="7%" class="text-center all">{{ trans('lang.action') }}</th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
 					</div>
-				<?php elseif(Session::has('error')):?>
-					<div class="alert alert-danger display-show">
-						<button class="close" data-close="alert"></button><strong>{{trans('lang.error')}}!</strong> {{Session::get('error')}} 
+					<div class="tab-pane fade padding-20" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+						<?php if(Session::has('success')):?>
+							<div class="alert alert-success display-show">
+								<button class="close" data-close="alert"></button><strong>{{trans('lang.success')}}!</strong> {{Session::get('success')}} 
+							</div>
+						<?php elseif(Session::has('error')):?>
+							<div class="alert alert-danger display-show">
+								<button class="close" data-close="alert"></button><strong>{{trans('lang.error')}}!</strong> {{Session::get('error')}} 
+							</div>
+						<?php endif; ?>
+						<table class="table table-striped table-bordered table-hover" id="my-table">
+							<thead>
+								<tr>
+									<th style="width: 3%;" class="all"></th>
+									<th width="15%" class="text-center all">{{ trans('lang.reference_no') }}</th>
+									<th width="15%" class="text-center all">{{ trans('lang.pr_no') }}</th>
+									<th width="5%" class="text-center all">{{ trans('lang.trans_date') }}</th>
+									<th width="5%" class="text-center all">{{ trans('lang.delivery_date') }}</th>
+									<th width="10%" class="text-center all">{{ trans('lang.sub_total') }}</th>
+									<th width="10%" class="text-center all">{{ trans('lang.discount') }}</th>
+									<th width="10%" class="text-center all">{{ trans('lang.grand_total') }}</th>
+									<th width="5%" class="text-center all">{{ trans('lang.status') }}</th>
+									<th width="8%" class="text-center all">{{ trans('lang.action') }}</th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
 					</div>
-				<?php endif; ?>
-				<table class="table table-striped table-bordered table-hover" id="my-table">
-					<thead>
-						<tr>
-							<th style="width: 3%;" class="all"></th>
-							<th width="15%" class="text-center all">{{ trans('lang.reference_no') }}</th>
-							<th width="15%" class="text-center all">{{ trans('lang.pr_no') }}</th>
-							<th width="5%" class="text-center all">{{ trans('lang.trans_date') }}</th>
-							<th width="5%" class="text-center all">{{ trans('lang.delivery_date') }}</th>
-							<th width="10%" class="text-center all">{{ trans('lang.sub_total') }}</th>
-							<th width="10%" class="text-center all">{{ trans('lang.discount') }}</th>
-							<th width="10%" class="text-center all">{{ trans('lang.grand_total') }}</th>
-							<th width="5%" class="text-center all">{{ trans('lang.status') }}</th>
-							<th width="8%" class="text-center all">{{ trans('lang.action') }}</th>
-						</tr>
-					</thead>
-					<tbody></tbody>
-				</table>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -82,6 +148,131 @@
 <script type="text/javascript">	
 	var objApproval = JSON.parse(convertQuot("{{\App\Model\ApproveOrder::select('po_id','role_id','approved_date','reject','approved_by',DB::raw('(SELECT pr_users.`name` FROM pr_users WHERE pr_users.`id`=approved_by)AS approve_name'))->get()}}"));
 
+	
+	
+	function formatRequest (d) {
+        var str = '';
+        str += '<table class="table table-striped details-table table-responsive"  id="sub-'+d.id+'">';
+            str += '<thead>';
+                str += '<tr>';
+					str += '<th style="width: 5%;">{{trans("lang.line_no")}}</th>';
+                    str += '<th style="width: 30%;">{{trans("lang.items")}}</th>';
+                    str += '<th style="width: 10%;">{{trans("lang.size")}}</th>';
+                    str += '<th style="width: 10%;">{{trans("lang.units")}}</th>';
+                    str += '<th style="width: 10%;">{{trans("lang.qty")}}</th>';
+                    str += '<th style="width: 20%;">{{trans("lang.desc")}}</th>';
+                    str += '<th style="width: 10%;">{{trans("lang.remark")}}</th>';
+                str += '</tr>';
+            str += '</thead>';
+        str +='</table>';
+        return str;
+    }
+	
+	var request_table = $('#request-table').DataTable({
+		"lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+		processing: true,
+		serverSide: true,
+		language: {"url": "{{url('assets/lang').'/'.config('app.locale').'.json'}}"},
+		ajax: '{{$rounte_request}}',
+		columns: [
+			{
+				className: 'request-details-control',
+				orderable: false,
+				searchable: false,
+				data: null,
+				defaultContent: ''
+			},
+			{data: 'ref_no', class:'text-center', name:'ref_no'},
+			{data: 'trans_date', class:'text-center', name:'trans_date'},
+			{data: 'delivery_date', name:'delivery_date'},
+			{data: 'request_by', name:'department'},
+			{data: 'department', name:'request_by'},
+			{data: 'trans_status', name:'trans_status'},
+			{data: 'note', name:'desc'},
+			{data: 'action', class :'text-center', orderable: false, searchable: false},
+		],
+		order: [[2, 'desc']],
+		fnCreatedRow:function(nRow, aData, iDataIndex){
+			console.log(aData);
+			$('td:eq(2)',nRow).html(formatDate(aData['trans_date']));
+			$('td:eq(3)',nRow).html(formatDate(aData['delivery_date']));
+			$status = '';
+			// Pending
+			if(aData['trans_status']==1 && aData["is_ordered"] == 0){
+				$status = '<span class="label label-warning" style="font-size: smaller;">{{trans("lang.pendding")}}</span>';
+			}
+			// Approving
+			else if(aData['trans_status']==2 && aData["is_ordered"] == 0){
+				$status = '<span class="label label-info" style="font-size: smaller;">{{trans("lang.approving")}}</span>';
+			}
+			// Complete
+			else if(aData['trans_status']==3 && aData["is_ordered"] == 0){
+				$status = '<span class="label label-success" style="font-size: smaller;">{{trans("lang.completed")}}</span>';
+			}
+			// Draft
+			else if(aData['trans_status']==5 && aData["is_ordered"] == 0){
+				$status = '<span class="label label-draft" style="font-size: smaller;">{{trans("lang.draft")}}</span>';
+			}
+			// Ordered
+			else if(aData["trans_status"] == 3 && aData["is_ordered"] == 1){
+				$status = '<span class="label label-draft" style="font-size: smaller;">{{trans("lang.ordered")}}</span>';
+			}
+			// Reject
+			else{
+				$status = '<span class="label label-danger" style="font-size: smaller;">{{trans("lang.rejected")}}</span>';
+			}
+			
+			$('td:eq(6)',nRow).html($status).addClass("text-center");
+			if(aData['trans_status']==3 && aData['is_ordered'] != 1){
+				$action = '<a onclick="onEdit(this)" title="{{trans("lang.make_order")}}" row_id="'+aData.id+'" row_rounte="{{url("purch/order/makeOrder")}}/'+aData.id+'">{{trans("lang.make_order")}}</a>';
+			}else{
+				$action = '<a class="disabled" title="{{trans("lang.make_order")}}" row_id="'+aData.id+'" >{{trans("lang.make_order")}}</a>';
+			}
+			$('td:eq(8)',nRow).html($action).addClass("text-center");
+		}
+	});
+	
+	$('#request-table tbody').on('click', 'td.request-details-control', function () {
+		var tr = $(this).closest('tr');
+		var row = request_table.row(tr);
+		var tableId = 'sub-' + row.data().id;
+		if(row.child.isShown()) {
+			row.child.hide();
+			tr.removeClass('shown');
+			objName = [];
+		}else{
+			row.child(formatRequest(row.data())).show();
+			initTableRequest(tableId,row.data());
+			$('#' + tableId+'_wrapper').attr('style','width: 99%;');
+			tr.addClass('shown');
+		}
+	});
+	
+	function initTableRequest(tableId, data) {
+		console.log(data);
+		$('#' + tableId).DataTable({
+			processing: true,
+			serverSide: true,
+			language: {"url": "{{url('assets/lang').'/'.config('app.locale').'.json'}}"},
+			paging:true,
+			filter:true,
+			info:true,
+			ajax: data.details_url,
+			columns: [
+				{ data: 'line_no', name: 'line_no' },
+				{ data: 'item', name: 'item' },
+				{ data: 'size', name: 'size' },
+				{ data: 'unit', name: 'unit' },
+				{ data: 'qty', name: 'qty' },
+				{ data: 'desc', name: 'desc' },
+				{ data: 'remark', name: 'remark' },
+			],fnCreatedRow:function(nRow, aData, iDataIndex){
+				$('td:eq(4)',nRow).html(formatNumber(aData['qty']));
+			}
+		});
+	}
+	
+	////// Order  ///////////
 	function format (d) {
         var str = '';
 		str += '<table class="table table-striped" width="100%">';

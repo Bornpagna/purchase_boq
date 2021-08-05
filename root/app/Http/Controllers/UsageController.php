@@ -76,8 +76,12 @@ class UsageController extends Controller
 
     public function GetItem(Request $request)
     {
+		// print_r($request->q);
     	try {
-
+			$where = ['status'=>1];
+			if(!empty($request["cat_id"])){
+				$where = array_merge($where,['cat_id'=>$request["cat_id"]]);
+			}
 			$limit  = 10;
 			$page   = 1;
 			$offset = 0;
@@ -94,11 +98,15 @@ class UsageController extends Controller
 
     		$select = ['*',DB::raw("id as item_id"),DB::raw("CONCAT(code,' (',name,')')AS text")];
 
-			$OrderItem  = Item::select($select)->where('items.code','like',''.($request->q).'%')
-						->where('status',1)
-						->orWhere('items.name','like',''.($request->q).'%')
-						->where('status',1)
-						->offset($offset)
+			$OrderItem  = Item::select($select)
+						->where($where);
+			if($request->q){
+				$OrderItem = $OrderItem->where(function ($query) use ($request) {
+						$query->orWhere('items.name','like','%'.($request->q).'%')->orWhere('items.code','like','%'.($request->q).'%');
+				});
+			}
+			
+			$OrderItem = $OrderItem->offset($offset)
 					    ->limit($limit)
 					    ->paginate($limit);
 

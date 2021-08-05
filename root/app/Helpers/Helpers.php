@@ -1,5 +1,9 @@
 <?php
 use App\Model\Setting;
+use App\Model\Boq;
+use App\Model\BoqHouse;
+use App\Model\BoqItem;
+use App\Model\SystemData;
 use Illuminate\Support\Facades\Session;
 use Intervention\Image\ImageManagerStatic as Image;
 
@@ -303,6 +307,26 @@ function getItemCost($item_id,$unit,$requestQty=0)
 	return $costing;
 }
 
+function romanize($num) {
+	$lookup = ['M'=>1000,'CM'=>900,'D'=>500,'CD'=>400,'C'=>100,'XC'=>90,'L'=>50,'XL'=>40,'X'=>10,'IX'=>9,'V'=>5,'IV'=>4,'I'=>1];
+	$integer = intval($num);
+	$result = '';
+		foreach($lookup as $roman => $value){
+			// Determine the number of matches
+			$matches = intval($integer/$value);
+		   
+			// Add the same number of characters to the string
+			$result .= str_repeat($roman,$matches);
+		   
+			// Set the integer to be the remainder of the integer and the value
+			$integer = $integer % $value;
+		   }
+		   
+		   // The Roman numeral should be built, return it
+		   return $result;
+		  
+}
+
 function getAllocateStock($warehouse_id, $item_id, $unit, $qty){
 	
 	$collectData = new \Illuminate\Support\Collection;
@@ -367,20 +391,71 @@ function getBOQs($id=NULL){
 	FROM `pr_boqs`".$where;
 	return DB::select($sql);
 }
+function getBoqWorkingType($id,$house_id = null){
+	// $where = ['status'=>1];
+	// $sql = "SELECT * FROM `pr_boq_items` JOIN `pr_system_datas` ON `pr_system_datas`.`id` = `pr_boq_items`.`working_type` WHERE `pr_boq_items`.`boq_id`=".$id;
+	// if($house_id != null){
+	// 	$sql = $sql." JOIN pr_boq_houses on pr_boq_items.boq_house_id = pr_boq_houses.house_id";
+	// }
+	// return DB::select($sql);
+	// print_r($id);
+	// print_r($house_id);
+
+	$working_type = Boq::select(
+		"boqs.id AS boq_id",
+		DB::raw("(SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boq_items`.`working_type`) AS working_type_name"),
+	"boq_houses.boq_house_code",
+	"boq_houses.house_id",
+	"houses.house_no" ,
+	"boq_items.working_type",
+	"boq_items.working_type AS id")
+	->join("boq_houses","boq_houses.boq_id","boqs.id")
+	->join("boq_items","boq_items.boq_house_id","boq_houses.id")
+	->join("houses","houses.id","boq_houses.house_id")->where("boqs.id",$id)->where("boq_houses.house_id",$house_id)->groupBy("boq_items.working_type")->get();
+	return $working_type;
+}
 function getBoqHouses($id=null){
 	$where = '';
 	if($id && $id!=0){
-		$where = ' WHERE `pr_boq_houses`.`boq_id` = '.$id;
+		$where = ' AND `pr_boq_houses`.`boq_id` = '.$id;
 	}
 	$sql = "SELECT * ,
 				(SELECT `pr_houses`.`house_no` FROM `pr_houses` WHERE `pr_houses`.id = `pr_boq_houses`.`house_id`) AS house,
 				(SELECT `pr_houses`.`house_desc` FROM `pr_houses` WHERE `pr_houses`.id = `pr_boq_houses`.`house_id`) AS house_desc
-			FROM `pr_boq_houses`".$where;
+			FROM `pr_boq_houses` WHERE pr_boq_houses.status = 1 ".$where;
 	return DB::select($sql);
+}
+
+function getBoqHouseItems($id,$house_id = null ,$working_type=null){
+	$boqItems = BoqItem::select(
+		'items.*',
+		'boq_items.*',
+		'items.cat_id',
+		'system_datas.name as working_type_name',
+		DB::raw('SUM(pr_boq_items.qty_std) as total_qty')
+	)->join('boq_houses','boq_houses.id','boq_items.boq_house_id')
+	->join('system_datas','system_datas.id','boq_items.working_type')
+	->join('items','items.id','boq_items.item_id')
+	->where('boq_houses.boq_id',$id);
+	if($house_id != null){
+		$boqItems = $boqItems->where('boq_houses.house_id',$house_id);
+	}
+	if($working_type != null){
+		$boqItems = $boqItems->where('boq_items.working_type',$working_type);
+	}
+	$boqItems = $boqItems->groupBy('boq_items.item_id')
+	->orderBy('boq_items.working_type')->get();
+	
+	return $boqItems; 
 }
 
 function getBOQItems($id){
 	$sql = "SELECT pr_boq_items.`id`, pr_boq_items.`item_id`, pr_boq_items.`house_id`, (SELECT pr_houses.house_no FROM pr_houses WHERE pr_houses.id = pr_boq_items.`house_id`) AS house_no, (SELECT pr_items.`code` FROM pr_items WHERE pr_items.`id` = pr_boq_items.`item_id`) AS `code`, (SELECT pr_items.`name` FROM pr_items WHERE pr_items.`id` = pr_boq_items.`item_id`) AS `name`, pr_boq_items.`unit`, pr_boq_items.`qty_std`, pr_boq_items.`qty_add` FROM pr_boq_items WHERE pr_boq_items.`boq_id` = $id"; return DB::select($sql);
+}
+
+function getBOQItemByWorkingType($id = null,$working_type = null){
+	$sql = "SELECT * FROM `pr_boq_items` JOIN `pr_items` ON `pr_items`.`id`=`pr_boq_items`.`item_id` WHERE `pr_boq_items`.`boq_id` =".$id." AND `pr_boq_items`.`working_type` = ".$working_type;
+	return DB::select($sql);
 }
 
 function getLineNo($id){

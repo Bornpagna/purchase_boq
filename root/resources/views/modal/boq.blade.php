@@ -104,7 +104,7 @@
 										{{-- <span class="required">*</span> --}}
 									</label>
 									<div class="col-md-12">
-										<select name="house_type_id[]" id="boq-house-type" class="form-control boq-house-type my-select2">
+										<select name="house_type_id" id="boq-house-type" class="form-control boq-house-type my-select2">
 											<option value=""></option>
 											{{getSystemData('HT')}}
 										</select>

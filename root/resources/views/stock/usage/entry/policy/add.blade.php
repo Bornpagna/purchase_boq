@@ -148,6 +148,13 @@
                                     <span class="help-block font-red bold"></span>
                                 </div>
                             </div>
+                             <!-- Note -->
+                             <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="trans_desc" class="control-label"><strong>{{ trans('lang.note') }}</strong></label>
+                                    <textarea class="form-control trans_desc" id="trans_desc" name="desc" rows="7" length="100" placeholder="{{ trans('lang.enter_text') }}"> </textarea>
+                                </div>
+                            </div>
                             <!-- Zone -->
                             @if(getSetting()->allow_zone == 1)
                             <div class="col-md-4">
@@ -174,6 +181,17 @@
                                 </div>
                             </div>
                             @endif
+
+                            <!-- Building -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="building_id" class="control-label"><strong>{{ trans('lang.building') }}</strong></label>
+                                    <select class="form-control select2 building_id" id="building_id" name="building_id">
+                                        
+                                    </select>
+                                    <span class="help-block font-red bold"></span>
+                                </div>
+                            </div>
                             <!-- Street -->
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -194,13 +212,18 @@
                                     <span class="help-block font-red bold"></span>
                                 </div>
                             </div>
-                            <!-- Note -->
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="trans_desc" class="control-label"><strong>{{ trans('lang.note') }}</strong></label>
-                                    <textarea class="form-control trans_desc" id="trans_desc" name="desc" rows="7" length="100" placeholder="{{ trans('lang.enter_text') }}"> </textarea>
-                                </div>
+
+                            <!-- Load Button -->
+                            <div class="col-md-4">
+                                {{-- <div class="form-group">
+                                    <label for="load_button" class="control-label"><strong> </strong></label>
+                                    <button type="button" class="load_button btn btn-success">{{ trans('lang.load_item') }}</button>
+                                </div> --}}
+                                <div class="form-actions">
+									<a class="btn blue bold" id="load-boq-item">{{trans('lang.load_item')}}</a>
+								</div>
                             </div>
+                           
                             <!-- Note Row color -->
                             <div class="col-md-12">
                                 <label for="trans_desc" class="control-label"><strong>{{ trans('lang.status') }}</strong></label>
@@ -231,11 +254,15 @@
                             <thead>
                                 <tr style="font-size:12px;">
                                     <th width="5%" class="text-center all">{{ trans('lang.line_no') }}</th>
-                                    <th width="30%" class="text-center all">{{ trans('lang.items') }}</th>
-                                    <th width="15%" class="text-center all">{{ trans('lang.boq') }}</th>
-                                    <th width="15%" class="text-center all">{{ trans('lang.stock') }}</th>
-                                    <th width="15%" class="text-center all">{{ trans('lang.qty') }}</th>
-                                    <th width="15%" class="text-center all">{{ trans('lang.units') }}</th>
+                                    {{-- <th width="10%" class="text-center all">{{ trans('lang.item_type') }}</th> --}}
+                                    <th width="15%" class="text-center all">{{ trans('lang.items') }}</th>
+                                    <th width="5%" class="text-center all">{{ trans('lang.size') }}</th>
+                                    <th width="10%" class="text-center all">{{ trans('lang.units') }}</th>
+                                    <th width="10%" class="text-center all">{{ trans('lang.qty_in_stock') }}</th>
+                                    <th width="10%" class="text-center all">{{ trans('lang.boq_qty') }}</th>
+                                    <th width="10%" class="text-center all">{{ trans('lang.remain_qty') }}</th>
+                                    <th width="10%" class="text-center all">{{ trans('lang.usage_qty') }}</th>
+                                    <th width="10%" class="text-center all">{{ trans('lang.remark') }}</th>
                                     <th width="5%" class="text-center all"><i class='fa fa-plus btnAdd' id="btnAdd"></i></th>
                                 </tr>
                             </thead>
@@ -263,6 +290,10 @@
 @section('javascript')
 <script type="text/javascript">	
     var objRef = [];
+    var index = 0;
+    function GetUnit(unit_stock) {
+		return $.ajax({url:'{{url("/stock/deliv/GetUnit")}}',type:'GET',dataType:'json',data:{unit_stock:unit_stock},async:false}).responseJSON;
+	}
 	isDuplicateArray = function(err) {
         var duplicate = false;
         err.sort();
@@ -308,27 +339,28 @@
 	$('#save_close,#save_new').on('click',function(){
         $('.form-message').empty();
 		$(this).prop('disabled', true);
-		if(chkValid([".reference_no",".trans_date",".warehouse_id",".reference",<?php if(getSetting()->allow_zone==1){echo '".zone_id",';} ?>,<?php if(getSetting()->allow_block==1){echo '".block_id",';} ?>,<?php if(getSetting()->usage_constructor==1){echo '".sub_const",';} ?>".engineer"])){ 
-            if(onSubmitFormCallback((self,msg) => {
-                $(self).addClass('invalid');
-                $('.form-message').append($('<li></li>').html(msg));
-            })){
+		// if(chkValid([".reference_no",".trans_date",".warehouse_id",".reference",<?php if(getSetting()->allow_zone==1){echo '".zone_id",';} ?>,<?php if(getSetting()->allow_block==1){echo '".block_id",';} ?>,<?php if(getSetting()->usage_constructor==1){echo '".sub_const",';} ?>".engineer"])){ 
+            // if(onSubmitFormCallback((self,msg) => {
+            //     $(self).addClass('invalid');
+            //     $('.form-message').append($('<li></li>').html(msg));
+            // })){
 				objRef = GetRef();
 				if (chkReference(objRef, '#reference')) {
 					$("#btnSubmit").val($(this).val());
 					$('#form-stock-entry').submit();
-				}else{
-					$(this).prop('disabled', false);
-					return false;
 				}
-			}else{
-				$(this).prop('disabled', false);
-				return false;
-			}
-		}else{
-			$(this).prop('disabled', false);
-			return false;
-		}
+                // else{
+				// 	$(this).prop('disabled', false);
+				// 	return false;
+				// }
+			// }else{
+			// 	$(this).prop('disabled', false);
+			// 	return false;
+			// }
+		// }else{
+		// 	$(this).prop('disabled', false);
+		// 	return false;
+		// }
 	});
 	
 	document.addEventListener("mousewheel", function(event){
@@ -519,6 +551,15 @@
             complete: complete
         });
     }
+
+    getBuildings = function(success,complete){
+        $.ajax({
+            url:"{{url('repository/getBuildings')}}",
+            type:'GET',
+            success: success,
+            complete: complete
+        });
+    }
     getStreets = function(success,complete){
         $.ajax({
             url:"{{url('repository/getStreets')}}",
@@ -563,6 +604,71 @@
         });
     }
 
+    /// Get house //////
+
+    /// get house All Trigger ///
+    function getHouseAllTrigger(){
+        var params = {
+            zone_id : null,
+            block_id : null,
+            building_id : null,
+            street_id : null,
+            house_type_id : null
+        }
+        zoneID = $("#zone_id").val();
+        blockID = $("#block_id").val();
+        buildingID = $("#building_id").val();
+        streetID = $("#street_id").val();
+        houseTypeID = $("#house_type_id").val();
+        if(zoneID){
+            params.zone_id = zoneID;
+        }
+        if(blockID){
+            params.block_id = blockID;
+        }
+        if(buildingID){
+            params.building_id = buildingID;
+        }
+        if(streetID){
+            params.street_id = streetID;
+        }
+        if(houseTypeID){
+            params.house_type_id = houseTypeID;
+        }
+
+        $.ajax({
+            url:"{{url('repository/getHousesByAllTrigger')}}",
+            type:'GET',
+            data:params,
+            success: function(result){
+                $(".house_id").empty();
+                $(".house_id").select2('val', null);
+                $(".house_id").append($('<option></option>').val('').text(''));
+                $.each(result,function(i,val){
+                    $(".house_id").append($('<option></option>').val(val.id).text(val.house_no));
+                });
+
+                // $("#boq-house").empty();
+                // $.each(result,function(key, val){
+                //     // if(boqHouse.length > 0){
+                //     // 	for(var i =0 ; i < boqHouse.length; i++){
+                //     // 		if(val.id == boqHouse[i].house_id){
+                //     // 			$("#boq-house").append($('<option selected></option>').val(val.id).text(val.house_no));
+                //     // 		}else{
+                //     // 			$("#boq-house").append($('<option></option>').val(val.id).text(val.house_no));
+                //     // 		}
+                //     // 		console.log(val.id +"="+ boqHouse[i].house_id);
+                //     // 	}
+                //     // }else{
+                //         $("#boq-house").append($('<option selected></option>').val(val.id).text(val.house_no));
+                //     // }
+                    
+                // });
+                // $('#boq-house').val(boqHouse).change();
+            }
+        });
+    }
+
     getHousesByZoneID = function(zoneID,success,complete){
         $.ajax({
             url:"{{url('repository/getHousesByZoneID')}}/" + zoneID,
@@ -575,6 +681,15 @@
     getHousesByBlockID = function(blockID,success,complete){
         $.ajax({
             url:"{{url('repository/getHousesByBlockID')}}/" + blockID,
+            type:'GET',
+            success: success,
+            complete: complete
+        });
+    }
+
+    getHousesByBuildingID = function(buildingID,success,complete){
+        $.ajax({
+            url:"{{url('repository/getHousesByBuildingID')}}/" + buildingID,
             type:'GET',
             success: success,
             complete: complete
@@ -614,6 +729,14 @@
         $(".zone_id").append($('<option></option>').val('').text(''));
         $.each(res,function(i,val){
             $(".zone_id").append($('<option></option>').val(val.id).text(val.name));
+        });
+    }
+    getBuildings_sussess = function(res){
+        $(".building_id").empty();
+		$(".building_id").select2('val', null);
+        $(".building_id").append($('<option></option>').val('').text(''));
+        $.each(res,function(i,val){
+            $(".building_id").append($('<option></option>').val(val.id).text(val.name));
         });
     }
 
@@ -658,17 +781,138 @@
     getStreets_complete = function(res){}
     getBlocks_complete = function(res){}
     getHouses_complete = function(res){}
+    getBuilding_complete = function(res){}
 
     fetchUsageBOQ = function(params,success,error){}
     fetchUsageBOQ_success = function(res){}
     fetchUsageBOQ_error = function(res){}
 
     btnAddButtonClicked = function(e){
-        var table = $('#table-income');
-        table.append(buildRow(e));
-        setupSelect2();
-        setupSelect2Autocompleted();
+        // console.log(e);
+        var table = $('#table-income tbody');
+        var lineNum = $("#table-income tbody tr").length;
+        if(lineNum == 20){
+            alert("Limit row of table less than 20");
+            return;
+        }
+        index++;
+
+        // const index  = parseInt(e.timeStamp * 1000);
+        const lineIndex = lineNo((lineNum),3);
+        // var row  = '<tr index='+ index +' class="tr-form tr-'+ index +'">';
+        //     // No
+        //     row += '<td width="5%">';
+        //     row += '<strong>'+ lineIndex +'</strong>';
+        //     row += '<input type="hidden" value='+lineIndex+' id="line_index'+ index +'" name="line_index[]" class="form-control line_index" />';
+        //     row += '</td>';
+        //     // Item
+        //     row += '<td width="30%">';
+        //     row += '<select onchange="onItemSelectChanged(this);" index="'+ index +'" id="item_id_'+ index +'" name="item_id[]" class="form-control select2 item_id"><option></option></select>';
+        //     row += '</td>';
+        //     // BOQ Qty
+        //     row += '<td width="15%" class="text-center">';
+        //     row += '<label class="label-boq-qty-'+ index +'">0</label>';
+        //     row += '<input type="hidden" id="boq_qty_'+ index +'" name="boq_qty[]" class="form-control boq_qty" />';
+        //     row += '<input type="hidden" id="boq_unit_'+ index +'" name="boq_unit[]" class="form-control boq_unit" />';
+        //     row += '<input type="hidden" id="boq_set_'+ index +'" name="boq_set[]" class="form-control boq_set" />';
+        //     row += '</td>';
+        //     // BOQ Unit
+        //     row += '<td width="15%" class="text-center">';
+        //     row += '<label class="label-stock-qty-'+ index +'">0</label>';
+        //     row += '<input type="hidden" id="stock_qty_'+ index +'" name="stock_qty[]" class="form-control stock_qty" />';
+        //     row += '</td>';
+        //     // Qty
+        //     row += '<td width="15%">';
+        //     row += '<input index="'+ index +'" type="text" id="qty_'+ index +'" name="qty[]" class="form-control qty" />';
+        //     row += '</td>';
+        //     // Unit
+        //     row += '<td width="15%">';
+        //     row += '<input type="hidden" id="unit_factor_'+ index +'" name="unit_factor[]" class="form-control unit_factor" />';
+        //     row += '<select index="'+ index +'" id="unit_id_'+ index +'" name="unit_id[]" class="form-control select2 unit_id"><option></option></select>';
+        //     row += '</td>';
+        //     // Remove
+        //     row += '<td width="5%" class="text-center">';
+        //     row += '<button type="button" index="'+ index +'" onclick="onRemove(this);" class="btn btn-sm red"><i class="fa fa-trash"></i></button>';
+        //     row += '</td>';
+        //     row += '</tr>';
+
+            html = '<tr index='+ index +' class="tr-form tr-'+ index +'">';
+				html+= '<td class="text-center all"><strong>'+lineNo(index,3)+'</strong>';
+                    html+= '<input type="hidden" class="check_row check_row_'+index+'" value="" />';
+                    html+= '<input type="hidden" class="line_index line_index_'+index+'" name="line_index[]" value="'+lineNo((index+1),3)+'" />';
+                    html+= '<input type="hidden" value="'+lineNo((index),3)+'" name="line_no[]" class="line_no line_no_'+index+'" />';
+                html+= '</td>';
+				// html+= '<td>';
+                //     html+= '<select class="form-control line_item_type line_item_type'+index+'" onchange="ChangeItemType(this, '+index+')" name="item_type[]">';
+                //         html+= '<option value=""></option>';
+                //         html+= '{{getSystemData("IT")}}'; 
+                //     html+= '</select>';
+                // html+= '</td>';
+				html+= '<td><select onchange="onItemSelectChanged(this);" index="'+ index +'" id="item_id_'+ index +'" name="item_id[]" class="form-control select2 item_id_"'+index+'><option></option></select></td>';
+				html+= '<td><input type="text" length="11" class="form-control size line_size line_size_'+index+'" name="size[]" placeholder="{{trans("lang.size")}}" /></td>';
+				html+= '<td>';
+                    html+= '<select class="form-control select2 select2_'+index+' line_unit line_unit_'+index+'" id="unit_id_'+ index +'" name="unit_id[]"> onchange="onChangeUnit(this, '+index+')"'; 
+					html+= '<option value=""></option>';
+                    html+= '</select>';
+                    html += '<input type="hidden" id="unit_factor_'+ index +'" name="unit_factor[]" class="form-control unit_factor" />';
+                    html += '<input type="hidden" id="boq_unit_'+ index +'" name="boq_unit[]" class="form-control boq_unit" />';
+                html+= '</td>';
+                html+= '<td>';
+                    html+= '<input type="hidden" length="11" class="form-control size line_size line_qty_stock_'+index+'" id="stock_qty_'+ index +'" name="stock_qty[]" placeholder="{{trans("lang.size")}}" /><span class="label-stock-qty-'+index+'"></span>';
+                html+= '</td>';
+                html+= '<td><input type="hidden" length="11" class="form-control size line_size line_boq_qty_'+index+'" name="boq_qty[]" placeholder="{{trans("lang.size")}}" /><span class="label-boq-qty-'+index+'"></span></td>';
+				html+= '<td>';
+                    html+= '<input type="hidden" length="11" class="form-control line_qty line_remain_qty_'+index+'" name="remain_qty[]" placeholder="{{trans("lang.enter_number")}}" />';
+                    html+= '<input type="hidden" class="form-control line_boq_set line_boq_set_'+index+'" name="boq_set[]"/>';
+                    html+= '<input type="hidden" class="form-control line_price line_price_'+index+'" name="line_price[]"/><span class="label-remain-qty-'+index+'"></span>';
+                html+= '</td>';
+				html += '<td><input type="number" length="11" class="form-control line_reference line_usage_qty_'+index+'" id="qty_'+ index +'" name="qty[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
+				html += '<td><input type="text" length="11" class="form-control  line_remark line_remark_'+index+'" name="remark[]" value="" placeholder="{{trans("lang.enter_remark")}}" /></td>';
+				html += '<td><a class="row_'+index+' btn btn-sm" onclick="DeleteRowBOQ('+index+')"><i class="fa fa-trash"></i></a></td>';
+			html+='</tr>';
+            
+			
+        // table.append(buildRow(e));
+        table.append(html);
+        // setupSelect2();
+        // setupSelect2Autocompleted();
         $(".qty").ForceNumericOnly();
+        // $(".line_item_type").select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
+        // $(".line_item_type"+index).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
+            $(".item_id_"+index).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
+            $(".line_unit_"+index).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
+            var itemSelect = $('#item_id_'+index);
+            var type_id = $('.line_item_type'+index).val();
+            itemSelect.select2({
+			  width:'100%',
+			  allowClear:'true',
+			  placeholder:'{{trans("lang.please_choose")}}',
+			  ajax: {
+			    url: '{{url("/stock/use/GetItem")}}',
+			    dataType:"json",
+			    data: function (params) {
+			      var query = {
+                    
+			        q: params.term,
+					cat_id : type_id
+			      }
+			      return query;
+			    },
+			    async:true,
+			    success:function(data){
+			    	jsonItems = data.data;
+			    },
+			    processResults: function (data) {
+			      return {
+			        results: data.data,
+			        more: (data.to < data.total),
+			        page: (data.current_page + 1),
+			        limit: data.per_page
+			      };
+			    }
+			  }
+            });
+            index++;
     }
 
     onRemove = function(self){
@@ -680,6 +924,7 @@
         const itemId = $(self).val();
         const selectUnitID = '#unit_id_' + index;
         const mainTR = ".tr-" + index;
+        console.log(index);
 
         $(mainTR).removeClass('invalid');
         $(mainTR).removeClass('out-stock');
@@ -691,7 +936,6 @@
         });
         fetchCurrentBOQ(itemId,function(res){
             // Success
-
             $("#boq_qty_" + index).val(0);
             $("#boq_unit_" + index).val(null);
             $("#unit_factor_" + index).val(1);
@@ -699,9 +943,7 @@
 
             $(".label-boq-qty-" + index).html(0);
             $(".label-stock-qty-" + index).html(0);
-            
-
-            if(res){
+            if(res.length > 0){
                 $.each(res,function(key,val){
 
                     const boq           = (val.qty_std_x + val.qty_add_x) - val.usage_qty_x;
@@ -738,6 +980,56 @@
 
                     $(".label-boq-qty-" + index).html(boqWithUnit);
                     $(".label-stock-qty-" + index).html(stockWithUnit);
+                });
+            }else{
+                
+                var params = {
+                    'item_id' : itemId
+                }
+                checkStockQuantity(params,function(res){
+                    if(res.length > 0){
+                        $.each(res,function(key,val){
+                            console.log(val);
+                            const boq           = (val.qty_std_x + val.qty_add_x) - val.usage_qty_x;
+                            const boqWithUnit   = "{{trans('lang.none_boq')}}";
+                            const stockWithUnit = val.stock_qty_x + ' | ' + val.unit;
+
+                            buildUnitWhenComplete(selectUnitID,val.unit_usage);
+
+                            // stock out
+                            if(val.stock_qty_x == 0 || boq == 0){
+                                $(mainTR).addClass('out-stock');
+                            }
+                            // out of boq
+                            else if(val.qty_std_x > 0 && boq == 0){
+                                $(mainTR).addClass('out-boq');
+                            }
+                            // boq not set
+                            else if(val.qty_std_x == 0){
+                                $("#boq_set_" + index).val(-1);
+                                $(mainTR).addClass('not-set-boq');
+                            }
+                            // normal & remove all highlight class
+                            else{
+                                $(mainTR).removeClass('out-stock');
+                                $(mainTR).removeClass('out-boq');
+                                $(mainTR).removeClass('not-set-boq');
+                                $(mainTR).removeClass('invalid');
+                            }
+                            
+                            $("#boq_qty_" + index).val(0);
+                            $("#boq_unit_" + index).val(val.unit);
+                            $("#unit_factor_" + index).val(val.factor);
+                            $("#stock_qty_" + index).val(val.stock_qty_x);
+
+                            $(".label-boq-qty-" + index).html(boqWithUnit);
+                            $(".label-stock-qty-" + index).html(stockWithUnit);
+                        });
+                    }else{
+                        const boqWithUnit   = "{{trans('lang.none_boq')}}";
+                        $(".label-boq-qty-" + index).html(boqWithUnit);
+                    }
+                   
                 });
             }
         },function(err){
@@ -899,53 +1191,121 @@
         const index = $(self).attr('index');
     }
 
-    buildRow = function(e){
-        var lineNum = $("#table-income tbody tr").length;
-        if(lineNum == 20){
-            alert("Limit row of table less than 20");
-            return;
-        }
+    // buildRow = function(e){
+    //     var lineNum = $("#table-income tbody tr").length;
+    //     if(lineNum == 20){
+    //         alert("Limit row of table less than 20");
+    //         return;
+    //     }
 
-        const index  = parseInt(e.timeStamp * 1000);
-        const lineIndex = lineNo((lineNum+1),3);
-        var row  = '<tr index='+ index +' class="tr-form tr-'+ index +'">';
-            // No
-            row += '<td width="5%">';
-            row += '<strong>'+ lineIndex +'</strong>';
-            row += '<input type="hidden" value='+lineIndex+' id="line_index'+ index +'" name="line_index[]" class="form-control line_index" />';
-            row += '</td>';
-            // Item
-            row += '<td width="30%">';
-            row += '<select onchange="onItemSelectChanged(this);" index="'+ index +'" id="item_id_'+ index +'" name="item_id[]" class="form-control select2 item_id"><option></option></select>';
-            row += '</td>';
-            // BOQ Qty
-            row += '<td width="15%" class="text-center">';
-            row += '<label class="label-boq-qty-'+ index +'">0</label>';
-            row += '<input type="hidden" id="boq_qty_'+ index +'" name="boq_qty[]" class="form-control boq_qty" />';
-            row += '<input type="hidden" id="boq_unit_'+ index +'" name="boq_unit[]" class="form-control boq_unit" />';
-            row += '<input type="hidden" id="boq_set_'+ index +'" name="boq_set[]" class="form-control boq_set" />';
-            row += '</td>';
-            // BOQ Unit
-            row += '<td width="15%" class="text-center">';
-            row += '<label class="label-stock-qty-'+ index +'">0</label>';
-            row += '<input type="hidden" id="stock_qty_'+ index +'" name="stock_qty[]" class="form-control stock_qty" />';
-            row += '</td>';
-            // Qty
-            row += '<td width="15%">';
-            row += '<input index="'+ index +'" type="text" id="qty_'+ index +'" name="qty[]" class="form-control qty" />';
-            row += '</td>';
-            // Unit
-            row += '<td width="15%">';
-            row += '<input type="hidden" id="unit_factor_'+ index +'" name="unit_factor[]" class="form-control unit_factor" />';
-            row += '<select index="'+ index +'" id="unit_id_'+ index +'" name="unit_id[]" class="form-control select2 unit_id"><option></option></select>';
-            row += '</td>';
-            // Remove
-            row += '<td width="5%" class="text-center">';
-            row += '<button type="button" index="'+ index +'" onclick="onRemove(this);" class="btn btn-sm red"><i class="fa fa-trash"></i></button>';
-            row += '</td>';
-            row += '</tr>';
-        return row;
-    }
+    //     // const index  = parseInt(e.timeStamp * 1000);
+    //     const lineIndex = lineNo((lineNum+1),3);
+    //     // var row  = '<tr index='+ index +' class="tr-form tr-'+ index +'">';
+    //     //     // No
+    //     //     row += '<td width="5%">';
+    //     //     row += '<strong>'+ lineIndex +'</strong>';
+    //     //     row += '<input type="hidden" value='+lineIndex+' id="line_index'+ index +'" name="line_index[]" class="form-control line_index" />';
+    //     //     row += '</td>';
+    //     //     // Item
+    //     //     row += '<td width="30%">';
+    //     //     row += '<select onchange="onItemSelectChanged(this);" index="'+ index +'" id="item_id_'+ index +'" name="item_id[]" class="form-control select2 item_id"><option></option></select>';
+    //     //     row += '</td>';
+    //     //     // BOQ Qty
+    //     //     row += '<td width="15%" class="text-center">';
+    //     //     row += '<label class="label-boq-qty-'+ index +'">0</label>';
+    //     //     row += '<input type="hidden" id="boq_qty_'+ index +'" name="boq_qty[]" class="form-control boq_qty" />';
+    //     //     row += '<input type="hidden" id="boq_unit_'+ index +'" name="boq_unit[]" class="form-control boq_unit" />';
+    //     //     row += '<input type="hidden" id="boq_set_'+ index +'" name="boq_set[]" class="form-control boq_set" />';
+    //     //     row += '</td>';
+    //     //     // BOQ Unit
+    //     //     row += '<td width="15%" class="text-center">';
+    //     //     row += '<label class="label-stock-qty-'+ index +'">0</label>';
+    //     //     row += '<input type="hidden" id="stock_qty_'+ index +'" name="stock_qty[]" class="form-control stock_qty" />';
+    //     //     row += '</td>';
+    //     //     // Qty
+    //     //     row += '<td width="15%">';
+    //     //     row += '<input index="'+ index +'" type="text" id="qty_'+ index +'" name="qty[]" class="form-control qty" />';
+    //     //     row += '</td>';
+    //     //     // Unit
+    //     //     row += '<td width="15%">';
+    //     //     row += '<input type="hidden" id="unit_factor_'+ index +'" name="unit_factor[]" class="form-control unit_factor" />';
+    //     //     row += '<select index="'+ index +'" id="unit_id_'+ index +'" name="unit_id[]" class="form-control select2 unit_id"><option></option></select>';
+    //     //     row += '</td>';
+    //     //     // Remove
+    //     //     row += '<td width="5%" class="text-center">';
+    //     //     row += '<button type="button" index="'+ index +'" onclick="onRemove(this);" class="btn btn-sm red"><i class="fa fa-trash"></i></button>';
+    //     //     row += '</td>';
+    //     //     row += '</tr>';
+
+    //         html = '<tr index='+ index +' class="tr-form tr-'+ index +'">';
+	// 			html+= '<td class="text-center all"><strong>'+lineNo(index+1,3)+'</strong>';
+    //                 html+= '<input type="hidden" class="check_row check_row_'+index+'" value="" />';
+    //                 html+= '<input type="hidden" class="line_index line_index_'+index+'" name="line_index[]" value="'+lineNo((index+1),3)+'" />';
+    //                 html+= '<input type="hidden" value="'+lineNo((index+1),3)+'" name="line_no[]" class="line_no line_no_'+index+'" />';
+    //             html+= '</td>';
+	// 			// html+= '<td>';
+    //             //     html+= '<select class="form-control line_item_type line_item_type'+index+'" onchange="ChangeItemType(this, '+index+')" name="item_type[]">';
+    //             //         html+= '<option value=""></option>';
+    //             //         html+= '{{getSystemData("IT")}}'; 
+    //             //     html+= '</select>';
+    //             // html+= '</td>';
+	// 			html+= '<td><select onchange="onItemSelectChanged(this);" index="'+ index +'" id="item_id_'+ index +'" name="item_id[]" class="form-control select2 item_id_"'+index+'><option></option></select></td>';
+	// 			html+= '<td><input type="text" length="11" class="form-control size line_size line_size_'+index+'" name="size[]" placeholder="{{trans("lang.size")}}" /></td>';
+	// 			html+= '<td>';
+    //                 html+= '<select class="form-control select2 select2_'+index+' line_unit line_unit_'+index+'" id="unit_id_'+ index +'" name="unit_id[]"> onchange="onChangeUnit(this, '+index+')"'; 
+	// 				html+= '<option value=""></option>';
+    //                 html+= '</select>';
+    //                 html += '<input type="hidden" id="unit_factor_'+ index +'" name="unit_factor[]" class="form-control unit_factor" />';
+    //                 html += '<input type="hidden" id="boq_unit_'+ index +'" name="boq_unit[]" class="form-control boq_unit" />';
+    //             html+= '</td>';
+    //             html+= '<td>';
+    //                 html+= '<input type="hidden" length="11" class="form-control size line_size line_qty_stock_'+index+'" id="stock_qty_'+ index +'" name="stock_qty[]" placeholder="{{trans("lang.size")}}" /><span class="label-stock-qty-'+index+'"></span>';
+    //             html+= '</td>';
+    //             html+= '<td><input type="hidden" length="11" class="form-control size line_size line_boq_qty_'+index+'" name="boq_qty[]" placeholder="{{trans("lang.size")}}" /><span class="label-boq-qty-'+index+'"></span></td>';
+	// 			html+= '<td>';
+    //                 html+= '<input type="hidden" length="11" class="form-control line_qty line_remain_qty_'+index+'" name="line_remain_qty_[]" placeholder="{{trans("lang.enter_number")}}" />';
+    //                 html+= '<input type="hidden" class="form-control line_boq_set line_boq_set_'+index+'" name="boq_set[]"/>';
+    //                 html+= '<input type="hidden" class="form-control line_price line_price_'+index+'" name="line_price[]"/><span class="label-remain-qty-'+index+'"></span>';
+    //             html+= '</td>';
+	// 			html += '<td><input type="number" length="11" class="form-control line_reference line_usage_qty_'+index+'" id="qty_'+ index +'" name="qty[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
+	// 			html += '<td><input type="text" length="11" class="form-control  line_remark line_remark_'+index+'" name="line_remark[]" value="" placeholder="{{trans("lang.enter_remark")}}" /></td>';
+	// 			html += '<td><a class="row_'+index+' btn btn-sm" onclick="DeleteRowBOQ('+index+')"><i class="fa fa-trash"></i></a></td>';
+	// 		html+='</tr>';
+    //         $(".line_item_type"+index).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
+    //         $(".item_id_"+index).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
+    //         $(".line_unit_"+index).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
+    //         var itemSelect = $('#item_id_'+index);
+    //         var type_id = $('.line_item_type'+index).val();
+    //         // itemSelect.select2({
+	// 		//   width:'100%',
+	// 		//   allowClear:'true',
+	// 		//   placeholder:'{{trans("lang.please_choose")}}',
+	// 		//   ajax: {
+	// 		//     url: '{{url("/stock/use/GetItem")}}',
+	// 		//     dataType:"json",
+	// 		//     data: function (params) {
+	// 		//       var query = {
+	// 		//         q: params.term,
+	// 		// 		cat_id : type_id
+	// 		//       }
+	// 		//       return query;
+	// 		//     },
+	// 		//     async:true,
+	// 		//     success:function(data){
+	// 		//     	jsonItems = data.data;
+	// 		//     },
+	// 		//     processResults: function (data) {
+	// 		//       return {
+	// 		//         results: data.data,
+	// 		//         more: (data.to < data.total),
+	// 		//         page: (data.current_page + 1),
+	// 		//         limit: data.per_page
+	// 		//       };
+	// 		//     }
+	// 		//   }
+	// 		// });
+    //     return html;
+    // }
 	
     setupDate = function(){
         $('#trans_date').val(formatDate("{{date('Y-m-d')}}"));
@@ -961,6 +1321,7 @@
     }
 
     setupSelect2Autocompleted = function(){
+        var type_id = $('.line_item_type'+index).val();
         $(".item_id").select2({
             width:'100%',
             allowClear:'true',
@@ -970,7 +1331,8 @@
                 dataType:"json",
                 data: function (params) {
                     var query = {
-                        q: params.term
+                        q: params.term,
+                        cat_id : type_id
                     }
                     return query;
                 },
@@ -1033,6 +1395,7 @@
         var params = {
             zone_id: null,
             block_id: null,
+            building_id:null,
             street_id: null,
             house_id: null,
             trans_date: '{{date("Y-m-d")}}',
@@ -1050,7 +1413,9 @@
                 params.block_id = blockId;
             }
         @endif
-
+        if(buildingID = $("#building_id").val()){
+            params.building_id = buildingID;
+        }
         if (streetId = $("street_id").val()) {
             params.street_id = streetId;
         }
@@ -1082,6 +1447,7 @@
         getHouses(getHouses_success,getHouses_complete);
         @if(getSetting()->allow_zone == 1)
         getZones(getZones_success,getZones_complete);
+        
         $('.zone_id').on('change',function(){
             const zoneID = $(this).val();
             if(zoneID){
@@ -1091,7 +1457,8 @@
                 @endif
 
                 getStreetsByZoneID(zoneID,getStreets_success,getStreets_complete);
-                getHousesByZoneID(zoneID,getHouses_success,getHouses_complete);
+                // getHousesByZoneID(zoneID,getHouses_success,getHouses_complete);
+                getHouseAllTrigger();
             }
         });
         @endif
@@ -1101,15 +1468,23 @@
             const blockID = $(this).val();
             if(blockID){
                 getStreetsByBlockID(blockID,getStreets_success,getStreets_complete);
-                getHousesByBlockID(blockID,getHouses_success,getHouses_complete);
+                // getHousesByBlockID(blockID,getHouses_success,getHouses_complete);
+                getHouseAllTrigger();
             }
         });
         @endif
+        getBuildings(getBuildings_sussess,getBuilding_complete);
+        $('.building_id').on('change',function(){
+            const buildingID = $(this).val();
+            if(buildingID){
+                getHouseAllTrigger();
+            }
+        });
 
         $('.street_id').on('change',function(){
-            const streetID = $(this).val();
-            if(streetID){
-                getHousesByStreetID(streetID,getHouses_success,getHouses_complete);
+            const buildingID = $(this).val();
+            if(buildingID){
+                getHouseAllTrigger();
             }
         });
 
@@ -1137,5 +1512,292 @@
 			});
 		}, 3000);
 	});
+
+    $("#load-boq-item").on("click",function(){
+		var params = {
+			zone_id: null,
+			block_id: null,
+			building_id : null,
+			street_id: null,
+			house_type: null,
+		};
+		const zoneID    = $('#zone_id').val();
+		const blockID   = $('#block_id').val();
+		const buildingID    = $('#building_id').val();
+		const streetID  = $('#street_id').val();
+		const houseType = $('#house_type_id').val();
+
+		if(zoneID){
+			params.zone_id = zoneID;
+		}
+
+		if(blockID){
+			params.block_id = blockID;
+		}
+		if(buildingID){
+			params.building_id = buildingID;
+		}
+
+		if(streetID){
+			params.street_id = streetID;
+		}
+
+		if(houseType){
+			params.house_type = houseType;
+		}
+		$.ajax({
+			url :'{{url("repository/getBoqItems")}}',
+			type:'GET',
+			data:params,
+			success:function(data){
+				$.each(data,function(key, val){
+                    index++;
+					loadWorkingTypeItem(val,index);
+                    
+				});
+			},error:function(){
+				
+			}
+		});
+	});
+
+    function loadWorkingTypeItem(data,index){
+		var table_boq = $('#table-income');
+		html = '<tr index='+ index +' class="tr-form tr-'+ index +'">';
+				html+= '<td class="text-center all"><strong>'+lineNo(index,3)+'</strong>';
+                    html+= '<input type="hidden" class="check_row check_row_'+index+'" value="" />';
+                    html+= '<input type="hidden" class="line_index line_index_'+index+'" name="line_index[]" value="'+lineNo((index+1),3)+'" />';
+                    html+= '<input type="hidden" value="'+lineNo((index),3)+'" name="line_no[]" class="line_no line_no_'+index+'" />';
+                html+='</td>';
+				// html+= '<td>'+data.item_type+'<input type="hidden" name="line_item_type[]" class="line_item_type'+index+'" value="'+data.cat_id+'" /></td>';
+				html+= '<td>'+data.item_name+'<input type="hidden" class="line_item line_item_'+index+'" name="item_id[]" value="'+data.item_id+'" /></td>';
+				html+= '<td><input type="text" length="11" class="form-control size line_size line_size_'+index+'" name="size[]" placeholder="{{trans("lang.size")}}" /></td>';
+				html+= '<td>';
+                    html+= '<select class="form-control select2 select2_'+index+' line_unit line_unit_'+index+'" name="unit_id[]"> onchange="onChangeUnit(this, '+index+')"' 
+                        html+= '<option value=""></option>';
+                    html+= '</select>';
+                    html += '<input type="hidden" id="unit_factor_'+ index +'" name="unit_factor[]" class="form-control unit_factor" />';
+                    html += '<input type="hidden" id="boq_unit_'+ index +'" name="boq_unit[]" class="form-control boq_unit" />';
+                html+= '</td>';
+                html+= '<td><input type="hidden" length="11" class="form-control size line_size line_qty_stock_'+index+'" name="stock_qty[]" placeholder="{{trans("lang.size")}}" /><span class="label-stock-qty-'+index+'"></span></td>';
+                html+= '<td><input type="hidden" length="11" class="form-control size line_size line_boq_qty_'+index+'" name="qty[]" placeholder="{{trans("lang.size")}}" /><span class="label-boq-qty-'+index+'"></span></td>';
+				html+= '<td><input type="hidden" length="11" class="form-control line_qty line_remain_qty_'+index+'" name="remain_qty[]" placeholder="{{trans("lang.enter_number")}}" /><input type="hidden" class="form-control line_boq_set line_boq_set_'+index+'" name="boq_set[]"/>'+
+					    '<input type="hidden" class="form-control line_price line_price_'+index+'" name="line_price[]"/><span class="label-remain-qty-'+index+'"></span></td>';
+				html += '<td><input type="number" length="11" class="form-control line_reference line_usage_qty_'+index+'" name="qty[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
+				html += '<td><input type="text" length="11" class="form-control  line_remark line_remark_'+index+'" name="remark[]" value="" placeholder="{{trans("lang.enter_remark")}}" /></td>';
+				html += '<td><a class="row_'+index+' btn btn-sm" onclick="DeleteRowBOQ('+index+')"><i class="fa fa-trash"></i></a></td>';
+			html+='</tr>';
+		table_boq.append(html);
+		
+		$.fn.select2.defaults.set('theme','classic');
+		$('.select2').select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
+		$('.line_unit_'+index).empty();
+		$('.line_unit_'+index).append($('<option></option>').val('').text(''));
+		jsonUnits = GetUnit(data.unit_stock);
+		$.each(jsonUnits, function(k, v){
+			$('.line_unit_'+index).append($('<option></option>').val(v.from_code).text(v.from_code+' ('+v.from_desc+')'));
+		});
+		@if(!isset($head))
+			$('.line_unit_'+index).select2('val', data.unit_purch);
+			var field = '.line_unit_'+index;
+			onChangeUnit(field,index);
+			
+		@endif
+        const selectUnitID = '.line_unit_' + index;
+        const mainTR = ".tr-" + index;
+
+        $(mainTR).removeClass('invalid');
+        $(mainTR).removeClass('out-stock');
+        $(mainTR).removeClass('out-boq');
+        $(mainTR).removeClass('not-set-boq');
+        fetchCurrentBOQ(data.item_id,function(res){
+            // Success
+            $("#boq_qty_" + index).val(0);
+            $("#boq_unit_" + index).val(null);
+            $("#unit_factor_" + index).val(1);
+            $("#stock_qty_" + index).val(0);
+
+            $(".label-boq-qty-" + index).html(0);
+            $(".label-stock-qty-" + index).html(0);
+            
+
+            if(res){
+                $.each(res,function(key,val){
+
+                    const boq           = (val.qty_std_x + val.qty_add_x);
+                    const boq_remain    = (val.qty_std_x + val.qty_add_x) - val.usage_qty_x;
+                    const boqWithUnit   = boq + ' | ' + val.unit_usage;
+                    const stockWithUnit = val.stock_qty_x + ' | ' + val.unit;
+                    const boq_remain_unit = boq_remain + ' | ' + val.unit_usage;
+
+                    buildUnitWhenComplete(selectUnitID,val.unit_usage);
+
+                    // stock out
+                    if(val.stock_qty_x == 0 || boq == 0){
+                        $(mainTR).addClass('out-stock');
+                    }
+                    // out of boq
+                    else if(val.qty_std_x > 0 && boq == 0){
+                        $(mainTR).addClass('out-boq');
+                    }
+                    // boq not set
+                    else if(val.qty_std_x == 0){
+                        $("#boq_set_" + index).val(-1);
+                        $(mainTR).addClass('not-set-boq');
+                    }
+                    // normal & remove all highlight class
+                    else{
+                        $(mainTR).removeClass('out-stock');
+                        $(mainTR).removeClass('out-boq');
+                        $(mainTR).removeClass('not-set-boq');
+                        $(mainTR).removeClass('invalid');
+                    }
+                    
+                    $("#boq_qty_" + index).val(boq);
+                    $("#boq_unit_" + index).val(val.unit);
+                    $("#unit_factor_" + index).val(val.factor);
+                    $("#stock_qty_" + index).val(val.stock_qty_x);
+
+                    $(".label-boq-qty-" + index).html(boqWithUnit);
+                    $(".label-stock-qty-" + index).html(stockWithUnit);
+                    $(".label-remain-qty-"+index).html(boq_remain_unit);
+                });
+            }
+        },function(err){
+            // Error
+            alert(err);
+        });
+	}
+
+    function onChangeUnit(field, row){
+		
+		var item_id = $(".line_item_"+row).val();
+		var unit = $(field).val();
+		var _token = $("input[name=_token]").val();
+		var params = {
+			zone_id: null,
+			block_id: null,
+			building_id : null,
+			street_id: null,
+			house_type: null,
+			_token :_token,
+			item_id : item_id,
+			unit : unit
+		};
+		const zoneID    = $('#boq-zone').val();
+		const blockID   = $('#boq-block').val();
+		const buildingID    = $('#boq-building').val();
+		const streetID  = $('#boq-street').val();
+		const houseType = $('#boq-house-type').val();
+
+		if(zoneID){
+			params.zone_id = zoneID;
+		}
+
+		if(blockID){
+			params.block_id = blockID;
+		}
+		if(buildingID){
+			params.building_id = buildingID;
+		}
+
+		if(streetID){
+			params.street_id = streetID;
+		}
+
+		if(houseType){
+			params.house_type = houseType;
+		}
+		
+		if(item_id!=null && item_id!='' && unit!=null && unit!=''){
+			
+			$.ajax({
+				url :'{{url("purch/request/remoteItem")}}',
+				type:'POST',
+				async:false,
+				data:params,
+				success:function(data){
+					console.log(data);
+					$('.line_boq_set_'+row).val(data.boq_set);
+					$('.line_price_'+row).val(data.price);
+				},error:function(){
+					$('.line_boq_set_'+row).val(0);
+					$('.line_price_'+row).val(0);
+					console.log('error get qty stock.');
+				}
+			});
+		}
+		$(".line_return_qty_"+row).val('');
+		$(".check_row_"+row).val(item_id+"_"+unit);
+	}
+
+    function ChangeItemType(val, row){
+        
+		if(val!=null && val!=''){
+			var itemSelect = $('.item_id_'+row);
+			var type_id = $('.line_item_type'+row).val();
+			console.log(itemSelect.select2({allowClear:'false'}));
+            // var query = {
+			// 		cat_id : type_id,
+			// 		q: "",
+			//       };
+            // $.ajax({
+			// 	url :'{{url("/stock/use/GetItem")}}',
+			// 	type:'GET',
+			// 	async:false,
+			// 	data:query,
+			// 	success:function(data){
+            //         jsonItems = data.data;
+			// 		console.log(jsonItems);
+					
+			// 	},
+            //     processResults: function (data) {
+			//       return {
+			//         results: data.data,
+			//         more: (data.to < data.total),
+			//         page: (data.current_page + 1),
+			//         limit: data.per_page
+			//       };
+			//     },error:function(){
+			// 		console.log('error get qty stock.');
+			// 	}
+			// });
+			itemSelect.select2({
+			  width:'100%',
+			  allowClear:'false',
+			  placeholder:'{{trans("lang.please_choose")}}',
+			  ajax: {
+			    url: '{{url("/stock/use/GetItem")}}',
+			    dataType:"json",
+			    data: function (params) {
+                    console.log(params);
+			      var query = {
+					cat_id : type_id,
+					q: params.term,
+			      }
+			      return query;
+			    },
+			    async:true,
+			    success:function(data){
+                    console.log(data);
+			    	jsonItems = data.data;
+
+			    },
+			    processResults: function (data) {
+			      return {
+			        results: data.data,
+			        more: (data.to < data.total),
+			        page: (data.current_page + 1),
+			        limit: data.per_page
+			      };
+			    }
+			  }
+			});
+
+		}else{
+			$(".show-message-error").html('{{trans("lang.not_more_than_100")}}!');
+		}
+        // }
+	}
 </script>
 @endsection()
