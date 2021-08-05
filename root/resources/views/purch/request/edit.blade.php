@@ -160,7 +160,7 @@
 								<!-- Label -->
 								<label for="status" class="control-label" style="text-align: left;"><strong>{{ trans('lang.note') }}</strong></label>
 								<!-- Textarea -->
-								<textarea class="form-control trans_desc" id="trans_desc" name="desc" length="100" rows="8" placeholder="{{ trans('lang.enter_text') }}"></textarea>
+								<input type="text" class="form-control trans_desc" id="trans_desc" name="desc" length="100" rows="8" placeholder="{{ trans('lang.enter_text') }}" />
 							</div>
 						</div>
 					</div>

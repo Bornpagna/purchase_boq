@@ -17,6 +17,8 @@ use App\Model\Unit;
 use App\Model\House;
 use App\Model\SystemData;
 use App\Model\Constructor;
+use App\Model\Boq;
+use App\Model\BoqHouse;
 use Illuminate\Support\Facades\Session;
 
 class RequestController extends Controller
@@ -297,6 +299,7 @@ class RequestController extends Controller
 
     public function save(Request $request)
     {
+		// print_r($request->all());exit;
     	$rules = [
 			'reference_no' 	=>'required|max:20|unique_request',
 			'trans_date' 	=>'required|max:20',
@@ -304,7 +307,9 @@ class RequestController extends Controller
 			'request_by'	=>'required|max:11',
 			'department'	=>'required|max:11',
 		];
+		
 		if(count($request['line_index']) > 0){
+			
 			for($i=0;$i<count($request['line_index']);$i++){
 				$rules['line_index.'.$i]	= 'required';
 				$rules['line_item.'.$i]		= 'required|max:11';
@@ -313,10 +318,15 @@ class RequestController extends Controller
 				$rules['line_boq_set.'.$i]	= 'required';
 				$rules['line_price.'.$i]	= 'required';
 			}
+			
 		}
+		
+		
         Validator::make($request->all(),$rules)->validate();
+		// print_r($request['line_index']);exit; 
 		try {
 			DB::beginTransaction();
+			
 			$trans_date = date("Y-m-d", strtotime($request->trans_date));
 			$delivery_date = date("Y-m-d", strtotime($request->delivery_date));
 			$data = [
@@ -337,8 +347,11 @@ class RequestController extends Controller
 			if(!$id = DB::table('requests')->insertGetId($data)){
 				throw new \Exception("Request not insert");
 			}
+			
 
 			if(count($request['line_index']) > 0){
+				
+				// print_r($request->all());exit;
 				for($i=0;$i<count($request['line_index']);$i++){
 					$details = [
 						'pr_id'			=>$id,
@@ -510,11 +523,45 @@ class RequestController extends Controller
 				}
 				
 				$price = (floatval($qtyPr) * floatval($itemObj->cost_purch)) / floatval($qtySt);
+
 			}
-
-			if(BoqItem::whereIn('house_id', House::where('pro_id', $pro_id)->pluck('id')->toArray())->where(['item_id'=>$item_id])->exists()){
-				$sql_boq = "SELECT F.item_id, (F.stock_qty / F.boq_qty) AS boq_qty FROM (SELECT E.item_id, E.stock_qty, (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '$unit'AND pr_units.`to_code` = E.unit_stock) AS boq_qty FROM (SELECT D.item_id, D.unit_stock, SUM(D.stock_qty) AS stock_qty FROM (SELECT C.item_id, C.unit_stock, (C.qty * C.stock_qty) AS stock_qty FROM (SELECT B.*, (CASE WHEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = B.unit AND pr_units.`to_code` = B.unit_stock)!='' THEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = B.unit AND pr_units.`to_code` = B.unit_stock) ELSE 1 END) AS stock_qty FROM (SELECT A.*, (SELECT pr_items.`unit_stock` FROM pr_items WHERE pr_items.`id` = A.item_id) AS unit_stock FROM (SELECT pr_boq_items.`id`, pr_boq_items.`house_id`, pr_boq_items.`item_id`, pr_boq_items.`unit`, (pr_boq_items.`qty_std` + pr_boq_items.`qty_add` ) AS qty FROM pr_boq_items WHERE pr_boq_items.`item_id` = $item_id) AS A WHERE A.`house_id` IN (SELECT pr_houses.`id` FROM pr_houses WHERE pr_houses.`pro_id` = $pro_id)) AS B) AS C) AS D GROUP BY D.item_id, D.unit_stock) AS E) AS F"; $objBOQ = collect(DB::select($sql_boq))->first();
-
+			$where = ['boqs.status'=> 1];
+			if(!empty($request["zone_id"])){
+				$where = array_merge($where,['boqs.zone_id'=>$request["zone_id"]]);
+			}
+			if(!empty($request["block_id"])){
+				$where = array_merge($where,['boqs.block_id'=>$request["block_id"]]);
+			}
+			if(!empty($request["building_id"])){
+				$where = array_merge($where,['boqs.building_id'=>$request['building_id']]);
+			}
+			if(!empty($request["street_id"])){
+				$where = array_merge($where,['boqs.street_id'=>$request["boqs.street_id"]]);
+			}
+			if(!empty($request["house_type"])){
+				$where = array_merge($where,['boq_items.working_type'=>$request["house_type"]]);
+			}
+			if(!empty($request["house_id"])){
+				$where = array_merge($where,['boq_houses.house_id'=>$request["house_id"]]);
+			}
+			if(!empty($request["boq_id"])){
+				$where = array_merge($where,['boqs.id'=>$request["boq_id"]]);
+			}
+			if(!empty($request["working_type"])){
+				$where = array_merge($where,['boq_items.working_type'=>$request["working_type"]]);
+			}
+			$boqs = Boq::where('boqs.pro_id',$pro_id)->where($where)->pluck('id');
+			$housesId =  BoqHouse::whereIn('boq_id', $boqs)->pluck('id');
+			$strHouseId = json_encode(str_replace(["[","]"],"",$housesId));
+			
+			$itemBoq = BoqItem::whereIn('boq_house_id',$housesId)->where(['item_id'=>$item_id])->exists();
+			
+			if($itemBoq){
+				$sql_boq = "SELECT F.item_id, (F.stock_qty / F.boq_qty) AS boq_qty 
+							FROM (SELECT E.item_id, E.stock_qty, (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '$unit'AND pr_units.`to_code` = E.unit_stock) AS boq_qty FROM (SELECT D.item_id, D.unit_stock, SUM(D.stock_qty) AS stock_qty FROM (SELECT C.item_id, C.unit_stock, (C.qty * C.stock_qty) AS stock_qty FROM (SELECT B.*, (CASE WHEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = B.unit AND pr_units.`to_code` = B.unit_stock)!='' THEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = B.unit AND pr_units.`to_code` = B.unit_stock) ELSE 1 END) AS stock_qty FROM (SELECT A.*, (SELECT pr_items.`unit_stock` FROM pr_items WHERE pr_items.`id` = A.item_id) AS unit_stock FROM (SELECT pr_boq_items.`id`, pr_boq_items.`house_id`,pr_boq_items.`boq_house_id`, pr_boq_items.`item_id`, pr_boq_items.`unit`, (pr_boq_items.`qty_std` + pr_boq_items.`qty_add` ) AS qty FROM pr_boq_items WHERE pr_boq_items.`item_id` = $item_id) AS A WHERE A.`boq_house_id` IN ($strHouseId)) AS B) AS C) AS D GROUP BY D.item_id, D.unit_stock) AS E) AS F"; 
+				// print_r($sql_boq);exit;
+				$objBOQ = collect(DB::select($sql_boq))->first();
+				
 				if($objBOQ){
 					$boq_set = floatval($objBOQ->boq_qty);				
 					
@@ -752,4 +799,6 @@ class RequestController extends Controller
 			return redirect('purch/request')->with("error", $ex->getMessage());
 		}
 	}
+
+	
 }

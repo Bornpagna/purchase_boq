@@ -82,6 +82,15 @@ function getReferencePR($edit_id=NULL){
 		}
 	}
 }
+///////////////BOQ///////////////
+function getBOQNumber(){
+	$pro_id = Session::get('project');
+	$where = ['status'=>1];
+	$data = DB::table('boqs')->where($where)->get();
+	foreach($data as $row){
+		echo '<option value="'.$row->id.'">'.$row->boq_code.'</option>';
+	}
+}
 
 ////////////////////// unit stock ///////////////////////////////
 function getSystemData($type=NULL,$val=NULL){
@@ -94,11 +103,12 @@ function getSystemData($type=NULL,$val=NULL){
 	}else if($type){
 		$where = array_merge($where, ['type'=>$type,'parent_id'=>$pro_id]);
 	}
-	$data = DB::table('system_datas')->where($where)->select(['id','name'])->get();
+	$data = DB::table('system_datas')->where($where)->get();
 	foreach($data as $row){
-		if($val!=NULL && $val==$row->id){
+		// print_r($row->id);exit;
+		if(strval($val) == strval($row->id)){
 			echo '<option value="'.$row->id.'" selected>'.$row->name.'</option>';
-		}else{
+		}else{ 
 			echo '<option value="'.$row->id.'">'.$row->name.'</option>';
 		}
 	}
@@ -214,8 +224,12 @@ function getWarehouse($val=NULL){
 }
 
 ////////////////////// get items ///////////////////////////////
-function getItems($val=NULL){
-	$data = DB::table('items')->select('id','code','name','unit_stock')->where('status','1')->get();
+function getItems($val=NULL,$cat_id = null){
+	$where = ['status'=>1];
+	if($cat_id != null){
+		$where = array_merge($where,['cat_id'=>$cat_id]);
+	}
+	$data = DB::table('items')->select('id','code','name','unit_stock')->where($where)->get();
 	foreach($data as $row){
 		if($val!=NULL && $val==$row->id){
 			echo '<option val="'.$row->unit_stock.'" value="'.$row->id.'" selected>'.$row->code.'('.$row->name.')</option>';

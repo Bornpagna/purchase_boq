@@ -160,7 +160,6 @@ class UsagePolicyController extends Controller
 	}
 
 	public function save(Request $request){
-
 		try {
 			DB::beginTransaction();
 
@@ -186,7 +185,7 @@ class UsagePolicyController extends Controller
 				}
 			}
 
-			Validator::make($request->all(),$rules)->validate();
+			// Validator::make($request->all(),$rules)->validate();
 
 			$originalDate = $request['trans_date'];
 			$trans_date = date("Y-m-d", strtotime($originalDate));
@@ -197,6 +196,9 @@ class UsagePolicyController extends Controller
 				'trans_date'	=>$trans_date,
 				'reference'		=>$request->reference,
 				'eng_usage'		=>$request->engineer,
+				'zone_id'		=> $request->zone_id,
+				'block_id'		=> $request->block_id,
+				'building_id'	=>	$request->building_id,
 				'desc'			=>$request->desc,
 				'created_by'	=>Auth::user()->id,
 				'created_at'	=>date('Y-m-d H:i:s'),
@@ -206,7 +208,7 @@ class UsagePolicyController extends Controller
 			if(getSetting()->usage_constructor==1){
 				$data = array_merge($data, ['sub_usage'=>$request->sub_const]);
 			}
-			
+			// print_r($data);exit;
 			if(!$id = DB::table('usages')->insertGetId($data)){
 				throw new \Exception("Usage[{$request->reference_no}] not insert");
 			}
@@ -243,13 +245,16 @@ class UsagePolicyController extends Controller
 			}
 
 			$usagePolicies = $usagePolicies->get();
+			
 
 			if(count($usagePolicies) == 0){
 				throw new \Exception("Usage policy value not found");
 			}
 			$qty =0;
 			if(count($request['line_index']) > 0){
+				
 				for($i=0;$i<count($request['line_index']);$i++){
+					
 					foreach($usagePolicies as $policy){
 						$reqQTY = floatval($request['qty'][$i]);
 						$calQTY = $reqQTY * (floatval($policy->percentage) / 100);
@@ -258,6 +263,7 @@ class UsagePolicyController extends Controller
 							throw new \Exception("House not found");
 						}
 						// $id = 1;
+						
 
 						//// FILLED USAGE DETAIL ROW ////
 						$detail = [
@@ -301,6 +307,7 @@ class UsagePolicyController extends Controller
 								$sql  = "CALL COSTING_LIFO({$request->session()->get('project')},{$request['item_id'][$i]});";
 							}
 							$stocks = DB::select($sql);
+							// print_r(count($stocks));exit;
 							// $columns = [
 							// 	'stocks.ref_id',
 							// 	'stocks.ref_no',
@@ -323,7 +330,7 @@ class UsagePolicyController extends Controller
 							// )->where('item_id',$request['item_id'][$i])->where('remain_qty','>',0)->where('trans_ref','I')->get();
 							// print_r($stocks);
 							// print_r($request['item_id'][$i]);
-							if($stocks){
+							if(count($stocks) > 0){
 								foreach($stocks as $stock){
 									$qty =0;
 									$remain_qty = 0;
@@ -373,6 +380,10 @@ class UsagePolicyController extends Controller
 									}
 								}
 								
+							}else{
+								DB::rollback();
+								throw new \Exception("Stock Out[{$i}] not insert.");
+								// print_r("No Stock available!");exit;
 							}
 							// exit;
 							// $costArr = getItemCost($request['item_id'][$i],$request['unit_id'][$i],$calQTY);

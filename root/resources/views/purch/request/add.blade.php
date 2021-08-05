@@ -160,7 +160,103 @@
 								<!-- Label -->
 								<label for="status" class="control-label" style="text-align: left;"><strong>{{ trans('lang.note') }}</strong></label>
 								<!-- Textarea -->
-								<textarea class="form-control trans_desc" id="trans_desc" name="desc" length="100" rows="8" placeholder="{{ trans('lang.enter_text') }}"></textarea>
+								{{-- <textarea class="form-control trans_desc" id="trans_desc" name="desc" length="100" rows="8" placeholder="{{ trans('lang.enter_text') }}"></textarea> --}}
+								<input type="text" name="desc" class="form-control" />
+								
+							</div>
+						</div>
+
+						<div class="col-md-12 card">
+							<div class="form-group">
+								<!-- Label -->
+								<label for="status" class="control-label" style="text-align: left;"><strong>{{ trans('lang.load_item_from_boq') }}</strong></label>
+								<!-- Textarea -->
+							</div>
+
+							<div class="col-12">
+								<div class="col-md-4">
+									<div class="form-group">
+										<label for="boq-zone" class="col-md-12 bold">{{trans('lang.zone')}} 
+										</label>
+										<div class="col-md-12">
+											<select name="zone_id" id="boq-zone" class="form-control boq-zone select2">
+												<option value=""></option>
+												{{getSystemData('ZN')}}
+											</select>
+											<span class="help-block font-red bold"></span>
+										</div>
+									</div>
+								</div>
+	
+								<div class="col-md-4">
+									<div class="form-group">
+										<label for="boq-block" class="col-md-12 bold">{{trans('lang.block')}} 
+										</label>
+										<div class="col-md-12">
+											<select name="block_id" id="boq-block" class="form-control boq-block select2">
+												<option value=""></option>
+												{{getSystemData('BK')}}
+											</select>
+											<span class="help-block font-red bold"></span>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-4">
+									<div class="form-group">
+										<label for="boq-building" class="col-md-12 bold">{{trans('lang.building')}} 
+										</label>
+										<div class="col-md-12">
+											<select name="building_id" id="boq-building" class="form-control boq-building select2">
+												<option value=""></option>
+												{{getSystemData('BD')}}
+											</select>
+											<span class="help-block font-red bold"></span>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-12">
+								<div class="col-md-4">
+									<div class="form-group">
+										<label for="boq-street" class="col-md-12 bold">{{trans('lang.street')}} 
+										</label>
+										<div class="col-md-12">
+											<select name="street_id" id="boq-street" class="form-control boq-street select2">
+												<option value=""></option>
+												{{getSystemData('ST')}}
+											</select>
+											<span class="help-block font-red bold"></span>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-4">
+									<div class="form-group">
+										<label for="boq-house-type" class="col-md-12 bold">{{trans('lang.house_type')}} 
+										</label>
+										<div class="col-md-12">
+											<select name="house_type_id" id="boq-house-type" class="form-control boq-house-type select2">
+												<option value=""></option>
+												{{getSystemData('HT')}}
+											</select>
+											<span class="help-block font-red bold"></span>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-4">
+									<div class="form-group">
+										<label for="boq-house" class="col-md-12 bold " id="label-house">{{trans('lang.house_no')}}
+										</label>
+										<div class="col-md-12 boq-house-wrapper">
+											<select name="house[]" id="boq-house" class="form-control boq-house select2" multiple>
+											
+											</select>
+											<span class="help-block font-red bold"></span>
+										</div>
+									</div>
+								</div>
+								<div class="form-actions text-right">
+									<a class="btn blue bold" id="load-boq-item">{{trans('lang.load_item')}}</a>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -171,13 +267,14 @@
 								<thead>
 									<tr style="font-size:12px;">
 										<th width="5%" class="text-center all">{{ trans('lang.line_no') }}</th>
+										<th width="15%" class="text-center all">{{ trans('lang.items_type') }}</th>
 										<th width="20%" class="text-center all">{{ trans('lang.items') }}</th>
 										<th width="10%" class="text-center all">{{ trans('lang.size') }}</th>
 										<th width="15%" class="text-center all">{{ trans('lang.units') }}</th>
 										<th width="15%" class="text-center all">{{ trans('lang.qty') }}</th>
 										<th width="15%" class="text-center all">{{ trans('lang.note') }}</th>
 										<th width="15%" class="text-center all">{{ trans('lang.remark') }}</th>
-										<th width="5%" class="text-center all"><i class='fa fa-plus btnAdd' id="btnAdd"></i></th>
+										<th width="5%" class="text-center all"><span  onclick="add()"><i class='fa fa-plus btnAdd'></i></span></th>
 									</tr>
 								</thead>
 								<tbody></tbody>
@@ -335,20 +432,54 @@
 	}
 
 	function onChangeUnit(field, row){
+		
 		var item_id = $(".line_item_"+row).val();
 		var unit = $(field).val();
+		var _token = $("input[name=_token]").val();
+		var params = {
+			zone_id: null,
+			block_id: null,
+			building_id : null,
+			street_id: null,
+			house_type: null,
+			_token :_token,
+			item_id : item_id,
+			unit : unit
+		};
+		const zoneID    = $('#boq-zone').val();
+		const blockID   = $('#boq-block').val();
+		const buildingID    = $('#boq-building').val();
+		const streetID  = $('#boq-street').val();
+		const houseType = $('#boq-house-type').val();
+
+		if(zoneID){
+			params.zone_id = zoneID;
+		}
+
+		if(blockID){
+			params.block_id = blockID;
+		}
+		if(buildingID){
+			params.building_id = buildingID;
+		}
+
+		if(streetID){
+			params.street_id = streetID;
+		}
+
+		if(houseType){
+			params.house_type = houseType;
+		}
+		
 		if(item_id!=null && item_id!='' && unit!=null && unit!=''){
-			var _token = $("input[name=_token]").val();
+			
 			$.ajax({
 				url :'{{url("purch/request/remoteItem")}}',
 				type:'POST',
 				async:false,
-				data:{
-					'_token': _token,
-					'item_id':item_id,
-					'unit':unit,
-				},
+				data:params,
 				success:function(data){
+					console.log(data);
 					$('.line_boq_set_'+row).val(data.boq_set);
 					$('.line_price_'+row).val(data.price);
 				},error:function(){
@@ -384,7 +515,8 @@
 		}
 	}
 	
-	$("#btnAdd").on('click',function(){
+	function add(){
+	// $("#btnAdd").on('click',function(){
 		var line_row = $("#table-income tbody tr").length;
 		if(line_row<=99){
 			$(".show-message-error").empty();
@@ -395,7 +527,13 @@
 					'	<strong>'+lineNo((line_row+1),3)+'</strong>'+
 					'</td>'+
 					'<td>'+
-					'	<select class="form-control line_item line_item_'+i+'" onchange="onChangeItem(this, '+i+')" name="line_item[]">'+
+					'	<select class="form-control line_item_type line_item_type'+i+'" onchange="ChangeItemType(this, '+i+')" name="line_item_type[]">'+
+					'		<option value=""></option>'+
+					'		{{getSystemData("IT")}}'+
+					'	</select>'+
+					'</td>'+
+					'<td>'+
+					'	<select class="form-control line_item line_item_'+i+'" onchange="onChangeItem(this, '+i+')"  name="line_item[]">'+
 					'		<option value=""></option>'+
 					'	</select>'+
 					'</td>'+
@@ -422,10 +560,13 @@
 					'	<button type="button" class="btn btn-danger" onclick="onRemove(this)" title="{{trans("lang.delete")}}"><i class="fa fa-remove"></i></button>'+
 					'</td>'+
 				'</tr>');
+			$(".line_item_type"+i).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
 			$(".line_unit_"+i).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
 			$(".line_qty_"+i).ForceNumericOnly();
 			
 			var itemSelect = $('.line_item_'+i);
+			var type_id = $('.line_item_type'+i).val();
+			console.log(type_id);
 			itemSelect.select2({
 			  width:'100%',
 			  allowClear:'true',
@@ -435,7 +576,8 @@
 			    dataType:"json",
 			    data: function (params) {
 			      var query = {
-			        q: params.term
+			        q: params.term,
+					cat_id : type_id
 			      }
 			      return query;
 			    },
@@ -458,7 +600,8 @@
 		}else{
 			$(".show-message-error").html('{{trans("lang.not_more_than_100")}}!');
 		}
-	});
+	// });
+}
 	
 	document.addEventListener("mousewheel", function(event){
 		if(document.activeElement.type === "number" &&
@@ -617,5 +760,128 @@
 			});
 		}, 3000); */
 	});
+	$("#load-boq-item").on("click",function(){
+		var params = {
+			zone_id: null,
+			block_id: null,
+			building_id : null,
+			street_id: null,
+			house_type: null,
+		};
+		const zoneID    = $('#boq-zone').val();
+		const blockID   = $('#boq-block').val();
+		const buildingID    = $('#boq-building').val();
+		const streetID  = $('#boq-street').val();
+		const houseType = $('#boq-house-type').val();
+
+		if(zoneID){
+			params.zone_id = zoneID;
+		}
+
+		if(blockID){
+			params.block_id = blockID;
+		}
+		if(buildingID){
+			params.building_id = buildingID;
+		}
+
+		if(streetID){
+			params.street_id = streetID;
+		}
+
+		if(houseType){
+			params.house_type = houseType;
+		}
+		$.ajax({
+			url :'{{url("repository/getBoqItems")}}',
+			type:'GET',
+			data:params,
+			success:function(data){
+				$.each(data,function(key, val){
+					loadWorkingTypeItem(val,key);
+				});
+			},error:function(){
+				
+			}
+		});
+	});
+
+	function loadWorkingTypeItem(data,index){
+		console.log(data);
+		var table_boq = $('#table-income');
+		html = '<tr>';
+				html+= '<td class="text-center all"><strong>'+lineNo(index+1,3)+'</strong><input type="hidden" class="check_row check_row_'+index+'" value="" /><input type="hidden" class="line_index line_index_'+index+'" name="line_index[]" value="'+lineNo((index+1),3)+'" /><input type="hidden" value="'+lineNo((index+1),3)+'" name="line_no[]" class="line_no line_no_'+index+'" /></td>';
+				html+= '<td>'+data.item_type+'<input type="hidden" name="line_item_type[]" class="line_item_type'+index+'" value="'+data.cat_id+'" /></td>';
+				html+= '<td>'+data.item_name+'<input type="hidden" class="line_item line_item_'+index+'" name="line_item[]" value="'+data.item_id+'" /></td>';
+				html+= '<td><input type="text" length="11" class="form-control size line_size line_size_'+index+'" name="size[]" placeholder="{{trans("lang.size")}}" /></td>';
+				html+= '<td><select class="form-control select2 select2_'+index+' line_unit line_unit_'+index+'" name="line_unit[]"> onchange="onChangeUnit(this, '+index+')"' 
+					+'<option value=""></option>'
+				+'</select></td>';
+				html+= '<td><input type="number" length="11" class="form-control line_qty line_qty_'+index+'" onkeyup="enterQtyRequest(this, '+index+')" name="line_qty[]" placeholder="{{trans("lang.enter_number")}}" /><input type="hidden" class="form-control line_boq_set line_boq_set_'+index+'" name="line_boq_set[]"/>'+
+					'	<input type="hidden" class="form-control line_price line_price_'+index+'" name="line_price[]"/></td>';
+				html += '<td><input type="number" length="11" class="form-control line_reference line_reference_'+index+'" name="line_reference[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
+				html += '<td><input type="number" length="11" class="form-control  line_remark line_remark_'+index+'" name="line_remark[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
+				html += '<td><a class="row_'+index+' btn btn-sm" onclick="DeleteRowBOQ('+index+')"><i class="fa fa-trash"></i></a></td>';
+			html+='</tr>';
+		table_boq.append(html);
+		
+		$.fn.select2.defaults.set('theme','classic');
+		$('.select2').select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
+		$('.line_unit_'+index).empty();
+		$('.line_unit_'+index).append($('<option></option>').val('').text(''));
+		jsonUnits = GetUnit(data.unit_stock);
+		$.each(jsonUnits, function(k, v){
+			$('.line_unit_'+index).append($('<option></option>').val(v.from_code).text(v.from_code+' ('+v.from_desc+')'));
+		});
+		@if(!isset($head))
+			$('.line_unit_'+index).select2('val', data.unit_purch);
+			var field = '.line_unit_'+index;
+			onChangeUnit(field,index);
+			
+		@endif
+	}
+
+	
+
+	function ChangeItemType(val, row){
+		if(val!=null && val!=''){
+			var itemSelect = $('.line_item_'+row);
+			var type_id = $('.line_item_type'+row).val();
+			console.log(type_id);
+			itemSelect.select2({
+			  width:'100%',
+			  allowClear:'true',
+			  placeholder:'{{trans("lang.please_choose")}}',
+			  ajax: {
+			    url: '{{url("/stock/use/GetItem")}}',
+			    dataType:"json",
+			    data: function (params) {
+			      var query = {
+			       
+					cat_id : type_id,
+					q: params.term,
+			      }
+			      return query;
+			    },
+			    async:true,
+			    success:function(data){
+			    	jsonItems = data.data;
+			    },
+			    processResults: function (data) {
+			      return {
+			        results: data.data,
+			        more: (data.to < data.total),
+			        page: (data.current_page + 1),
+			        limit: data.per_page
+			      };
+			    }
+			  }
+			});
+
+		}else{
+			$(".show-message-error").html('{{trans("lang.not_more_than_100")}}!');
+		}
+	}
+	
 </script>
 @endsection()
