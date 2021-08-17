@@ -222,6 +222,7 @@
 			var rounte = $(this).attr('rounte');
 			$('.upload-excel-form').attr('action',rounte);
 			$('.upload-excel-form').modal('show');
+			$('.displayNone').css('display','block');
 			$('#btn_upload_excel').on('click',function(){
 				if(onUploadExcel()){}else{return false}
 			}); 
@@ -726,7 +727,6 @@
 				$("#boq-house").append('{{getSystemData("HT")}}');
 			}
 		});
-		
 		$('#boq-zone').on('change', function(){
 			getHouses();
 		});
@@ -741,6 +741,24 @@
 		});
 
 		$('#boq-house-type').on('change', function(){
+			var type = $(this).val();
+			getHouses();
+		});
+
+		$('#boq-zone-preview').on('change', function(){
+			getHouses();
+		});
+		$('#boq-block-preview').on('change', function(){
+			getHouses();
+		});
+		$('#boq-building-preview').on('change', function(){
+			getHouses();
+		});
+		$('#boq-street-preview').on('change', function(){
+			getHouses();
+		});
+
+		$('#boq-house-type-preview').on('change', function(){
 			var type = $(this).val();
 			getHouses();
 		});
@@ -785,6 +803,7 @@
 					$("#boq-house").empty();
 					$.each(result,function(key, val){
 						$("#boq-house").append($('<option></option>').val(val.id).text(val.house_no));
+						$("#boq-house-preview").append($('<option></option>').val(val.id).text(val.house_no));
 					});
 				}
 			});
@@ -808,12 +827,12 @@
 			$('.enter-boq-modal').modal('show');
 			
 			$("#btnEnterBoq").on('click',function(){
-				if(chkValid([".boq-zone",".boq-block",".boq-building",".line_item_type",".line_item",".line_unit",".line_qty_std",".line_qty_add"])){
+				// if(chkValid([".boq-zone",".boq-block",".boq-building",".line_item_type",".line_item",".line_unit",".line_qty_std",".line_qty_add"])){
 					$('.enter-boq-form').submit();
-				}else{
-					$('.boq-button-submit').prop('disabled', false);
-					return false;
-				}
+				// }else{
+				// 	$('.boq-button-submit').prop('disabled', false);
+				// 	return false;
+				// }
 			});
 		});
 		/* end button click save */

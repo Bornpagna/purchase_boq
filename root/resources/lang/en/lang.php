@@ -268,6 +268,7 @@ return [
 	'please_choose'         => 'Please Choose',
 	'pr_list'				=> 'Purchase Request List',
 	'po_list'				=> 'Purchase Order List',
+	'preview'				=> 'Preview',
 /* Q */
 	'qty'         => 'Qty',
 	'qty_std'     => 'Qty/Std',

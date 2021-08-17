@@ -71,6 +71,7 @@ Route::group(['prefix' => 'boqs'], function() {
 	Route::post('reviseBoqHouse/{boq_id}/{house_id}/{working_type}','BoqController@reviseBoqHouse')->middleware('checkRole:revise_boq_house');
 	Route::any('reviseBoqHouses/{boq_id}/{house_id}/{working_type}','BoqController@reviseBoqHouse')->middleware('checkRole:revise_boq_house');
 	Route::get('viewBoq/{id}/{back}','BoqController@viewBoq')->middleware('checkRole:view_boq');
+	Route::post('uploadBoqPreview','BoqController@uploadBoqPreview')->middleware('checkRole:boq_add');
 });
 
 ///////////////////// route zone ///////////////////////////
