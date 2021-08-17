@@ -11,8 +11,77 @@
             background: url("{{url("assets/upload/temps/details_close.png")}}") no-repeat center center !important;
         }
 		.boq-pointer{
-		cursor: pointer;
-	}
+			cursor: pointer;
+		}
+		#select2-boq-house-results > .select2-results__option {
+		padding-right: 20px;
+		vertical-align: middle;
+		}
+		#select2-boq-house-results > .select2-results__option:before {
+		content: "";
+		display: inline-block;
+		position: relative;
+		height: 20px;
+		width: 20px;
+		border: 2px solid #e9e9e9;
+		border-radius: 4px;
+		background-color: #fff;
+		margin-right: 20px;
+		vertical-align: middle;
+		}
+		#select2-boq-house-results > .select2-results__option[aria-selected=true]:before {
+		font-family:fontAwesome;
+		content: "\f00c";
+		color: #fff;
+		background-color: #3d76cc;
+		border: 0;
+		display: inline-block;
+		padding-left: 3px;
+		}
+		#select2-boq-house-results > .select2-container--default .select2-results__option[aria-selected=true] {
+			background-color: #fff;
+		}
+		#select2-boq-house-results > .select2-container--default .select2-results__option--highlighted[aria-selected] {
+			background-color: #eaeaeb;
+			color: #272727;
+		}
+		#select2-boq-house-results > .select2-container--default .select2-selection--multiple {
+			margin-bottom: 10px;
+		}
+		#select2-boq-house-results > .select2-container--default.select2-container--open.select2-container--below .select2-selection--multiple {
+			border-radius: 4px;
+		}
+		#select2-boq-house-results > .select2-container--default.select2-container--focus .select2-selection--multiple {
+			border-color: #3d76cc;
+			border-width: 2px;
+		}
+		#select2-boq-house-results > .select2-container--default .select2-selection--multiple {
+			border-width: 2px;
+		}
+		#select2-boq-house-results > .select2-container--open .select2-dropdown--below {
+			
+			border-radius: 6px;
+			box-shadow: 0 0 10px rgba(0,0,0,0.5);
+
+		}
+		#select2-boq-house-results > .select2-selection .select2-selection--multiple:after {
+			content: 'hhghgh';
+		}
+		/* select with icons badges single*/
+		#select2-boq-house-results > .select-icon .select2-selection__placeholder .badge {
+			display: none;
+		}
+		#select2-boq-house-results > .select-icon .placeholder {
+			display: none;
+		}
+		#select2-boq-house-results > .select-icon .select2-results__option:before,
+		#select2-boq-house-results > .select-icon .select2-results__option[aria-selected=true]:before {
+			display: none !important;
+			/* content: "" !important; */
+		}
+		#select2-boq-house-results > .select-icon  .select2-search--dropdown {
+			display: none;
+		}
 	</style>
 @endsection
 @section('content')
@@ -25,8 +94,8 @@
 				<div class="portlet-title">
 					<div class="caption">
 						<i class="fa fa-plus font-dark"></i>
-						<span class="caption-subject bold font-dark uppercase"> Order</span>
-						<span class="caption-helper">Add New</span>
+						<span class="caption-subject bold font-dark uppercase">{{ trans('lang.boq') }}</span>
+						<span class="caption-helper">{{ trans('lang.revise_boq') }}</span>
 					</div>
 					<div class="actions">
 						<a rounte="{{$rounteBack}}" title="Back" class="btn btn-circle btn-icon-only btn-default" id="btnBack">

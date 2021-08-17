@@ -8,6 +8,7 @@ use App\Model\Item;
 use App\Model\Order;
 use App\Model\OrderItem;
 use App\Model\Boq;
+use App\Model\BoqHouse;
 use App\Model\BoqItem;
 use App\Model\Usage;
 use App\Model\UsageDetails;
@@ -55,7 +56,7 @@ class RepositoryController extends Controller
 		$rawStockSQL = Stock::select($columns)
 					->leftJoin('items','stocks.item_id','items.id')
 					->whereRaw(DB::raw("{$prefix}stocks.item_id={$itemId}"))
-					// ->whereRaw(DB::raw("{$prefix}stocks.trans_date >= '{$tranDate}'"))
+					->whereRaw(DB::raw("{$prefix}stocks.trans_date >= '{$tranDate}'"))
 					->whereRaw(DB::raw("{$prefix}stocks.delete=0"))->toSql();
 					// print_r($rawStockSQL);
 
@@ -631,9 +632,34 @@ class RepositoryController extends Controller
 		->join('boqs','boqs.id','boq_houses.boq_id')
 		->where('boqs.pro_id',$projectID);
 		$boqItems = $boqItems->where($where)->groupBy('boq_items.item_id')
-		->orderBy('boq_items.working_type')->get();
+		->orderBy('boq_items.working_type')->toSql();
 		return response()->json($boqItems,200);
 	}
 
-	
+	public function getHouseNoBoq(Request $request){
+		$boq_house = BoqHouse::groupBy("boq_houses.house_id")->pluck('id');
+		$prefix = DB::getTablePrefix();
+		$houses = House::select([
+			'*' 
+		])->whereNotIn('houses.id',$boq_house);
+
+		if($zoneID = $request->input('zone_id')){
+			$houses = $houses->where('zone_id',$zoneID);
+		}
+
+		if($blockID = $request->input('block_id')){
+			$houses = $houses->where('block_id',$blockID);
+		}
+
+		if($streetID = $request->input('street_id')){
+			$houses = $houses->where('street_id',$streetID);
+		}
+
+		if($houseType = $request->input('house_type')){
+			$houses = $houses->where('house_type',$houseType);
+		}
+		$houses = $houses->get();
+
+		return response()->json($houses,200); 
+	}
 }

@@ -98,6 +98,7 @@ class ItemTypeController extends Controller
 		DB::beginTransaction();
 		try {
 			$data = [
+				'parent'	=>$request->parent_id == "" ? 0 : $request->parent_id,
 				'name'		=>$request->name,
 				'desc'		=>$request->desc,
 				'type'		=>self::SYSTEM_TYPE,
@@ -128,6 +129,7 @@ class ItemTypeController extends Controller
     	DB::beginTransaction();
 		try {
 			$data = [
+				'parent'	=>$request->parent_id == "" ? 0 : $request->parent_id,
 				'name'		=>$request->name,
 				'desc'		=>$request->desc,
 				'type'		=>self::SYSTEM_TYPE,

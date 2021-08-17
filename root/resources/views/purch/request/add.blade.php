@@ -267,11 +267,13 @@
 								<thead>
 									<tr style="font-size:12px;">
 										<th width="5%" class="text-center all">{{ trans('lang.line_no') }}</th>
-										<th width="15%" class="text-center all">{{ trans('lang.items_type') }}</th>
-										<th width="20%" class="text-center all">{{ trans('lang.items') }}</th>
+										<th width="10%" class="text-center all">{{ trans('lang.items_type') }}</th>
+										<th width="15%" class="text-center all">{{ trans('lang.items') }}</th>
 										<th width="10%" class="text-center all">{{ trans('lang.size') }}</th>
-										<th width="15%" class="text-center all">{{ trans('lang.units') }}</th>
-										<th width="15%" class="text-center all">{{ trans('lang.qty') }}</th>
+										<th width="10%" class="text-center all">{{ trans('lang.units') }}</th>
+										<th width="10%" class="text-center all">{{ trans('lang.qty_in_stock') }}</th>
+										<th width="10%" class="text-center all">{{ trans('lang.qty_boq_remain') }}</th>
+										<th width="10%" class="text-center all">{{ trans('lang.qty') }}</th>
 										<th width="15%" class="text-center all">{{ trans('lang.note') }}</th>
 										<th width="15%" class="text-center all">{{ trans('lang.remark') }}</th>
 										<th width="5%" class="text-center all"><span  onclick="add()"><i class='fa fa-plus btnAdd'></i></span></th>
@@ -311,7 +313,7 @@
 		return $.ajax({url:'{{url("/stock/use/GetItem")}}',type:'GET',dataType:'json',data:{q:query},async:false}).responseJSON;
 	}
 	
-	var i = 1;
+	var i = 0;
 	function onRemove(field){
 		$(field).parents('tr').remove();
 		$("#table-income tbody tr").each(function(k){
@@ -516,6 +518,7 @@
 	}
 	
 	function add(){
+		i++;
 	// $("#btnAdd").on('click',function(){
 		var line_row = $("#table-income tbody tr").length;
 		if(line_row<=99){
@@ -544,6 +547,12 @@
 					'	<select class="form-control line_unit line_unit_'+i+'" onchange="onChangeUnit(this, '+i+')" name="line_unit[]">'+
 					'		<option value=""></option>'+
 					'	</select>'+
+					'</td>'+
+					'<td>'+
+					'	<input class="form-control qty_in_stock qty_in_stock_'+i+'" name="qty_in_stock[]" />'+
+					'</td>'+
+					'<td>'+
+					'	<input class="form-control boq_qty_remain boq_qty_remain_'+i+'" name="boq_qty_remain[]" />'+
 					'</td>'+
 					'<td>'+
 					'	<input type="number" length="50" step="any" class="form-control noscroll line_qty line_qty_'+i+'" onkeyup="enterQtyRequest(this, '+i+')"  name="line_qty[]" placeholder="{{trans('lang.enter_text')}}"/>'+
@@ -596,7 +605,7 @@
 			  }
 			});
 
-			i++;
+			
 		}else{
 			$(".show-message-error").html('{{trans("lang.not_more_than_100")}}!');
 		}
@@ -799,6 +808,7 @@
 			success:function(data){
 				$.each(data,function(key, val){
 					loadWorkingTypeItem(val,key);
+					i = key;
 				});
 			},error:function(){
 				
@@ -813,10 +823,12 @@
 				html+= '<td class="text-center all"><strong>'+lineNo(index+1,3)+'</strong><input type="hidden" class="check_row check_row_'+index+'" value="" /><input type="hidden" class="line_index line_index_'+index+'" name="line_index[]" value="'+lineNo((index+1),3)+'" /><input type="hidden" value="'+lineNo((index+1),3)+'" name="line_no[]" class="line_no line_no_'+index+'" /></td>';
 				html+= '<td>'+data.item_type+'<input type="hidden" name="line_item_type[]" class="line_item_type'+index+'" value="'+data.cat_id+'" /></td>';
 				html+= '<td>'+data.item_name+'<input type="hidden" class="line_item line_item_'+index+'" name="line_item[]" value="'+data.item_id+'" /></td>';
-				html+= '<td><input type="text" length="11" class="form-control size line_size line_size_'+index+'" name="size[]" placeholder="{{trans("lang.size")}}" /></td>';
+				html+= '<td><input type="text" length="11" class="form-control size line_size line_size_'+index+'" name="line_size[]" placeholder="{{trans("lang.size")}}" /></td>';
 				html+= '<td><select class="form-control select2 select2_'+index+' line_unit line_unit_'+index+'" name="line_unit[]"> onchange="onChangeUnit(this, '+index+')"' 
 					+'<option value=""></option>'
 				+'</select></td>';
+				html+= '<td><input class="form-control qty_in_stock qty_in_stock_'+index+'" name="qty_in_stock[]" /></td>';
+				html+= '<td><input class="form-control boq_qty_remain boq_qty_remain_'+index+'" name="boq_qty_remain[]" /></td>';
 				html+= '<td><input type="number" length="11" class="form-control line_qty line_qty_'+index+'" onkeyup="enterQtyRequest(this, '+index+')" name="line_qty[]" placeholder="{{trans("lang.enter_number")}}" /><input type="hidden" class="form-control line_boq_set line_boq_set_'+index+'" name="line_boq_set[]"/>'+
 					'	<input type="hidden" class="form-control line_price line_price_'+index+'" name="line_price[]"/></td>';
 				html += '<td><input type="number" length="11" class="form-control line_reference line_reference_'+index+'" name="line_reference[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';

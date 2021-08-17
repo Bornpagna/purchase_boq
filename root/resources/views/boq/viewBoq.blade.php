@@ -48,7 +48,7 @@
 							<th style="width: 15%;">{{trans("lang.house_desc")}}</th>
 							<th style="width: 10%;">{{trans("lang.created_by")}}</th>
 							<th style="width: 10%;">{{trans("lang.created_at")}}</th>
-							<th style="width: 15%;">{{trans("lang.action")}}</th>
+							{{-- <th style="width: 15%;">{{trans("lang.action")}}</th> --}}
 						</tr>
 					</thead>
 				</table>
@@ -115,7 +115,7 @@
 			{ data: 'house_desc', name: 'house_desc' },
 			{ data: 'created_by', name: 'created_by' },
 			{ data: 'created_at', name: 'created_at' },
-			{ data: 'action', name: 'action', class :'text-center', orderable: false, searchable: false}
+			// { data: 'action', name: 'action', class :'text-center', orderable: false, searchable: false}
 		],order: [[1, 'desc']]
 		
 	});

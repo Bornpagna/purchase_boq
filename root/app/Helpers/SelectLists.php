@@ -93,23 +93,45 @@ function getBOQNumber(){
 }
 
 ////////////////////// unit stock ///////////////////////////////
-function getSystemData($type=NULL,$val=NULL){
+function getSystemData($type=NULL,$val=NULL,$parent_only=NULL){
 	$pro_id = Session::get('project');
 	$where = [
 		'status'=>'1'
 	];
+
 	if(($type) && ($type == "IT" || $type == "DP")){
 		$where = array_merge($where, ['type'=>$type]);
 	}else if($type){
 		$where = array_merge($where, ['type'=>$type,'parent_id'=>$pro_id]);
 	}
-	$data = DB::table('system_datas')->where($where)->get();
-	foreach($data as $row){
-		// print_r($row->id);exit;
-		if(strval($val) == strval($row->id)){
-			echo '<option value="'.$row->id.'" selected>'.$row->name.'</option>';
-		}else{ 
-			echo '<option value="'.$row->id.'">'.$row->name.'</option>';
+	$parentDatas = DB::table('system_datas')->where($where)->where('parent',0)->get();
+	
+	foreach($parentDatas as $row){
+		if($parent_only){
+			if(strval($val) == strval($row->id)){
+				echo '<option value="'.$row->id.'" selected>'.$row->name.'</option>';
+			}else{ 
+				echo '<option value="'.$row->id.'">'.$row->name.'</option>';
+			}
+		}else{
+			$data = DB::table('system_datas')->where($where)->where('parent',$row->id)->get();
+			if(count($data) > 0){
+				echo '<optgroup label="'.$row->name.'">';
+					foreach($data as $key=>$child){
+						if(strval($val) == strval($child->id)){
+							echo '<option value="'.$child->id.'" selected>'.$child->name.'</option>';
+						}else{ 
+							echo '<option value="'.$child->id.'">'.$child->name.'</option>';
+						}
+					}
+				echo '</optgroup>';
+			}else{
+				if(strval($val) == strval($row->id)){
+					echo '<option value="'.$row->id.'" selected>'.$row->name.'</option>';
+				}else{ 
+					echo '<option value="'.$row->id.'">'.$row->name.'</option>';
+				}
+			}
 		}
 	}
 }

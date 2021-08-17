@@ -371,7 +371,7 @@ function getAllocateStock($warehouse_id, $item_id, $unit, $qty){
 function getBOQs($id=NULL){
 	$where = '';
 	if($id && $id!=0){
-		$where = ' WHERE pr_boqs.id = '.$id;
+		$where = ' and pr_boqs.id = '.$id;
 	}
 	// $sql = "SELECT `pr_boqs`.`id`, pr_boqs.`house_id`, 
 	// (SELECT pr_houses.`house_no` FROM pr_houses WHERE pr_houses.`id` = pr_boqs.`house_id`) AS house_no, 
@@ -388,7 +388,7 @@ function getBOQs($id=NULL){
 		 pr_boqs.trans_by AS trans_by_id,
 		 (SELECT pr_users.`name` FROM pr_users WHERE pr_users.`id` = pr_boqs.`trans_by`) AS `trans_by`
 
-	FROM `pr_boqs`".$where;
+	FROM `pr_boqs` where pr_boqs.status = 1 ".$where;
 	return DB::select($sql);
 }
 function getBoqWorkingType($id,$house_id = null){

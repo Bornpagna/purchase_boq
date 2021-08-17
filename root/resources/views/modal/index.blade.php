@@ -265,6 +265,7 @@
 	});
 	
 	$(function(){
+		$('.select2').select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
 		/* button click save */
 		$("#btnAdd").on("click",function(){
 			var rounte = $(this).attr('rounte');
