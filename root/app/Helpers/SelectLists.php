@@ -113,7 +113,69 @@ function getSystemData($type=NULL,$val=NULL){
 		}
 	}
 }
-
+function getSystemDataVal($type=NULL,$val=NULL){
+	$pro_id = Session::get('project');
+	$where = [
+		'status'=>'1'
+	];
+	if(($type) && ($type == "IT" || $type == "DP")){
+		$where = array_merge($where, ['type'=>$type]);
+	}else if($type){
+		$where = array_merge($where, ['type'=>$type,'parent_id'=>$pro_id]);
+	}
+	$data = DB::table('system_datas')->where($where)->get();
+	foreach($data as $row){
+		if(($val) == ($row->id)){
+			echo '<option value="'.$row->id.'" selected>'.$row->name.'</option>';
+		}else{ 
+			echo '<option value="'.$row->id.'">'.$row->name.'</option>';
+		}
+	}
+}
+function getSystemDataName($type=NULL,$val=NULL){
+	$pro_id = Session::get('project');
+	$where = [
+		'status'=>'1'
+	];
+	if(($type) && ($type == "IT" || $type == "DP")){
+		$where = array_merge($where, ['type'=>$type]);
+	}else if($type){
+		$where = array_merge($where, ['type'=>$type,'parent_id'=>$pro_id]);
+	}
+	$data = DB::table('system_datas')->where($where)->get();
+	foreach($data as $row){
+		if(strval($val) == $row->name){
+			echo '<option value="'.$row->id.'" selected>'.$row->name.'</option>';
+		}else{ 
+			echo '<option value="'.$row->id.'">'.$row->name.'</option>';
+		}
+	}
+}
+function getHouseOption($val=NULL,$arr=NULL){
+	$where = [
+		'status'=>'1'
+	];
+	$data = DB::table('houses')->where($where)->get();
+	if(!empty($arr)){
+		foreach($data as $row){
+			$select = '';
+			foreach($arr as $sub_row){
+				if($sub_row==$row->id){
+					$select = 'selected';
+				}
+			}
+			echo '<option value="'.$row->id.'" '.$select.'>'.$row->house_no.'</option>';
+		}
+	}else{
+		foreach($data as $row){
+			if($val == $row->name){
+				echo '<option value="'.$row->id.'" selected>'.$row->house_no.'</option>';
+			}else{ 
+				echo '<option value="'.$row->id.'">'.$row->house_no.'</option>';
+			}
+		}
+	}	
+}
 ////////////////////// unit stock ///////////////////////////////
 function getUnitStock($val=NULL){
 	$data = DB::table('units')->where('status','1')->select(['to_code','to_desc'])->distinct('to_code')->get();
@@ -238,7 +300,20 @@ function getItems($val=NULL,$cat_id = null){
 		}
 	}
 }
-
+function getItemName($val=NULL,$cat_id = null){
+	$where = ['status'=>1];
+	if($cat_id != null){
+		$where = array_merge($where,['cat_id'=>$cat_id]);
+	}
+	$data = DB::table('items')->select('id','code','name','unit_stock')->where($where)->get();
+	foreach($data as $row){
+		if($val!=NULL && $val==$row->name){
+			echo '<option val="'.$row->unit_stock.'" value="'.$row->id.'" selected>'.$row->code.'('.$row->name.')</option>';
+		}else{
+			echo '<option val="'.$row->unit_stock.'" value="'.$row->id.'">'.$row->code.' ('.$row->name.')</option>';
+		}
+	}
+}
 ////////////////////// get tax ///////////////////////////////
 function getConstructor($arr){
 	$arrCon = ['',trans('lang.engineer'),trans('lang.sub_const'),trans('lang.worker'),trans('lang.security'),trans('lang.driver')];

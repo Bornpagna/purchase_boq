@@ -25,6 +25,98 @@
 													<p>The first line in downloaded csv file should remain as it is. Please do not change the order of columns.<br />
 														The correct column order is () &amp; you must follow this. Please make sure the csv file is UTF-8 encoded and not saved with byte order mark (BOM).</p>
 												</div>
+												<!-- Form Select Zone Street Block Building House -->
+												<div class="displayNone" style="display: none;">
+													<div class="row">
+														<div class="col-md-4">
+															<div class="form-group">
+																<label for="boq-zone" class="col-md-12 bold">{{trans('lang.zone')}} 
+																	<span class="required">*</span>
+																</label>
+																<div class="col-md-12">
+																	<select name="zone_id" id="boq-zone-preview" class="form-control boq-zone my-select2">
+																		<option value=""></option>
+																		{{getSystemData('ZN')}}
+																	</select>
+																	<span class="help-block font-red bold"></span>
+																</div>
+															</div>
+														</div>
+
+														<div class="col-md-4">
+															<div class="form-group">
+																<label for="boq-block" class="col-md-12 bold">{{trans('lang.block')}} 
+																	<span class="required">*</span>
+																</label>
+																<div class="col-md-12">
+																	<select name="block_id" id="boq-block-preview" class="form-control boq-block my-select2">
+																		<option value=""></option>
+																		{{getSystemData('BK')}}
+																	</select>
+																	<span class="help-block font-red bold"></span>
+																</div>
+															</div>
+														</div>
+														<div class="col-md-4">
+															<div class="form-group">
+																<label for="boq-building" class="col-md-12 bold">{{trans('lang.building')}} 
+																	<span class="required">*</span>
+																</label>
+																<div class="col-md-12">
+																	<select name="building_id" id="boq-building-preview" class="form-control boq-building my-select2">
+																		<option value=""></option>
+																		{{getSystemData('BD')}}
+																	</select>
+																	<span class="help-block font-red bold"></span>
+																</div>
+															</div>
+														</div>
+													</div>
+													<div class="row">
+														<div class="col-md-4">
+															<div class="form-group">
+																<label for="boq-street" class="col-md-12 bold">{{trans('lang.street')}} 
+																	{{-- <span class="required">*</span> --}}
+																</label>
+																<div class="col-md-12">
+																	<select name="street_id" id="boq-street-preview" class="form-control boq-street my-select2">
+																		<option value=""></option>
+																		{{getSystemData('ST')}}
+																	</select>
+																	<span class="help-block font-red bold"></span>
+																</div>
+															</div>
+														</div>
+														<div class="col-md-4">
+															<div class="form-group">
+																<label for="boq-house-type" class="col-md-12 bold">{{trans('lang.house_type')}} 
+																	{{-- <span class="required">*</span> --}}
+																</label>
+																<div class="col-md-12">
+																	<select name="house_type_id" id="boq-house-type-preview" class="form-control boq-house-type my-select2">
+																		<option value=""></option>
+																		{{getSystemData('HT')}}
+																	</select>
+																	<span class="help-block font-red bold"></span>
+																</div>
+															</div>
+														</div>
+														<div class="col-md-4">
+															<div class="form-group">
+																<label for="boq-house" class="col-md-12 bold " id="label-house">{{trans('lang.house_no')}} 
+																	{{-- <span class="required">*</span> --}}
+																</label>
+																<div class="col-md-12 boq-house-wrapper">
+																	<select name="house[]" id="boq-house-preview" class="form-control boq-house my-select2" multiple>
+																	
+																	</select>
+																	<span class="help-block font-red bold"></span>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!-- End Form Select Zone Street Block Building House -->
 												<div class="text-right">
 													<a title="{{trans('lang.download_example')}}" class="btn btn-primary float-right" href="#">
 														<i class="fa fa-download"></i> {{ trans('lang.download_example') }}
@@ -66,7 +158,7 @@
 													{{-- <span class="required">*</span> --}}
 												</label>
 												<div class="col-md-12">
-													<select name="house_type_id[]" id="boq-house-type" class="form-control boq-house-type my-select2">
+													<select name="house_type_ids[]" id="boq-house-type" class="form-control boq-house-type my-select2">
 														<option value=""></option>
 														{{getBOQNumber()}}
 													</select>
@@ -82,7 +174,7 @@
 														<span class="input-group-addon btn btn-success btn-file">
 															<span class="fileinput-new bold">{{trans('lang.select_doc')}}</span>
 															<span class="fileinput-exists bold">{{trans('lang.change')}}</span>
-															<input type="file" id="excel" name="excel" />
+															<input type="file" id="excel" name="excels" />
 														</span>
 															<a href="#" class="input-group-addon btn btn-danger fileinput-exists bold" data-dismiss="fileinput">{{trans('lang.delete')}}</a>
 													</div>
