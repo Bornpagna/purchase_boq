@@ -2,6 +2,9 @@
 
 @section('stylesheet')
 	<style>
+		.modal-lg{
+			width: 90% !important;
+		}
 		td.details-control {
             background: url("{{url("assets/upload/temps/details_open.png")}}") no-repeat center center !important;
             cursor: pointer !important;
@@ -86,6 +89,76 @@
 		#select2-boq-house-results > .select-icon  .select2-search--dropdown {
 			display: none;
 		}
+
+		#select2-boq_house_assign_house-results > .select2-results__option {
+		padding-right: 20px;
+		vertical-align: middle;
+		}
+		#select2-boq_house_assign_house-results > .select2-results__option:before {
+		content: "";
+		display: inline-block;
+		position: relative;
+		height: 20px;
+		width: 20px;
+		border: 2px solid #e9e9e9;
+		border-radius: 4px;
+		background-color: #fff;
+		margin-right: 20px;
+		vertical-align: middle;
+		}
+		#select2-boq_house_assign_house-results > .select2-results__option[aria-selected=true]:before {
+		font-family:fontAwesome;
+		content: "\f00c";
+		color: #fff;
+		background-color: #3d76cc;
+		border: 0;
+		display: inline-block;
+		padding-left: 3px;
+		}
+		#select2-boq_house_assign_house-results > .select2-container--default .select2-results__option[aria-selected=true] {
+			background-color: #fff;
+		}
+		#select2-boq_house_assign_house-results > .select2-container--default .select2-results__option--highlighted[aria-selected] {
+			background-color: #eaeaeb;
+			color: #272727;
+		}
+		#select2-boq_house_assign_house-results > .select2-container--default .select2-selection--multiple {
+			margin-bottom: 10px;
+		}
+		#select2-boq_house_assign_house-results > .select2-container--default.select2-container--open.select2-container--below .select2-selection--multiple {
+			border-radius: 4px;
+		}
+		#select2-boq_house_assign_house-results > .select2-container--default.select2-container--focus .select2-selection--multiple {
+			border-color: #3d76cc;
+			border-width: 2px;
+		}
+		#select2-boq_house_assign_house-results > .select2-container--default .select2-selection--multiple {
+			border-width: 2px;
+		}
+		#select2-boq_house_assign_house-results > .select2-container--open .select2-dropdown--below {
+			
+			border-radius: 6px;
+			box-shadow: 0 0 10px rgba(0,0,0,0.5);
+
+		}
+		#select2-boq_house_assign_house-results > .select2-selection .select2-selection--multiple:after {
+			content: 'hhghgh';
+		}
+		/* select with icons badges single*/
+		#select2-boq_house_assign_house-results > .select-icon .select2-selection__placeholder .badge {
+			display: none;
+		}
+		#select2-boq_house_assign_house-results > .select-icon .placeholder {
+			display: none;
+		}
+		#select2-boq_house_assign_house-results > .select-icon .select2-results__option:before,
+		#select2-boq_house_assign_house-results > .select-icon .select2-results__option[aria-selected=true]:before {
+			display: none !important;
+			/* content: "" !important; */
+		}
+		#select2-boq_house_assign_house-results > .select-icon  .select2-search--dropdown {
+			display: none;
+		}
 		.padding-20{
 			padding:0 20px;
 		}
@@ -99,7 +172,28 @@
 		.padding-content-20{
 			padding:20px;
 		}
+		.color-white{
+			background: #fff;
+			
+		}
+		.modal-title {
+			color:#000000;
+		}
+		table.item_table {
+			counter-reset: rowNumber;
+		}
 		
+		table.item_table tr td:first-child::before {
+			display: table-cell;
+			counter-increment: rowNumber;
+			content: counter(rowNumber) ".";
+			padding-right: 0.3em;
+			text-align: right;
+		}
+		table.item_table tr td:first-child {
+			vertical-align: middle;
+			font-weight: 700;
+		}
 	</style>
 @endsection
 
@@ -191,6 +285,9 @@
 @include('modal.edit_boq')
 @include('modal.revise_boq_house')
 @include('modal.upload')
+@include('modal.upload_revise')
+@include('modal.assign_house')
+@include('modal.confirm')
 @endsection()
 
 @section('javascript')
@@ -331,16 +428,22 @@
 		var working_type = $("input[name='working_type_no[]']").map(function(){return $(this).val();}).get();
 		var data = $('.boq-working-type').select2('data');
 		var table_boq = $('#table_boq');
-		if(jQuery.inArray(data[0].id, working_type) !== -1){
+		console.log(data[0].id );
+		if(data[0].id != ""){
+			if(jQuery.inArray(data[0].id, working_type) !== -1){
+			}else{
+				html = '<tr class="">';
+					html += '<td><strong class="line bold">'+romanize(index_work_type)+'</strong></td>';
+					html += '<td colspan="6"><span class="bold">'+data[0].text+'</span><input type="hidden" value="'+data[0].id+'" name="working_type_no[]" class="working_type_no_'+index_work_type+'" /></td>';
+					html += '<td class="text-right"><a class="add_item_working_type_'+index_work_type+' btn btn-sm" onclick="addWorkingTypeItem('+index_work_type+','+data[0].id+')"><i class="fa fa-plus pionter"></i></a></td>';
+				html += '</tr>';
+				html += '<tr><td colspan="8"><table class="table table-hover no-footer item_table" id="working_type_'+index_work_type+'_'+data[0].id+'"></table></td></tr>';
+				table_boq.append(html);
+				index_work_type++;
+			}
 		}else{
-		html = '<tr class="">';
-			html += '<td><strong class="line bold">'+romanize(index_work_type)+'</strong></td>';
-			html += '<td colspan="6"><span class="bold">'+data[0].text+'</span><input type="hidden" value="'+data[0].id+'" name="working_type_no[]" class="working_type_no_'+index_work_type+'" /></td>';
-			html += '<td class="text-right"><a class="add_item_working_type_'+index_work_type+' btn btn-sm" onclick="addWorkingTypeItem('+index_work_type+','+data[0].id+')"><i class="fa fa-plus pionter"></i></a></td>';
-		html += '</tr>';
-		html += '<tr><td colspan="8"><table class="table table-hover no-footer item_table" id="working_type_'+index_work_type+'_'+data[0].id+'"></table></td></tr>';
-		table_boq.append(html);
-			index_work_type++;
+			$(".confirm_body").html("{{trans('lang.please_select_working_type')}}");
+			$("#mi-modal").modal('show');
 		}
 	});
 	 function addWorkingTypeItem(row,type_id){
@@ -348,28 +451,35 @@
 		var table_boq = $('#working_type_'+row+'_'+type_id);
 		var rowCount = $('#working_type_'+row+'_'+type_id+' tr').length;
 		var itemIndex = "'"+index_boq+"_"+type_id+"'";
-		html = '<tr>';
-				html+= '<td><strong>'+lineNo(rowCount+1,1)+'</strong><input type="hidden" value="'+lineNo((index_boq+1),3)+'" name="line_no_'+type_id+'[]" class="line_no line_no_'+index_boq+'_'+type_id+'" /></td>';
-				html+= '<td><select onchange="ChangeItemType(this.value, '+itemIndex+')" class="form-control select2_'+index_boq+'_'+type_id+' line_item_type line_item_type_'+index_boq+'_'+type_id+'" name="line_item_type_'+type_id+'[]">'
+		html = '<tr class="tr_"'+itemIndex+'>';
+			// <strong>'+lineNo(rowCount+1,1)+'</strong>
+				html+= '<td width="3%"><input type="hidden" value="'+lineNo((index_boq+1),3)+'" name="line_no_'+type_id+'[]" class="line_no line_no_'+index_boq+'_'+type_id+'" /></td>';
+				html+= '<td width="15%"><select onchange="ChangeItemType(this.value, '+itemIndex+')" class="form-control select2_'+index_boq+'_'+type_id+' line_item_type line_item_type_'+index_boq+'_'+type_id+'" name="line_item_type_'+type_id+'[]">'
 					+'<option value=""></option>'
 					+'{{getSystemData("IT")}}'
 					+'</select></td>';
-				html+= '<td><select onchange="ChangeItem(this.value, '+itemIndex+')" class="form-control select2_'+index_boq+'_'+type_id+' line_item line_item_'+index_boq+'_'+type_id+'" name="line_item_'+type_id+'[]">'
+				html+= '<td width="15%"><select onchange="ChangeItem(this.value, '+itemIndex+')" class="form-control select2_'+index_boq+'_'+type_id+' line_item line_item_'+index_boq+'_'+type_id+'" name="line_item_'+type_id+'[]">'
 					+'<option value=""></option>'
 				+'</select></td>';
-				html+= '<td><select class="form-control select2_'+index_boq+'_'+type_id+' line_unit line_unit_'+index_boq+'_'+type_id+'" name="line_unit_'+type_id+'[]">'
+				html+= '<td width="10%"><select class="form-control select2_'+index_boq+'_'+type_id+' line_unit line_unit_'+index_boq+'_'+type_id+'" name="line_unit_'+type_id+'[]">'
 					+'<option value=""></option>'
 				+'</select></td>';
-				html+= '<td><input type="number" length="11" class="form-control line_qty_std line_qty_std_'+index_boq+'_'+type_id+'" name="line_qty_std_'+type_id+'[]" placeholder="{{trans("lang.enter_number")}}" /></td>';
-				html += '<td><input type="number" length="11" class="form-control line_qty_add line_qty_add_'+index_boq+'_'+type_id+'" name="line_qty_add_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
-				html += '<td><input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'_'+type_id+'" name="line_cost_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
-				html += '<td><a class="row_'+index_boq+'_'+type_id+' btn btn-sm" onclick="DeleteRowBOQ('+index_boq+'_'+type_id+')"><i class="fa fa-trash"></i></a></td>';
+				html+= '<td width="10%"><input type="number" length="11" class="form-control line_qty_std line_qty_std_'+index_boq+'_'+type_id+'" name="line_qty_std_'+type_id+'[]" placeholder="{{trans("lang.enter_number")}}" /></td>';
+				html += '<td width="10%"><input type="number" length="11" class="form-control line_qty_add line_qty_add_'+index_boq+'_'+type_id+'" name="line_qty_add_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
+				html += '<td width="10%"><input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'_'+type_id+'" name="line_cost_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
+				html += '<td width="3%"><a class="row_'+index_boq+'_'+type_id+' btn btn-sm" onclick="deleteItem(this)"><i class="fa fa-trash"></i></a></td>';
 			html+='</tr>';
 		table_boq.append(html);
 		$.fn.select2.defaults.set('theme','classic');
 			$(".select2_"+index_boq+'_'+type_id).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true});
 			index_boq++;
-		
+	 }
+	 function deleteItem(itemIndex){
+		var row = itemIndex.parentNode.parentNode;
+  		row.parentNode.removeChild(row);
+		// var itemIndex = "'"+row+"_"+type_id+"'";
+		// $(".tr_"+itemIndex).remove();
+
 	 }
 	// $('.boq-pointer').on('click', function(){
 	// 	var table_boq = $('#table_boq').DataTable();
@@ -807,7 +917,70 @@
 					});
 				}
 			});
-			
+		}
+
+		$('#zone_id_assign_house').on('change', function(){
+			getHouseNoBoq();
+		});
+		$('#block_id_assign_house').on('change', function(){
+			getHouseNoBoq();
+		});
+		$('#building_id_assign_house').on('change', function(){
+			getHouseNoBoq();
+		});
+		$('#street_id_assign_house').on('change', function(){
+			console.log($('#street_id_assign_house').val());
+			getHouseNoBoq();
+		});
+
+		$('#house_type_id_assign_house').on('change', function(){
+			var type = $(this).val();
+			getHouseNoBoq();
+		});
+
+		function getHouseNoBoq(){
+			var params = {
+				zone_id: null,
+				block_id: null,
+				building_id : null,
+				street_id: null,
+				house_type: null,
+			};
+			const zoneID    = $('#zone_id_assign_house').val();
+			const blockID   = $('#block_id_assign_house').val();
+			const buildingID    = $('#building_id_assign_house').val();
+			const streetID  = $('#street_id_assign_house').val();
+			const houseType = $('#house_type_id_assign_house').val();
+
+			if(zoneID){
+				params.zone_id = zoneID;
+			}
+
+			if(blockID){
+				params.block_id = blockID;
+			}
+			if(buildingID){
+				params.building_id = buildingID;
+			}
+
+			if(streetID){
+				params.street_id = streetID;
+			}
+
+			if(houseType){
+				params.house_type = houseType;
+			}
+			$.ajax({
+				url:"{{url('repository/houseNoBoq')}}",
+				type:'GET',
+				data: params,
+				success: function(result){
+					$("#boq_house_assign_house").empty();
+					$.each(result,function(key, val){
+						$("#boq_house_assign_house").append($('<option></option>').val(val.id).text(val.house_no));
+					});
+				}
+			});
 		}
 		
 		/* button click save */
@@ -820,6 +993,16 @@
 			
 			$('.boq-house').select2('val', null);
 			$('.boq-street').select2('val', null);
+			$("#checkbox-house").click(function(){
+				if($("#checkbox-house").is(':checked') ){
+					console.log(11); 
+					$(".boq-house > option").prop("selected","selected");
+					$(".boq-house").trigger("change");
+				}else{
+					$(".boq-house > option").removeAttr("selected");
+					$(".boq-house").trigger("change");
+				}
+			});
 			
 			// var table_boq = $('#table_boq').DataTable();
 			// table_boq.row().clear();
@@ -856,15 +1039,15 @@
 			});
 		}
 	});
-
-	function  onReviseBoqHouse(field){
+	function  onExcelRevise(field){
 		console.log(field);
 		var id = $(field).attr('row_id');
 		var rounte = $(field).attr('row_rounte');
 		var _token = $("input[name=_token]").val();
-		$('.form-revise-boq-house').attr('action',rounte);
-		$('.modal-revise-boq-house').children().find('div').children().find('h4').html('{{trans("lang.revise_boq_house")}}');
-		if(objName && jsonHouse){
+		$('.upload-excel-revise-form').attr('action',rounte);
+		$('.modal-upload-excel-revise-form').children().find('div').children().find('h4').html('{{trans("lang.import_revised_boq")}}');
+		if(jsonHouse){
+			console.log(jsonHouse);
 			$.each(objName.filter(c=>c.id==id),function(key,val){
 				$.each(jsonHouse.filter(c=>c.id==val.house_id),function(k, v){
 					$("#boq-street-edit").select2('val', v.street_id);
@@ -893,9 +1076,146 @@
 				$("#qty_add").val(val.qty_add);
 			});
 		}
+		$('.button-submit-revise_boq_house').attr('id','btnExcelReviseBoq').attr('name','btnExcelReviseBoq');
+		$('.button-submit-revise_boq_house').html('{{trans("lang.revise_boq")}}');
+		$('.modal-upload-excel-revise-form').modal('show');
+		
+		$("#btnExcelReviseBoq").on('click',function(){
+			
+			$('#btnUpdate').prop('disabled', true);
+			var working_type = $("#working_type").val();
+			
+			if(chkValid([".working_type"])){
+				rounte = rounte + "?working_type="+working_type;
+				console.log(rounte);
+				$('.upload-excel-revise-form').attr('action',rounte);
+				$('.upload-excel-revise-form').submit();
+			}else{
+				$('#btnExcelReviseBoq').prop('disabled', false);
+				return false;
+			}
+		});
+	}
+
+	// function  onReviseBoqHouseExcel(field){
+	// 	console.log(field);
+	// 	var id = $(field).attr('row_id');
+	// 	var rounte = $(field).attr('row_rounte');
+	// 	var _token = $("input[name=_token]").val();
+	// 	$('.upload-form').attr('action',rounte);
+	// 	$('.modal-upload-form').children().find('div').children().find('h4').html('{{trans("lang.import_revised_boq")}}');
+	// 	if(jsonHouse){
+	// 		console.log(jsonHouse);
+	// 		$.each(objName.filter(c=>c.id==id),function(key,val){
+	// 			$.each(jsonHouse.filter(c=>c.id==val.house_id),function(k, v){
+	// 				$("#boq-street-edit").select2('val', v.street_id);
+	// 			});
+	// 			$("#boq-house-edit").select2('val', val.house_id);
+				
+	// 			if(jsonItem){
+	// 				$('#item').empty();
+	// 				$('#item').append($('<option></option>').val('').text(''));
+	// 				$.each(jsonItem, function(k ,v){
+	// 					$('#item').append($('<option></option>').val(v.id).text(v.code+' ('+v.name+')'));
+	// 				});
+	// 				$('#item').select2('val', val.item_id);
+					
+	// 				$.each(jsonItem.filter(c=>c.id==val.item_id), function(k, v){
+	// 					$('#unit').empty();
+	// 					$('#unit').append($('<option></option>').val('').text(''));
+	// 					$('#unit').select2('val', null);
+	// 					$.each(jsonUnit.filter(d=>d.to_code==v.unit_stock), function(kk, vv){
+	// 						$('#unit').append($('<option></option>').val(vv.from_code).text(vv.from_code+' ('+vv.from_desc+')'));
+	// 					});
+	// 				});
+	// 				$('#unit').select2('val', val.unit);
+	// 			}
+	// 			$("#qty_std").val(val.qty_std);
+	// 			$("#qty_add").val(val.qty_add);
+	// 		});
+	// 	}
+	// 	$('.button-submit-revise_boq_house').attr('id','btnExcelReviseBoq').attr('name','btnExcelReviseBoq');
+	// 	$('.button-submit-revise_boq_house').html('{{trans("lang.revise_boq")}}');
+	// 	$('.modal-upload-form').modal('show');
+		
+	// 	$("#btnExcelReviseBoq").on('click',function(){
+			
+	// 		$('#btnUpdate').prop('disabled', true);
+	// 		var working_type = $("#working_type").val();
+			
+	// 		if(chkValid([".working_type"])){
+	// 			rounte = rounte + "?working_type="+working_type;
+	// 			console.log(rounte);
+	// 			$('.upload-form').attr('action',rounte);
+	// 			$('.upload-form').submit();
+	// 		}else{
+	// 			$('#btnExcelReviseBoq').prop('disabled', false);
+	// 			return false;
+	// 		}
+	// 	});
+	// }
+	function  onReviseBoqHouse(field){
+		var id = $(field).attr('row_id');
+		var rounte = $(field).attr('row_rounte');
+		var _token = $("input[name=_token]").val();
+		$('.form-revise-boq-house').attr('action',rounte);
+		$('.modal-revise-boq-house').children().find('div').children().find('h4').html('{{trans("lang.revise_boq_house")}}');
+		// if(jsonHouse){
+		// 	// console.log(jsonHouse);
+		// 	$.each(objName.filter(c=>c.id==id),function(key,val){
+		// 		$.each(jsonHouse.filter(c=>c.id==val.house_id),function(k, v){
+		// 			$("#boq-street-edit").select2('val', v.street_id);
+		// 		});
+		// 		$("#boq-house-edit").select2('val', val.house_id);
+				
+		// 		if(jsonItem){
+		// 			$('#item').empty();
+		// 			$('#item').append($('<option></option>').val('').text(''));
+		// 			$.each(jsonItem, function(k ,v){
+		// 				$('#item').append($('<option></option>').val(v.id).text(v.code+' ('+v.name+')'));
+		// 			});
+		// 			$('#item').select2('val', val.item_id);
+					
+		// 			$.each(jsonItem.filter(c=>c.id==val.item_id), function(k, v){
+		// 				$('#unit').empty();
+		// 				$('#unit').append($('<option></option>').val('').text(''));
+		// 				$('#unit').select2('val', null);
+		// 				$.each(jsonUnit.filter(d=>d.to_code==v.unit_stock), function(kk, vv){
+		// 					$('#unit').append($('<option></option>').val(vv.from_code).text(vv.from_code+' ('+vv.from_desc+')'));
+		// 				});
+		// 			});
+		// 			$('#unit').select2('val', val.unit);
+		// 		}
+		// 		$("#qty_std").val(val.qty_std);
+		// 		$("#qty_add").val(val.qty_add);
+		// 	});
+		// }
 		$('.button-submit-revise_boq_house').attr('id','btnReviseBoqHouse').attr('name','btnReviseBoqHouse');
 		$('.button-submit-revise_boq_house').html('{{trans("lang.revise_boq")}}');
 		$('.modal-revise-boq-house').modal('show');
+
+		var el = $("#working_type").select2();
+		$("#checkbox-excel").click(function(){
+			if($("#checkbox-excel").is(':checked') ){
+				console.log(11); 
+				$("#working_type_excel > option").prop("selected","selected");
+				$("#working_type_excel").trigger("change");
+			}else{
+				$("#working_type_excel > option").removeAttr("selected");
+				$("#working_type_excel").trigger("change");
+			}
+		});
+		$("#checkbox").click(function(){
+			
+			if($("#checkbox").is(':checked') ){
+				console.log(11); 
+				$("#working_type > option").prop("selected","selected");
+				$("#working_type").trigger("change");
+			}else{
+				$("#working_type > option").removeAttr("selected");
+				$("#working_type").trigger("change");
+			}
+		});
 		
 		$("#btnReviseBoqHouse").on('click',function(){
 			
@@ -988,6 +1308,65 @@
 		var rounte = $(field).attr('row_rounte');
 		window.location.href = rounte;
 	}
+
+	function  onAssignHouse(field){
+		console.log(field);
+		var id = $(field).attr('row_id');
+		var rounte = $(field).attr('row_rounte');
+		var _token = $("input[name=_token]").val();
+		$('.assign-house-form').attr('action',rounte);
+		$('.assign-house-modal').children().find('div').children().find('h4').html('{{trans("lang.assign_house")}}');
+		if(objName && jsonHouse){
+			console.log(jsonHouse);
+			$.each(objName.filter(c=>c.id==id),function(key,val){
+				$.each(jsonHouse.filter(c=>c.id==val.house_id),function(k, v){
+					$("#boq-street-edit").select2('val', v.street_id);
+				});
+				$("#boq-house-edit").select2('val', val.house_id);
+				
+				if(jsonItem){
+					$('#item').empty();
+					$('#item').append($('<option></option>').val('').text(''));
+					$.each(jsonItem, function(k ,v){
+						$('#item').append($('<option></option>').val(v.id).text(v.code+' ('+v.name+')'));
+					});
+					$('#item').select2('val', val.item_id);
+					
+					$.each(jsonItem.filter(c=>c.id==val.item_id), function(k, v){
+						$('#unit').empty();
+						$('#unit').append($('<option></option>').val('').text(''));
+						$('#unit').select2('val', null);
+						$.each(jsonUnit.filter(d=>d.to_code==v.unit_stock), function(kk, vv){
+							$('#unit').append($('<option></option>').val(vv.from_code).text(vv.from_code+' ('+vv.from_desc+')'));
+						});
+					});
+					$('#unit').select2('val', val.unit);
+				}
+				$("#qty_std").val(val.qty_std);
+				$("#qty_add").val(val.qty_add);
+			});
+		}
+		$('.button-submit-assign-house').attr('id','btnAssignHouse').attr('name','btnAssignHouse');
+		$('.button-submit-assign-house').html('{{trans("lang.assign_house")}}');
+		$('.assign-house-modal').modal('show');
+		
+		$("#btnAssignHouse").on('click',function(){
+			
+			$('#btnUpdate').prop('disabled', true);
+			var working_type = $("#assign-house").val();
+			
+			if(chkValid([".assign-house"])){
+
+				rounte = rounte + "?working_type="+working_type;
+				console.log(rounte);
+				$('.assign-house-form').attr('action',rounte);
+				$('.assign-house-form').submit();
+			}else{
+				$('#btnAssignHouse').prop('disabled', false);
+				return false;
+			}
+		});
+	}
 	
 	function onDelete(field){
 		var rounte = $(field).attr('row_rounte');
@@ -1012,5 +1391,31 @@
         });
 	}
 	
+	var modalConfirm = function(callback){
+  
+	$("#btn-confirm").on("click", function(){
+		$("#mi-modal").modal('show');
+	});
+
+	$("#modal-btn-si").on("click", function(){
+		callback(true);
+		$("#mi-modal").modal('hide');
+	});
+	
+	$("#modal-btn-no").on("click", function(){
+		callback(false);
+		$("#mi-modal").modal('hide');
+	});
+	};
+
+	modalConfirm(function(confirm){
+	if(confirm){
+		//Acciones si el usuario confirma
+		$("#result").html("CONFIRMADO");
+	}else{
+		//Acciones si el usuario no confirma
+		$("#result").html("NO CONFIRMADO");
+	}
+	});
 </script>
 @endsection()

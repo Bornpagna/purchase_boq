@@ -37,6 +37,8 @@ return [
 	'approve_purchase_order'   => 'Approve purchase order',
 	'add'					   => 'Add',
 	'add_working_type'		   => 'Add Work Type',
+	'assign_house'			   => 'Assign House',
+	'all'					   => 'All',
 /* B */
 	'backup'         => 'Backup',
 	'backup_list'    => 'Backup List',
@@ -146,6 +148,7 @@ return [
 	'ending_balance'     =>'Ending Balance',
 	'exist_boq'			 => 'Exist BOQ',
 	'enter_remark'		 => 'Enter Remark',
+	'excel_import'		 => 'Excel Import',
 /* F */
 	'from_warehouse' => 'From warehouse',
 	'from_house'     => 'From house',
@@ -195,6 +198,8 @@ return [
 	'in_warehouse'   => 'In warehouse',
 	'interval'       => 'Interval',
 	'items_type'	 =>	'Item Type',
+	'import_revised_boq'	=>	'Import Excel Revise',
+	'import_excel'	=>	'Import Revise',	
 /* J */
 /* K */
 	'khmer' 		=> 'Khmer',
@@ -216,6 +221,9 @@ return [
 	'my_tasks'        => 'My tasks',
 	'my_profile'      => 'My profile',
 	'make_order'	  => 'Make Order',
+	'manual_revised_boq'	=>	'Manual Revise',
+	'manual_input'	  => 'Manual Input',
+	
 /* N */
 	'notification'               => 'Notifications',
 	'name'                       => 'Name',
@@ -226,6 +234,7 @@ return [
 	'no_data_available_in_table' => 'No data available in table',
 	'new_boq'					 => 'New BOQ',
 	'none_boq'					 => 'None BOQ',
+	'note_upload_revise_boq'	 =>	'If you revise BOQ with this option all BOQ that you revised by each BOQ house will reset to new BOQ that do revising.',
 /* O */
 	'order'                                      => 'Order',
 	'report_order_items'                         => 'Report Order Items',
@@ -269,6 +278,7 @@ return [
 	'pr_list'				=> 'Purchase Request List',
 	'po_list'				=> 'Purchase Order List',
 	'preview'				=> 'Preview',
+	'please_select_working_type'	=>	'Please Select Working Type',
 /* Q */
 	'qty'         => 'Qty',
 	'qty_std'     => 'Qty/Std',
@@ -279,6 +289,7 @@ return [
 	'qty_in_stock'=> 'Qty In-Stock',
 	'boq_qty'		  => 'BOQ Qty',
 	'remain_qty'	  => 'Remain Qty',
+	'qty_boq_remain'	=>	'Boq Remain',
 /* R */
 	'reference_no'                                 => 'Reference No',
 	'reference'                                    => 'Reference',
@@ -426,6 +437,7 @@ return [
 	'warehouse_list' => 'Warehouse List',
 	'wrong_file'     => 'Upload wrong file!',
 	'working_type'	 =>	'Working Type',
+	'warning'		 => 'Warning',
 /* X */
 /* Y */
 	'yes' => 'Yes',

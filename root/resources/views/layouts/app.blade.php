@@ -98,6 +98,14 @@
         .select2-search__field{
         	width: 100% !important;
         }
+		.select2-results__group{
+			padding: 6px 6px !important;
+			font-family:"Open Sans",sans-serif,myKhBattambang !important;
+			color: #000 !important;
+		}
+		.select2-results__options--nested > .select2-results__option{
+			padding: 6px 16px !important;
+		}
 	</style>
 	@yield('stylesheet')
 	</head>
@@ -369,7 +377,9 @@
 					$(value).each(function(k,v){
 						var len = $(this).attr('length');
 						var val = $(this).val();
+						console.log(this);
 						if(val == null || val =='' || typeof val == undefined){
+							console.log(111);
 							$(this).css('border','1px solid #e43a45');
 							$(this).next().find('.select2-selection').css('border','1px solid #e43a45');
 							$(this).next('.help-block').html("{{trans('lang.field_required')}}");

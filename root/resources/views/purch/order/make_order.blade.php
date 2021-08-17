@@ -465,6 +465,8 @@
 		var qty = 0;
 		var price = 0;
 		var disc = 0;
+		var total_amout = 0;
+		var total_grand_total = 0;
 		
 		var qty_ = $(".line_qty_"+row).val();
 		var price_ = $(".line_price_"+row).val();
@@ -478,9 +480,10 @@
 		if(disc_ !='' && disc_!=null){
 			disc = parseFloat(disc_);
 		}
-		
-		$(".line_amount_"+row).val(parseFloat(qty) * parseFloat(price));
-		$(".line_grand_total_"+row).val((parseFloat(qty) * parseFloat(price)) - parseFloat(disc));
+		total_amout = parseFloat(qty) * parseFloat(price);
+		total_grand_total = (parseFloat(qty) * parseFloat(price)) - parseFloat(disc);
+		$(".line_amount_"+row).val(total_amout.toFixed(4));
+		$(".line_grand_total_"+row).val(total_grand_total.toFixed(4));
 		
 		calculateTotal();
 	}
@@ -500,7 +503,7 @@
 			}
 		});
 		
-		$(".sub_total").val(parseFloat(sub_total));
+		$(".sub_total").val(parseFloat(sub_total.toFixed(4)));
 
 		calculateGrandTotal();
 	}
@@ -664,8 +667,8 @@
 		var discount = $("#disc_usd").val();
 		var deposit = $("#deposit").val();
 		if (sub_total!='' && sub_total!=null && discount!='' && discount!=null && deposit!='' && deposit!=null && parseFloat(sub_total)!=0) {
-			$("#last_total").val(((parseFloat(sub_total) + parseFloat(fee_charge))  - parseFloat(discount))-parseFloat(deposit));
-			$("#grand_total").val((parseFloat(sub_total) + parseFloat(fee_charge))  - parseFloat(discount));
+			$("#last_total").val((((parseFloat(sub_total) + parseFloat(fee_charge))  - parseFloat(discount))-parseFloat(deposit)).toFixed(4));
+			$("#grand_total").val(((parseFloat(sub_total) + parseFloat(fee_charge))  - parseFloat(discount)).toFixed(4));
 		}
 	}
 	
@@ -678,7 +681,7 @@
 			$("#disc_perc").attr('readonly', false);
 		}else{
 			disc = (parseFloat(val) * 100) / parseFloat(sub_total);
-			$("#disc_perc").val(disc);
+			$("#disc_perc").val(disc.toFixed(4));
 			$("#disc_perc").attr('readonly', true);
 		}
 
@@ -694,7 +697,7 @@
 			$("#disc_usd").attr('readonly', false);
 		}else{
 			disc = (parseFloat(val) * parseFloat(sub_total)) / 100;
-			$("#disc_usd").val(disc);
+			$("#disc_usd").val(disc.toFixed(4));
 			$("#disc_usd").attr('readonly', true);
 		}
 
@@ -820,13 +823,13 @@
 								initTable(row);
 								grand_total = grand_total + (parseFloat(row.price) * parseFloat(row.qty));
 							});
-							$(".sub_total").val(grand_total);
+							$(".sub_total").val(grand_total.toFixed(4));
 							$(".fee_charge").val(0);
 							$(".disc_perc").val(0);
 							$(".disc_usd").val(0);
 							$(".deposit").val(0);
-							$(".grand_total").val(grand_total);
-							$(".last_total").val(grand_total);
+							$(".grand_total").val(grand_total.toFixed(4));
+							$(".last_total").val(grand_total.toFixed(4));
 						}
 					},error:function(){
 						console.log('error get PR reference.');

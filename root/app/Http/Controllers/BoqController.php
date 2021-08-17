@@ -15,8 +15,10 @@ use Excel;
 use App\Model\House;
 use App\Model\SystemData;
 use App\Model\BoqItem;
+use App\Model\BoqItemDefualt;
 use App\Model\UsageDetails;
 use App\Model\Item;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 
 class BoqController extends Controller
@@ -109,7 +111,7 @@ class BoqController extends Controller
 			// DB::table('boqs')->where('id',$id)->update(['status'=>0,'is_revise'=>$boq->is_revise+1]);
 			// DB::commit();
 			$redirect = url('boqs');
-			$items = $this->getBoqItem($id);
+			$items = $this->getBoqItemDefault($id);
 			
 			$data = [
 				'id'			=> $id,
@@ -137,6 +139,7 @@ class BoqController extends Controller
 				'boq'=>$boq,
 				'boqHouses'=>$boqHouses,
 				'rounteBack'	=> url('/boqs'),
+				
 			];
 			if(hasRole('revise_boq')){
 				$data = array_merge($data, ['rounteSave'=> url('boqs/reviseboq/'.$id)]);
@@ -168,7 +171,6 @@ class BoqController extends Controller
 	}
 
 	public function getBoqItem($id,$house_id = null ,$working_type=null){
-		
 		$boqItems = BoqItem::select(
 			'boq_items.*',
 			'items.cat_id',
@@ -190,7 +192,24 @@ class BoqController extends Controller
 		return $boqItems;
 	}
 
-	
+	public function getBoqItemDefault($id,$house_id = null ,$working_type=null){
+		
+		
+		$boqItems = BoqItemDefualt::select(
+			'boq_item_defualts.*',
+			'items.cat_id',
+			'system_datas.name as working_type_name')
+		->join('system_datas','system_datas.id','boq_item_defualts.working_type')
+		->join('items','items.id','boq_item_defualts.item_id')
+		->where('boq_item_defualts.boq_id',$id);
+		if($working_type != null){
+			$boqItems = $boqItems->whereIn('boq_item_defualts.working_type',$working_type);
+		}
+		$boqItems = $boqItems->groupBy('boq_item_defualts.item_id')
+		->orderBy('boq_item_defualts.working_type')->get();
+		return $boqItems;
+	}
+
 	public function reviseBoq(Request $request,$id){
 		try {
 			DB::beginTransaction();
@@ -285,14 +304,15 @@ class BoqController extends Controller
 				];
 				$boq_id = DB::table('boqs')->insertGetId($boq);
 				
-				foreach($houses as $key=>$house){
+				foreach($houses as $house_key=>$house){
 					$boq_house = [
 						'boq_id'			=>	$boq_id,
 						'house_id'			=>	$house->id,
 						'boq_house_code'	=>	"BOQ-".$this->getBoqHouseCode($house->id,3),
 						'created_by'		=>	Auth::user()->id,
 						'created_at'		=>	date('Y-m-d H:i:s'),
-						'created_by'	=> Auth::user()->id,
+						'created_by'		=> Auth::user()->id,
+						'status'			=>	1
 					];
 					$boq_house_id = DB::table('boq_houses')->insertGetId($boq_house);
 
@@ -315,6 +335,9 @@ class BoqController extends Controller
 										'created_at'	=>	Auth::user()->id,
 									];
 									$boq_item = DB::table('boq_items')->insertGetID($item_types);
+									if($house_key == 0){
+										DB::table('boq_item_defualts')->insertGetID($item_types);
+									}
 									// print_r($boq_item);exit;
 								}
 							}
@@ -475,15 +498,19 @@ class BoqController extends Controller
 		->addColumn('action', function ($row) {
 			$back =  url('/boqs');
 			$rounte_download = url('boqs/excel/download/'.$row->id);
+			$assign_house = url('boqs/assignHouse/'.encrypt($row->id));
 			$rounte_view = url('boqs/viewBoq/'.encrypt($row->id).'/'.encrypt($back));
 			$rounte_revise = url('boqs/replicateboq/'.$row->id);
+			$rounte_upload_revise = url('boqs/uploadRevise/'.$row->id);
 			$rounte_delete = url('boqs/delete/'.$row->id);
 			$route_add_type = url('boqs/addworktype/'.$row->id);
 			$btnDelete = 'onclick="onDelete(this)"';
 			$btnDownload = 'href="'.$rounte_download.'"';
 			$btnView = 'onclick="onView(this)"';
+			$btnUploadRevise = 'onClick="onExcelRevise(this)"';
 			$btnRevise = 'href="'.$rounte_revise.'"';
 			$btnAddType = 'href="'.$route_add_type.'"';
+			$btnAssignHouse = 'onclick="onAssignHouse(this)"';
 			
 			
 			if(hasRole('boq_download')){
@@ -519,10 +546,12 @@ class BoqController extends Controller
 			  '.trans('lang.action').' <span class="caret"></span>
 			</button><ul class="dropdown-menu dropdown-menu-right">'.
 			'<li><a '.$btnDownload.' title="'.trans('lang.download').'"><i class="fa fa-file-excel-o"></i> '.trans('lang.download').'</a></li>'.
+			'<li><a '.$btnAssignHouse.' title="'.trans('lang.assign_house').'" row_id="'.$row->id.'" row_rounte="'.$assign_house.'"><i class="fa fa-plus"></i> '.trans('lang.assign_house').'</a></li>'.
 			'<li><a '.$btnView.' title="'.trans('lang.view').'" row_id="'.$row->id.'" row_rounte="'.$rounte_view.'"><i class="fa fa-eye"></i> '.trans('lang.view').'</a></li>'.
-			'<li><a '.$btnRevise.' title="'.trans('lang.revised_boq').'" row_id="'.$row->id.'" row_rounte="'.$rounte_revise.'"><i class="fa fa-pencil-square-o"></i> '.trans('lang.revised_boq').'</a></li>'.
+			'<li><a '.$btnRevise.' title="'.trans('lang.manual_revised_boq').'" row_id="'.$row->id.'" row_rounte="'.$rounte_revise.'"><i class="fa fa-pencil-square-o"></i> '.trans('lang.manual_revised_boq').'</a></li>'.
+			// '<li><a '.$btnUploadRevise.' title="'.trans('lang.import_revised_boq').'" row_id="'.$row->id.'" row_rounte="'.$rounte_upload_revise.'"><i class="fa fa-pencil-square-o"></i> '.trans('lang.import_revised_boq').'</a></li>'.
 			'<li><a '.$btnDelete.' title="'.trans('lang.delete').'" row_id="'.$row->id.'" row_rounte="'.$rounte_delete.'"><i class="fa fa-trash"></i> '.trans('lang.delete').'</a></li>'.
-			'<li><a '.$btnAddType.' title="'.trans('lang.add_working_type').'" row_id="'.$row->id.'" row_rounte="'.$route_add_type.'"><i class="fa fa-plus"></i> '.trans('lang.add_working_type').'</a></li>'.
+			// '<li><a '.$btnAddType.' title="'.trans('lang.add_working_type').'" row_id="'.$row->id.'" row_rounte="'.$route_add_type.'"><i class="fa fa-plus"></i> '.trans('lang.add_working_type').'</a></li>'.
 			'</ul></div>';
 		})->addColumn('details_url',function($row){
             // return url('boqs/subdt').'/'.$row->id;
@@ -594,11 +623,48 @@ class BoqController extends Controller
 		return Datatables::of(getBoqHouses($id))
 		->addColumn('action', function ($row) {
 			$rounte_revise_boq_house = url('boqs/reviseBoqHouseView/'.$row->boq_id."/".$row->house_id);
+			$rounte_revise_boq_house_excel = url('boqs/reviseBoqHouseView/'.$row->boq_id."/".$row->house_id);
+			$rounte_delete = url('boqs/sub/delete/'.$row->id);
+			$btnDelete = 'onclick="onDelete(this)"';
+			$btnReviseBoqHouse = 'onClick="onReviseBoqHouse(this)"';
+			$btnReviseBoqHouseExcel = 'onClick="onReviseBoqHouseExcel(this)"';
+			$btnView = 'onclick="onViewBoqHouse(this)"';
+			$rounte_view = url('boqs/view/'.encrypt($row->boq_id)."/".encrypt(1).'/'.encrypt($row->house_id));
+			
+			if(!hasRole('boq_edit')){
+				$btnEdit = "disabled";
+			}
+			// if(UsageDetails::where(['house_id'=>$row->house_id,'item_id'=>$row->item_id])->exists()){
+			// 	$btnDelete = "disabled";
+			// }
+			// if(!hasRole('boq_delete')){
+			// 	$btnDelete = "disabled";
+			// }
+			return
+				'<div class="actions"><div class="btn btn-xs"><a '.$btnReviseBoqHouse.' title="'.trans('lang.revise_boq').'" class="revise-record" row_id="'.$row->id.'" row_rounte="'.$rounte_revise_boq_house.'">'.
+				'	<i class="fa fa-edit"></i><br />'.trans("lang.revise_boq").
+				'</a></div>'.
+				'<div class="btn btn-xs"><a '.$btnView.' title="'.trans('lang.view').'" class="view-record" row_id="'.$row->id.'" row_rounte="'.$rounte_view.'">'.
+				'	<i class="fa fa-eye"></i><br />'.trans("lang.view").
+				'</a></div>'.
+				// '<div class="btn btn-xs"><a '.$btnReviseBoqHouseExcel.' title="'.trans('lang.import_excel').'" class="view-record" row_id="'.$row->id.'" row_rounte="'.$rounte_revise_boq_house_excel.'">'.
+				// '	<i class="fa fa-eye"></i><br />'.trans("lang.import_excel").
+				// '</a></div>'.
+				'<div class="btn btn-xs"><a '.$btnDelete.' title="'.trans('lang.delete').'" class="delete-boq-record" row_id="'.$row->id.'" row_rounte="'.$rounte_delete.'">'.
+				'	<i class="fa fa-trash"></i><br />'.trans("lang.delete").
+				'</a></div></div>'; 
+		})->make(true);
+	}
+
+	public function boqHousesViewDt(Request $request, $id){
+		return Datatables::of(getBoqHouses($id))
+		->addColumn('action', function ($row) {
+			$rounte_revise_boq_house = url('boqs/reviseBoqHouseView/'.$row->boq_id."/".$row->house_id);
 			$rounte_delete = url('boqs/sub/delete/'.$row->id);
 			$btnDelete = 'onclick="onDelete(this)"';
 			$btnReviseBoqHouse = 'onClick="onReviseBoqHouse(this)"';
 			$btnView = 'onclick="onViewBoqHouse(this)"';
-			$rounte_view = url('boqs/view/'.encrypt($row->boq_id)."/".encrypt($row->house_id).'/'.encrypt(1));
+			$rounte_view = url('boqs/view/'.encrypt($row->boq_id)."/".encrypt(1).'/'.encrypt($row->house_id));
 			
 			if(!hasRole('boq_edit')){
 				$btnEdit = "disabled";
@@ -619,18 +685,23 @@ class BoqController extends Controller
 				'<div class="btn btn-xs"><a '.$btnDelete.' title="'.trans('lang.delete').'" class="delete-boq-record" row_id="'.$row->id.'" row_rounte="'.$rounte_delete.'">'.
 				'	<i class="fa fa-trash"></i><br />'.trans("lang.delete").
 				'</a></div></div>'; 
-		})->make(true);
+		})->addColumn('details_url',function($row){
+            return url('boqs/getBoqItems').'/'.$row->boq_id."/".$row->house_id;
+			// return url('boqs/boqworkingtypedt').'/'.$row->id;
+        })->make(true);
 	}
 
 	public function boqHouses(Request $request, $id){
 		return Datatables::of(getBoqHouses($id))
 		->addColumn('action', function ($row) {
 			$rounte_revise_boq_house = url('boqs/reviseBoqHouseView/'.$row->boq_id."/".$row->house_id);
+			$rounte_revise_boq_house_excel = url('boqs/reviseBoqHouseView/'.$row->boq_id."/".$row->house_id);
 			$rounte_delete = url('boqs/sub/delete/'.$row->id);
 			$btnDelete = 'onclick="onDelete(this)"';
 			$btnReviseBoqHouse = 'onClick="onReviseBoqHouse(this)"';
+			$btnReviseBoqHouseExcel = 'onClick="onReviseBoqHouseExcel(this)"';
 			$btnView = 'onclick="onViewBoqHouse(this)"';
-			$rounte_view = url('boqs/view/'.encrypt($row->boq_id)."/".encrypt($row->house_id).'/'.encrypt(1));
+			$rounte_view = url('boqs/view/'.encrypt($row->boq_id).'/'.encrypt(1)."/".encrypt($row->house_id));
 			
 			if(!hasRole('boq_edit')){
 				$btnEdit = "disabled";
@@ -647,6 +718,9 @@ class BoqController extends Controller
 				'</a></div>'.
 				'<div class="btn btn-xs"><a '.$btnView.' title="'.trans('lang.view').'" class="view-record" row_id="'.$row->id.'" row_rounte="'.$rounte_view.'">'.
 				'	<i class="fa fa-eye"></i><br />'.trans("lang.view").
+				'</a></div>'.
+				'<div class="btn btn-xs"><a '.$btnReviseBoqHouseExcel.' title="'.trans('lang.view').'" class="view-record" row_id="'.$row->id.'" row_rounte="'.$rounte_revise_boq_house_excel.'">'.
+				'	<i class="fa fa-eye"></i><br />'.trans("lang.import").
 				'</a></div>'.
 				'<div class="btn btn-xs"><a '.$btnDelete.' title="'.trans('lang.delete').'" class="delete-boq-record" row_id="'.$row->id.'" row_rounte="'.$rounte_delete.'">'.
 				'	<i class="fa fa-trash"></i><br />'.trans("lang.delete").
@@ -728,7 +802,7 @@ class BoqController extends Controller
 
     public function save(Request $request){
 		try {
-			print_r($request->all());exit;
+
 			$rules = [
 				'zone_id'	=> 'required',
 				'block_id' 	=> 'required',
@@ -736,6 +810,7 @@ class BoqController extends Controller
 				// 'street_id'	=>'required',
 				// 'house'		=>'required',
 			];
+			
 			// if(count($request['working_type_no'])>0){
 			// 	for($i=0; $i< count($request['working_type_no']); $i++){
 			// 		$working_type_id = $request['working_type_no'][$i];
@@ -754,16 +829,16 @@ class BoqController extends Controller
 			// }
 			// // exit;
 			// Validator::make($request->all(),$rules)->validate();
-			$where = ['status'=>1];
+			$where = [];
 			if(!empty($request['zone_id'])){
 				$where = array_merge($where, ['zone_id'=>$request['zone_id']]);
 			}
 			if(!empty($request['block_id'])){
 				$where = array_merge($where, ['block_id'=>$request['block_id']]);
 			}
-			if(!empty($request['building_id'])){
-				$where = array_merge($where, ['building_id'=>$request['building_id']]);
-			}
+			// if(!empty($request['building_id'])){
+			// 	$where = array_merge($where, ['building_id'=>$request['building_id']]);
+			// }
 			if(!empty($request['house_type_id'])){
 				$where = array_merge($where, ['house_type'=>$request['house_type_id']]);
 			}
@@ -772,7 +847,9 @@ class BoqController extends Controller
 				$where = array_merge($where, ['street_id'=>$request['street_id']]);
 			}
 			if(!empty($request['house']) && count($request['house']) > 0){
+				// print_r($where);exit;
 				$houses = DB::table('houses')->where($where)->whereIn('id',$request['house'])->get();
+				// print_r($houses);exit;
 			}else{
 				$houses = DB::table('houses')->where($where)->get();
 			}			
@@ -805,7 +882,8 @@ class BoqController extends Controller
 				];
 				$boq_id = DB::table('boqs')->insertGetId($boq);
 				
-				foreach($houses as $key=>$house){
+				
+				foreach($houses as $house_key=>$house){
 					$boq_house = [
 						'boq_id'			=>	$boq_id,
 						'house_id'			=>	$house->id,
@@ -833,10 +911,14 @@ class BoqController extends Controller
 										'working_type'	=>	$working_type,
 										'created_at'	=>	date('Y-m-d H:i:s'),
 										'created_at'	=>	Auth::user()->id,
-										'status'		=>	1,
+										// 'status'		=>	1,
 
 									];
 									$boq_item = DB::table('boq_items')->insertGetID($item_types);
+									if($house_key == 0){
+										$boq_item_defualt = DB::table('boq_item_defualts')->insertGetID($item_types);
+									}
+									
 									// print_r($boq_item);exit;
 								}
 							}
@@ -918,7 +1000,7 @@ class BoqController extends Controller
 			// }
 		} catch (\Exception $e) {
 			DB::rollback();
-			print_r($e->getMessage().$e->getLine());exit;
+			print_r($e->getMessage().$e->getLine());
 			return redirect()->back()->with('error',trans('lang.save_error').' '.$e->getMessage().' '.$e->getLine());
 		}
 	}
@@ -1014,7 +1096,7 @@ class BoqController extends Controller
 						'caption' 	=> trans('lang.view'),
 				],
 			],			
-			'rounte'		=> url('boqs/boqhousesdt').'/'.$id,			
+			'rounte'		=> url('boqs/boqhousesviewdt').'/'.$id,			
 			'rounteBack'	=> $redirect,
 		];
 		return view('boq.viewBoq',$data);
@@ -1531,7 +1613,6 @@ class BoqController extends Controller
 		$boq_id = decrypt($boq_id);
 		$house_id = decrypt($house_id);
 		$working_type = decrypt($working_type);
-		// print_r($request->all());exit;
 		try {
 			DB::beginTransaction();
 			// Get old BOQ House
@@ -1563,7 +1644,8 @@ class BoqController extends Controller
 					$boqItemDB->save();
 				}
 			}
-				DB::table('boq_items')->where('boq_id',$boq_id)->where('boq_house_id',$oldBoqHouseId)->update(['remain_qty'=>0]);
+				DB::table('boq_items')->where('boq_id',$boq_id)->where('boq_house_id',$oldBoqHouseId->id)->update(['remain_qty'=>0]);
+				DB::table('boq_houses')->where("boq_id",$boq_id)->where("house_id",$oldBoqHouseId->house_id)->where('id',$oldBoqHouseId->id)->update(['status'=>0,'revise_by'=>Auth::user()->id,'is_revise'=>1,"referent_id"=>$oldBoqHouseId->id]);
 				if(count($request["working_type_no"]) > 0){
 					foreach($request["working_type_no"] as $key=>$working_type){
 						if(count($request["line_item_type_".$working_type]) > 0){
@@ -1588,14 +1670,57 @@ class BoqController extends Controller
 					}
 				}
 			// }
-			DB::table('boq_houses')->where("boq_id",$boq_id)->where("house_id",$oldBoqHouseId)->update(['status'=>0,'revise_by'=>Auth::user()->id,'is_revise'=>1,"referent_id"=>$oldBoqHouseId]);
 			
 			DB::commit();
+			// return Redirect::to('/')->with(['type' => 'error','message' => 'Your message'])->withInput(Input::except('password'));
+			return redirect('/boqs')->with('success',trans('lang.save_success'));
 		}catch (\Exception $e) {
 			DB::rollback();
 			return redirect()->back()->with('error',trans('lang.save_error').' '.$e->getMessage().' '.$e->getLine());
 		}
 		
+
+	}
+	public function assignHouse(Request $request,$boq_id){
+		$boq_id = decrypt($boq_id);
+		try{
+			DB::beginTransaction();
+			$houses = $request->house;
+			
+			if(count($houses)>0){
+				foreach($houses as $key=>$house){
+					// print_r($house);
+					$boq_house = [
+						'boq_id'			=>	$boq_id,
+						'house_id'			=>	$house,
+						'boq_house_code'	=>	"BOQ-".$this->getBoqHouseCode($house,3),
+						'created_by'		=>	Auth::user()->id,
+						'created_at'		=>	date('Y-m-d H:i:s'),
+						'created_by'	=> Auth::user()->id,
+						'status'		=>	1,
+					];
+					$boq_house_id = DB::table('boq_houses')->insertGetId($boq_house);
+					$boq_items = BoqItemDefualt::where("boq_id",$boq_id)->get();
+					if($boq_items){
+						foreach($boq_items as $key=>$item){
+							$newBoqItem = $item->replicate();
+							$newBoqItem->boq_house_id = $boq_house_id;
+							$newBoqItem->boq_id = $boq_id;
+							$newBoqItem->house_id = $boq_house_id;
+							$newBoqItem->setTable("boq_items");
+							$newBoqItem->save();
+
+						}
+					}
+					
+				}
+			}
+			DB::commit();
+			return redirect('/boqs')->with('success',trans('lang.save_success'));
+		}catch(Exception $e){
+			print_r($e->getMessage());
+			DB::rollback();
+		}
 
 	}
 }

@@ -66,12 +66,14 @@ Route::group(['prefix' => 'boqs'], function() {
 	Route::post('reviseboq/{id}','BoqController@reviseBoq')->middleware('checkRole:revise_boq');
 	Route::get('replicateboqworkingtype/{boq_id}/{type_id}','BoqController@replicateBoqByWorkingType')->middleware('checkRole:replicate_boq_by_working_type');
 	Route::post('reviseboqworkingtype/{boq_id}/{type_id}','BoqController@reviseBoqWorkingType')->middleware('checkRole:revise_boq_working_type');
-	Route::get('getBoqItems/{boq_id}/{house_id}/{working_type_id}','BoqController@getBoqHouseItem');
+	Route::get('getBoqItems/{boq_id}/{house_id}/{working_type_id?}','BoqController@getBoqHouseItem');
 	Route::post('reviseBoqHouseView/{boq_id}/{house_id}','BoqController@reviseBoqHouseView');
 	Route::post('reviseBoqHouse/{boq_id}/{house_id}/{working_type}','BoqController@reviseBoqHouse')->middleware('checkRole:revise_boq_house');
-	Route::any('reviseBoqHouses/{boq_id}/{house_id}/{working_type}','BoqController@reviseBoqHouse')->middleware('checkRole:revise_boq_house');
+	Route::any('reviseBoqHouses/{boq_id}/{house_id}/{working_type}','BoqController@reviseBoqHouse');
 	Route::get('viewBoq/{id}/{back}','BoqController@viewBoq')->middleware('checkRole:view_boq');
 	Route::post('uploadBoqPreview','BoqController@uploadBoqPreview')->middleware('checkRole:boq_add');
+	Route::get('boqhousesviewdt/{id}','BoqController@boqHousesViewDt');
+	Route::post('assignHouse/{id}','BoqController@assignHouse');
 });
 
 ///////////////////// route zone ///////////////////////////
@@ -509,3 +511,4 @@ Route::get('repository/getApprovalUsers','RepositoryController@getApprovalUsers'
 Route::get('repository/fetchCurrentBOQ','RepositoryController@fetchCurrentBOQ');
 Route::get('repository/checkStockQuantity','RepositoryController@checkStockQuantity');
 Route::get('repository/getBoqItems','RepositoryController@getBoqItems');
+Route::get('repository/houseNoBoq','RepositoryController@getHouseNoBoq');

@@ -169,7 +169,7 @@
 	});
 	
 	function initTable(tableId, data) {
-		// console.log(data);
+		console.log(data);
 		$('#' + tableId).DataTable({
 			processing: true,
 			serverSide: true,
