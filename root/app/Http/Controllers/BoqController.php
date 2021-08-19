@@ -1190,11 +1190,12 @@ class BoqController extends Controller
    			$excel->sheet('Upload BOQ',function($sheet){
    				$sheet->cell('A1', 'No');
    				$sheet->cell('B1', 'Item Type');
-   				$sheet->cell('C1', 'Items Name');
-   				$sheet->cell('D1', 'UOM');
-  				$sheet->cell('E1', 'Qty Std');
-   				$sheet->cell('F1', 'Qty Add');
-  				$sheet->cell('G1', 'Cost');
+   				$sheet->cell('C1', 'Code');
+   				$sheet->cell('D1', 'Items Name');
+   				$sheet->cell('E1', 'UOM');
+  				$sheet->cell('F1', 'Qty Std');
+   				$sheet->cell('G1', 'Qty Add');
+  				$sheet->cell('H1', 'Cost');
    			});
    		})->download('xlsx');
    	}
@@ -1355,21 +1356,21 @@ class BoqController extends Controller
 				'building_id' 	=> 'required',
 			];
 			$where = ['status'=>1];
-			// if(!empty($request['zone_id'])){
-			// 	$where = array_merge($where, ['zone_id'=>$request['zone_id']]);
-			// }
-			// if(!empty($request['block_id'])){
-			// 	$where = array_merge($where, ['block_id'=>$request['block_id']]);
-			// }
-			// if(!empty($request['building_id'])){
-			// 	$where = array_merge($where, ['building_id'=>$request['building_id']]);
-			// }
-			// if(!empty($request['house_type_id'])){
-			// 	$where = array_merge($where, ['house_type'=>$request['house_type_id']]);
-			// }			
-			// if(!empty($request['street_id'])){
-			// 	$where = array_merge($where, ['street_id'=>$request['street_id']]);
-			// }			
+			if(!empty($request['zone_id'])){
+				$where = array_merge($where, ['zone_id'=>$request['zone_id']]);
+			}
+			if(!empty($request['block_id'])){
+				$where = array_merge($where, ['block_id'=>$request['block_id']]);
+			}
+			if(!empty($request['building_id'])){
+				$where = array_merge($where, ['building_id'=>$request['building_id']]);
+			}
+			if(!empty($request['house_type_id'])){
+				$where = array_merge($where, ['house_type'=>$request['house_type_id']]);
+			}			
+			if(!empty($request['street_id'])){
+				$where = array_merge($where, ['street_id'=>$request['street_id']]);
+			}			
 			if(!empty($request['house']) && count($request['house']) > 0){
 				$houses = DB::table('houses')->where($where)->whereIn('id',$request['house'])->get();
 			}else{
@@ -1493,6 +1494,8 @@ class BoqController extends Controller
 				}				
 				DB::commit();
 				return redirect('/boqs')->with('success',trans('lang.save_success'));
+			}else{
+				return redirect('/boqs')->with('error',trans('lang.save_error').' '.$e->getMessage().' '.$e->getLine());
 			}
 		} catch (\Exception $e) {
 			DB::rollback();

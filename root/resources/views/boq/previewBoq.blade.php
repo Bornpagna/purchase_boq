@@ -95,7 +95,7 @@
                                             {{-- <span class="required">*</span> --}}
                                         </label>
                                         <div class="col-md-12">
-                                            <select name="street_id" id="boq-street-preview" class="form-control boq-street my-select2">
+                                            <select name="street_id" id="boq-street" class="form-control boq-street my-select2">
                                                 <option value=""></option>
                                                 {{getSystemDataVal('ST',$request['street_id'])}}
                                             </select>
@@ -245,7 +245,7 @@
 			$("#boq-house").select2('val', null);
 			$("#boq-house").append($('<option></option>').val('').text(''));
 			if($(this).val()==1){
-				$("#boq-street option[value='0']").remove();
+				$("#boq-street-preview option[value='0']").remove();
 				$("#label-house").html('{{trans("lang.house_no")}}');
 				if(street!=null && street!="" && jsonHouse){
 					$.each(jsonHouse.filter(c=>c.street_id==street),function(key, val){
@@ -254,30 +254,31 @@
 				}
 			}else{
 				$("#label-house").html('{{trans("lang.house_type")}}');
-				$("#boq-street").append('<option value="0">{{trans("lang.all")}}</option>');
+				$("#boq-street-preview").append('<option value="0">{{trans("lang.all")}}</option>');
 				$("#boq-house").append('{{getSystemData("HT")}}');
 			}
 		});
 		
-		$('#boq-zone').on('change', function(){
+		$('#boq-zone-preview').on('change', function(){
 			getHouses();
 		});
-		$('#boq-block').on('change', function(){
+		$('#boq-block-preview').on('change', function(){
 			getHouses();
 		});
-		$('#boq-building').on('change', function(){
+		$('#boq-building-preview').on('change', function(){
 			getHouses();
 		});
-		$('#boq-street').on('change', function(){
+		$('#boq-street-preview').on('change', function(){
 			getHouses();
 		});
 
-		$('#boq-house-type').on('change', function(){
+		$('#boq-house-type-preview').on('change', function(){
 			var type = $(this).val();
 			getHouses();
 		});
 
 		function getHouses(){
+			console.log(12121212);
 			var params = {
 				zone_id: null,
 				block_id: null,
@@ -285,11 +286,11 @@
 				street_id: null,
 				house_type: null,
 			};
-			const zoneID    = $('#boq-zone').val();
-			const blockID   = $('#boq-block').val();
-			const buildingID    = $('#boq-building').val();
-			const streetID  = $('#boq-street').val();
-			const houseType = $('#boq-house-type').val();
+			const zoneID    = $('#boq-zone-preview').val();
+			const blockID   = $('#boq-block-preview').val();
+			const buildingID    = $('#boq-building-preview').val();
+			const streetID  = $('#boq-street-preview').val();
+			const houseType = $('#boq-house-type-preview').val();
 
 			if(zoneID){
 				params.zone_id = zoneID;
@@ -316,7 +317,6 @@
 				success: function(result){
 					$("#boq-house").empty();
 					$.each(result,function(key, val){
-						$("#boq-house").append($('<option></option>').val(val.id).text(val.house_no));
 						$("#boq-house-preview").append($('<option></option>').val(val.id).text(val.house_no));
 					});
 				}
