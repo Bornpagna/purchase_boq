@@ -155,8 +155,8 @@ class BoqController extends Controller
 			return view('boq.revise_boq',$data);
 		}catch (\Exception $e) {
 			DB::rollback();
-			print_r($e->getMessage());exit;
-			// return redirect()->back()->with('error',trans('lang.save_error').' '.$e->getMessage().' '.$e->getLine());
+			// print_r($e->getMessage());exit;
+			return redirect()->back()->with('error',trans('lang.save_error').' '.$e->getMessage().' '.$e->getLine());
 		}
 		
 	}
@@ -545,7 +545,7 @@ class BoqController extends Controller
 			<button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 			  '.trans('lang.action').' <span class="caret"></span>
 			</button><ul class="dropdown-menu dropdown-menu-right">'.
-			'<li><a '.$btnDownload.' title="'.trans('lang.download').'"><i class="fa fa-file-excel-o"></i> '.trans('lang.download').'</a></li>'.
+			'<li><a '.$btnDownload.' title="'.trans('lang.download').'" href="'.url('boqs/downloadBoq').'/'.$row->id.'"><i class="fa fa-file-excel-o"></i> '.trans('lang.download').'</a></li>'.
 			'<li><a '.$btnAssignHouse.' title="'.trans('lang.assign_house').'" row_id="'.$row->id.'" row_rounte="'.$assign_house.'"><i class="fa fa-plus"></i> '.trans('lang.assign_house').'</a></li>'.
 			'<li><a '.$btnView.' title="'.trans('lang.view').'" row_id="'.$row->id.'" row_rounte="'.$rounte_view.'"><i class="fa fa-eye"></i> '.trans('lang.view').'</a></li>'.
 			'<li><a '.$btnRevise.' title="'.trans('lang.manual_revised_boq').'" row_id="'.$row->id.'" row_rounte="'.$rounte_revise.'"><i class="fa fa-pencil-square-o"></i> '.trans('lang.manual_revised_boq').'</a></li>'.
@@ -1725,5 +1725,55 @@ class BoqController extends Controller
 			DB::rollback();
 		}
 
+	}
+	public function downloadBoq(Request $request,$boq_id){
+		Excel::create('BOQ.export_'.date('Y_m_d_H_i_s'),function($excel) use($boq_id){
+			$excel->setCreator(Auth::user()->name)->setCompany(config('app.name'));
+			$excel->sheet('BOQ Info',function($sheet) use($boq_id){
+				$cells = 1;
+			 $sheet->cell('A'.$cells,trans('lang.house_no'));
+				$sheet->cell('B'.$cells,trans('lang.street'));
+				$sheet->cell('C'.$cells,trans('lang.line_no'));
+				$sheet->cell('D'.$cells,trans('lang.trans_date'));
+				$sheet->cell('E'.$cells,trans('lang.trans_by'));
+				$sheet->cell('F'.$cells,trans('lang.trans_ref'));
+			 
+			 $cells++;
+			 $boq = getBOQs($boq_id);
+			 print_r($boq);exit;
+			 if(count($boq)>0){
+				 foreach ($boq as $value) {
+						$sheet->cell('A'.($cells),$value->house_no);
+						$sheet->cell('B'.($cells),$value->street);
+						$sheet->cell('C'.($cells),$value->line_no);
+						$sheet->cell('D'.($cells),$value->trans_date);
+						$sheet->cell('E'.($cells),$value->trans_by);
+						$sheet->cell('F'.($cells),$value->trans_type);
+					 $cells++;
+					 
+					 $sheet->cell('A'.$cells,'');
+					 $sheet->cell('B'.$cells,trans('lang.item_code'));
+					 $sheet->cell('C'.$cells,trans('lang.item_name'));
+					 $sheet->cell('D'.$cells,trans('lang.units'));
+					 $sheet->cell('E'.$cells,trans('lang.qty_std'));
+					 $sheet->cell('F'.$cells,trans('lang.qty_add'));
+					 
+					 $cells++;
+					 $boq_item = getBOQItems($value->id);
+					 if($boq_item){
+						 foreach($boq_item as $val){
+							 $sheet->cell('A'.($cells),'');
+							 $sheet->cell('B'.($cells),$val->code);
+							 $sheet->cell('C'.($cells),$val->name);
+							 $sheet->cell('D'.($cells),$val->unit);
+							 $sheet->cell('E'.($cells),$val->qty_std);
+							 $sheet->cell('F'.($cells),$val->qty_add);
+							 $cells++;
+						 }
+					 }
+					}
+				}
+			});
+		})->download('xlsx');
 	}
 }
