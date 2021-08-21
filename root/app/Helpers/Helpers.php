@@ -396,14 +396,20 @@ function getBOQExport($id=NULL){
 	if($id && $id!=0){
 		$where = ' and pr_boqs.id = '.$id;
 	}
-	$sql = "SELECT *,
-		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`zone_id`) AS zone_name,
-		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`block_id`) AS block_name,
-		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`building_id`) AS building_name,
-		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`street_id`) AS street_name,
-		 pr_boqs.trans_by AS trans_by_id,
-		 (SELECT pr_users.`name` FROM pr_users WHERE pr_users.`id` = pr_boqs.`trans_by`) AS `trans_by`
-		FROM `pr_boqs` where pr_boqs.status = 1 ".$where;
+	$sql = "SELECT
+			pr_boqs.`zone_id`,
+			pr_boqs.`block_id`,
+			pr_boqs.`building_id`,
+			pr_boqs.`street_id`,
+			pr_boq_houses.`boq_house_code`,
+			pr_boq_houses.`house_id`,
+			pr_boq_houses.
+		FROM
+			pr_boq_items
+		JOIN pr_boqs
+			ON pr_boqs.id = pr_boq_items.boq_id
+		JOIN pr_boq_houses
+			ON pr_boq_houses.boq_id = pr_boqs.idwhere pr_boqs.status = 1 ".$where;
 	return DB::select($sql);
 }
 function getBoqWorkingType($id,$house_id = null){
