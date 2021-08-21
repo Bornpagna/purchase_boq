@@ -1731,47 +1731,56 @@ class BoqController extends Controller
 			$excel->setCreator(Auth::user()->name)->setCompany(config('app.name'));
 			$excel->sheet('BOQ Info',function($sheet) use($boq_id){
 				$cells = 1;
-			 $sheet->cell('A'.$cells,trans('lang.house_no'));
-				$sheet->cell('B'.$cells,trans('lang.street'));
-				$sheet->cell('C'.$cells,trans('lang.line_no'));
-				$sheet->cell('D'.$cells,trans('lang.trans_date'));
-				$sheet->cell('E'.$cells,trans('lang.trans_by'));
-				$sheet->cell('F'.$cells,trans('lang.trans_ref'));
+			$sheet->cell('A'.$cells,trans('lang.no'));
+			$sheet->cell('B'.$cells,trans('lang.trans_date'));
+			$sheet->cell('C'.$cells,trans('lang.boq_code'));
+			$sheet->cell('D'.$cells,trans('lang.zone'));
+			$sheet->cell('E'.$cells,trans('lang.block'));
+			$sheet->cell('F'.$cells,trans('lang.building'));
+			$sheet->cell('G'.$cells,trans('lang.street'));
+			$sheet->cell('H'.$cells,trans('lang.house_no'));
+			$sheet->cell('I'.$cells,trans('lang.working_type'));
+			$sheet->cell('J'.$cells,trans('lang.item_type'));
+			$sheet->cell('K'.$cells,trans('lang.item_code'));
+			$sheet->cell('L'.$cells,trans('lang.item_name'));
+			$sheet->cell('M'.$cells,trans('lang.units'));
+			$sheet->cell('N'.$cells,trans('lang.qty_std'));
+			$sheet->cell('O'.$cells,trans('lang.cost'));
 			 
 			 $cells++;
-			 $boq = getBOQs($boq_id);
-			 print_r($boq);exit;
+			 $boq = getBOQExport($boq_id);
+			 $i = 1;
 			 if(count($boq)>0){
-				 foreach ($boq as $value) {
-						$sheet->cell('A'.($cells),$value->house_no);
-						$sheet->cell('B'.($cells),$value->street);
-						$sheet->cell('C'.($cells),$value->line_no);
-						$sheet->cell('D'.($cells),$value->trans_date);
-						$sheet->cell('E'.($cells),$value->trans_by);
-						$sheet->cell('F'.($cells),$value->trans_type);
-					 $cells++;
+				//  foreach ($boq as $value) {
+					// 	$sheet->cell('A'.($cells),$value->house_no);
+					// 	$sheet->cell('B'.($cells),$value->street);
+					// 	$sheet->cell('C'.($cells),$value->line_no);
+					// 	$sheet->cell('D'.($cells),$value->trans_date);
+					// 	$sheet->cell('E'.($cells),$value->trans_by);
+					// 	$sheet->cell('F'.($cells),$value->trans_type);
+					//  $cells++;
 					 
-					 $sheet->cell('A'.$cells,'');
-					 $sheet->cell('B'.$cells,trans('lang.item_code'));
-					 $sheet->cell('C'.$cells,trans('lang.item_name'));
-					 $sheet->cell('D'.$cells,trans('lang.units'));
-					 $sheet->cell('E'.$cells,trans('lang.qty_std'));
-					 $sheet->cell('F'.$cells,trans('lang.qty_add'));
-					 
-					 $cells++;
-					 $boq_item = getBOQItems($value->id);
-					 if($boq_item){
-						 foreach($boq_item as $val){
-							 $sheet->cell('A'.($cells),'');
-							 $sheet->cell('B'.($cells),$val->code);
-							 $sheet->cell('C'.($cells),$val->name);
-							 $sheet->cell('D'.($cells),$val->unit);
-							 $sheet->cell('E'.($cells),$val->qty_std);
-							 $sheet->cell('F'.($cells),$val->qty_add);
-							 $cells++;
-						 }
-					 }
-					}
+					//  $sheet->cell('A'.$cells,'');
+					//  $sheet->cell('B'.$cells,trans('lang.item_code'));
+					//  $sheet->cell('C'.$cells,trans('lang.item_name'));
+					//  $sheet->cell('D'.$cells,trans('lang.units'));
+					//  $sheet->cell('E'.$cells,trans('lang.qty_std'));
+					//  $sheet->cell('F'.$cells,trans('lang.qty_add'));					 
+					//  $cells++;
+					//  $boq_item = getBOQItems($value->id);
+					//  if($boq_item){
+					// 	 foreach($boq_item as $val){
+					// 		 $sheet->cell('A'.($cells),$i++);
+					// 		 $sheet->cell('B'.($cells),$val->code);
+					// 		 $sheet->cell('C'.($cells),$val->name);
+					// 		 $sheet->cell('D'.($cells),$val->unit);
+					// 		 $sheet->cell('E'.($cells),$val->qty_std);
+					// 		 $sheet->cell('F'.($cells),$val->qty_add);
+					// 		 $sheet->cell('G'.($cells),$val->cost);
+					// 		 $cells++;
+					// 	 }
+					//  }
+					// }
 				}
 			});
 		})->download('xlsx');
