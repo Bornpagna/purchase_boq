@@ -283,7 +283,7 @@
 
 @include('modal.boq')
 @include('modal.edit_boq')
-<!-- @include('modal.revise_boq_house') -->
+@include('modal.revise_boq_house')
 @include('modal.upload')
 <!-- @include('modal.upload_revise') -->
 @include('modal.assign_house')

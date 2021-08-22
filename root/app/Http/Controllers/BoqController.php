@@ -1192,7 +1192,7 @@ class BoqController extends Controller
    				$sheet->cell('B1', 'Item Type');
    				$sheet->cell('C1', 'Code');
    				$sheet->cell('D1', 'Items Name');
-   				$sheet->cell('E1', 'UOM');
+   				$sheet->cell('E1', 'Unit');
   				$sheet->cell('F1', 'Qty Std');
    				$sheet->cell('G1', 'Qty Add');
   				$sheet->cell('H1', 'Cost');
@@ -1365,8 +1365,8 @@ class BoqController extends Controller
 			if(!empty($request['building_id'])){
 				$where = array_merge($where, ['building_id'=>$request['building_id']]);
 			}
-			if(!empty($request['house_type_id'])){
-				$where = array_merge($where, ['house_type'=>$request['house_type_id']]);
+			if(!empty($request['house_type'])){
+				$where = array_merge($where, ['house_type'=>$request['house_type']]);
 			}			
 			if(!empty($request['street_id'])){
 				$where = array_merge($where, ['street_id'=>$request['street_id']]);
@@ -1456,9 +1456,9 @@ class BoqController extends Controller
 												'name'=> !empty($request["item_name_".$working_type][$key])?$request["item_name_".$working_type][$key]:"",
 												'desc'=> !empty($request["item_name_".$working_type][$key])?$request["item_name_".$working_type][$key]:"",
 												'alert_qty'=> 1,
-												'unit_stock'=> !empty($request["uom_".$working_type][$key])?$request["uom_".$working_type][$key]:"",
-												'unit_usage'=> !empty($request["uom_".$working_type][$key])?$request["uom_".$working_type][$key]:"",
-												'unit_purch'=> !empty($request["uom_".$working_type][$key])?$request["uom_".$working_type][$key]:"",
+												'unit_stock'=> !empty($request["unit_".$working_type][$key])?$request["unit_".$working_type][$key]:"",
+												'unit_usage'=> !empty($request["unit_".$working_type][$key])?$request["unit_".$working_type][$key]:"",
+												'unit_purch'=> !empty($request["unit_".$working_type][$key])?$request["unit_".$working_type][$key]:"",
 												'cost_purch'=> 0,
 												'photo'=> "",
 												'status'=> 1,
@@ -1476,7 +1476,7 @@ class BoqController extends Controller
 										'boq_house_id' 	=>	!empty($boq_house_id)?$boq_house_id:0,
 										'house_id'		=>	!empty($house->id)?$house->id:0,
 										'item_id'		=>	!empty($item_ids)?$item_ids:0,
-										'unit'			=>	!empty($request["uom_".$working_type][$key])?$request["uom_".$working_type][$key]:"",
+										'unit'			=>	!empty($request["unit_".$working_type][$key])?$request["unit_".$working_type][$key]:"",
 										'qty_std'		=>	!empty($request["qty_std_".$working_type][$key])?$request["qty_std_".$working_type][$key]:0,
 										'qty_add'		=>	!empty($request["qty_add_".$working_type][$key])?$request["qty_add_".$working_type][$key]:0,
 										'cost'			=>	!empty($request["cost_".$working_type][$key])?$request["cost_".$working_type][$key]:"",
@@ -1731,56 +1731,67 @@ class BoqController extends Controller
 			$excel->setCreator(Auth::user()->name)->setCompany(config('app.name'));
 			$excel->sheet('BOQ Info',function($sheet) use($boq_id){
 				$cells = 1;
-			$sheet->cell('A'.$cells,trans('lang.no'));
-			$sheet->cell('B'.$cells,trans('lang.trans_date'));
-			$sheet->cell('C'.$cells,trans('lang.boq_code'));
-			$sheet->cell('D'.$cells,trans('lang.zone'));
-			$sheet->cell('E'.$cells,trans('lang.block'));
-			$sheet->cell('F'.$cells,trans('lang.building'));
-			$sheet->cell('G'.$cells,trans('lang.street'));
-			$sheet->cell('H'.$cells,trans('lang.house_no'));
-			$sheet->cell('I'.$cells,trans('lang.working_type'));
-			$sheet->cell('J'.$cells,trans('lang.item_type'));
-			$sheet->cell('K'.$cells,trans('lang.item_code'));
-			$sheet->cell('L'.$cells,trans('lang.item_name'));
-			$sheet->cell('M'.$cells,trans('lang.units'));
-			$sheet->cell('N'.$cells,trans('lang.qty_std'));
-			$sheet->cell('O'.$cells,trans('lang.cost'));
-			 
-			 $cells++;
-			 $boq = getBOQExport($boq_id);
-			 $i = 1;
-			 if(count($boq)>0){
-				//  foreach ($boq as $value) {
-					// 	$sheet->cell('A'.($cells),$value->house_no);
-					// 	$sheet->cell('B'.($cells),$value->street);
-					// 	$sheet->cell('C'.($cells),$value->line_no);
-					// 	$sheet->cell('D'.($cells),$value->trans_date);
-					// 	$sheet->cell('E'.($cells),$value->trans_by);
-					// 	$sheet->cell('F'.($cells),$value->trans_type);
-					//  $cells++;
-					 
-					//  $sheet->cell('A'.$cells,'');
-					//  $sheet->cell('B'.$cells,trans('lang.item_code'));
-					//  $sheet->cell('C'.$cells,trans('lang.item_name'));
-					//  $sheet->cell('D'.$cells,trans('lang.units'));
-					//  $sheet->cell('E'.$cells,trans('lang.qty_std'));
-					//  $sheet->cell('F'.$cells,trans('lang.qty_add'));					 
-					//  $cells++;
-					//  $boq_item = getBOQItems($value->id);
-					//  if($boq_item){
-					// 	 foreach($boq_item as $val){
-					// 		 $sheet->cell('A'.($cells),$i++);
-					// 		 $sheet->cell('B'.($cells),$val->code);
-					// 		 $sheet->cell('C'.($cells),$val->name);
-					// 		 $sheet->cell('D'.($cells),$val->unit);
-					// 		 $sheet->cell('E'.($cells),$val->qty_std);
-					// 		 $sheet->cell('F'.($cells),$val->qty_add);
-					// 		 $sheet->cell('G'.($cells),$val->cost);
-					// 		 $cells++;
-					// 	 }
-					//  }
-					// }
+				$sheet->cell(('A'.$cells),"List BOQ by House");
+				$sheet->mergeCells('A1:Q1');
+				$sheet->cell(("A1"),function($cells){
+					$cells->setFontSize(15);;
+					$cells->setAlignment('center');
+					$cells->setFontWeight('bold');
+					$cells->setFontFamily('Khmer OS Muol');
+				});
+				$cells++;
+				$sheet->cell('A'.$cells,trans('lang.no'));
+				$sheet->cell('B'.$cells,trans('lang.trans_date'));
+				$sheet->cell('C'.$cells,trans('lang.boq_code'));
+				$sheet->cell('D'.$cells,trans('lang.zone'));
+				$sheet->cell('E'.$cells,trans('lang.block'));
+				$sheet->cell('F'.$cells,trans('lang.building'));
+				$sheet->cell('G'.$cells,trans('lang.street'));
+				$sheet->cell('H'.$cells,trans('lang.house_type'));
+				$sheet->cell('I'.$cells,trans('lang.house_no'));
+				$sheet->cell('J'.$cells,trans('lang.working_type'));
+				$sheet->cell('K'.$cells,trans('lang.item_type'));
+				$sheet->cell('L'.$cells,trans('lang.item_code'));
+				$sheet->cell('M'.$cells,trans('lang.item_name'));
+				$sheet->cell('N'.$cells,trans('lang.units'));
+				$sheet->cell('O'.$cells,trans('lang.qty_std'));
+				$sheet->cell('P'.$cells,trans('lang.qty_add'));
+				$sheet->cell('Q'.$cells,trans('lang.cost'));	
+				$sheet->cell(("A$cells:Q$cells"),function($cells){
+					$cells->setBackground('#337ab7');
+					$cells->setAlignment('center');
+					$cells->setFontFamily('Khmer OS Battambang');
+					$cells->setFontColor('#ffffff');
+				});			
+				$boq = getBOQExport($boq_id);
+				$i = 1;
+				if(count($boq)>0){
+					foreach ($boq as $value) {
+						$cells++;
+						$sheet->cell('A'.($cells),$i++);
+						$sheet->cell('B'.($cells),date('d/m/Y', strtotime(str_replace('/', '-', $value->trans_date))));
+						$sheet->cell('C'.($cells),$value->boq_code);
+						$sheet->cell('D'.($cells),$value->zone_name);
+						$sheet->cell('E'.($cells),$value->block_name);
+						$sheet->cell('F'.($cells),$value->building_name);
+						$sheet->cell('G'.($cells),$value->street_name);
+						$sheet->cell('H'.($cells),$value->house_type);
+						$sheet->cell('I'.($cells),$value->house_no);
+						$sheet->cell('J'.($cells),$value->working_type);
+						$sheet->cell('K'.($cells),$value->item_type);
+						$sheet->cell('L'.($cells),$value->code);
+						$sheet->cell('M'.($cells),$value->name);
+						$sheet->cell('N'.($cells),$value->unit);
+						$sheet->cell('O'.($cells),$value->qty_std);
+						$sheet->cell('P'.($cells),$value->qty_add);
+						$sheet->cell('Q'.($cells),$value->cost);
+						$sheet->cell(("A$cells:Q$cells"),function($cells){
+							$cells->setBorder('thin', 'thin', 'thin', 'thin');
+							$cells->setAlignment('center');
+							$cells->setFontFamily('Khmer OS Battambang');
+							$cells->setFontColor('#000000');
+						});			
+					}
 				}
 			});
 		})->download('xlsx');

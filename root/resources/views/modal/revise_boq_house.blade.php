@@ -21,9 +21,9 @@
 									<li class="nav-item active">
 										<a class="nav-link active" id="manual-tab" data-toggle="tab" href="#manual" role="tab" aria-controls="manual" aria-selected="true">{{ trans('lang.manual_input') }}</a>
 									</li>
-									<li class="nav-item">
+									<!-- <li class="nav-item">
 										<a class="nav-link" id="excel-tab" data-toggle="tab" href="#excel" role="tab" aria-controls="excel" aria-selected="false">{{ trans('lang.excel_import') }}</a>
-									</li>
+									</li> -->
 								</ul>
 								<div class="tab-content upload_boq_tab" id="myTabContentRevise">
 									<div class="padding-20 tab-pane fade active in" id="manual" role="tabpanel" aria-labelledby="manual-tab">
@@ -53,7 +53,7 @@
 										</div>
 									</div>
 								
-								<div class="tab-pane fade" id="excel" role="tabpanel" aria-labelledby="excel-tab">
+								<!-- <div class="tab-pane fade" id="excel" role="tabpanel" aria-labelledby="excel-tab">
 									<div class="form-body">
 										<div class="form-group padding-20">
 											<div class="row padding-20">
@@ -104,7 +104,7 @@
 											</div>
 										</div>
 									</div>
-								</div>
+								</div> -->
 							</div>
 							</div>
 						</div>

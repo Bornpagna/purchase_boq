@@ -171,7 +171,7 @@
                                     <td><input type="text" length="11" class="form-control item_type_boq" name="item_type_{{$start-1}}[]" value="{{$value->item_type}}"></td>
                                     <td><input type="text" length="11" class="form-control code_boq" name="code_{{$start-1}}[]" value="{{$value->code}}"></td>
                                     <td><input type="text" length="11" class="form-control item_name_boq" name="item_name_{{$start-1}}[]" value="{{$value->items_name}}"></td>
-                                    <td><input type="text" length="11" class="form-control uom_boq" name="uom_{{$start-1}}[]" value="{{$value->uom}}"></td>
+                                    <td><input type="text" length="11" class="form-control unit_boq" name="unit_{{$start-1}}[]" value="{{$value->unit}}"></td>
                                     <td><input type="number" length="11" class="form-control qty_std_boq" name="qty_std_{{$start-1}}[]" placeholder="Enter number..." value="{{$value->qty_std}}"></td>
                                     <td><input type="number" length="11" class="form-control qty_add_boq" name="qty_add_{{$start-1}}[]" placeholder="Enter number..." value="{{$value->qty_add}}"></td>
                                     <td><input type="number" length="11" class="form-control cost_boq" name="cost_{{$start-1}}[]" placeholder="Enter number..." value="{{formatQty($value->cost)}}"></td>
@@ -224,7 +224,7 @@
 				hmtl+='<td><input type="text" length="11" class="form-control item_type_boq" name="item_type_'+val+'[]"></td>';
 				hmtl+='<td><input type="text" length="11" class="form-control code_boq" name="code_'+val+'[]"></td>';
 				hmtl+='<td><input type="text" length="11" class="form-control item_name_boq" name="item_name_'+val+'[]"></td>';
-				hmtl+='<td><input type="text" length="11" class="form-control uom_boq" name="uom_'+val+'[]"></td>';
+				hmtl+='<td><input type="text" length="11" class="form-control unit_boq" name="unit_'+val+'[]"></td>';
 				hmtl+='<td><input type="number" length="11" class="form-control qty_std_boq" name="qty_std_'+val+'[]" placeholder="Enter number"></td>';
 				hmtl+='<td><input type="number" length="11" class="form-control qty_add_boq" name="qty_add_'+val+'[]" placeholder="Enter number"></td>';
 				hmtl+='<td><input type="number" length="11" class="form-control cost_boq" name="cost_'+val+'[]" placeholder="Enter number"></td>';
