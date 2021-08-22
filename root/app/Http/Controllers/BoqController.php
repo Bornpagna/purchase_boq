@@ -1484,7 +1484,6 @@ class BoqController extends Controller
 										'working_type'	=>	!empty($working_type_id)?$working_type_id:0,
 										'created_at'	=>	date('Y-m-d H:i:s'),
 										'created_at'	=>	Auth::user()->id,
-										// 'status'		=>	1,
 									];
 									$boq_item = DB::table('boq_items')->insertGetID($item_types);
 								}
