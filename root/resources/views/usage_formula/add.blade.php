@@ -515,14 +515,14 @@
             if(building_id){
                 $('#generate').removeClass("disabled");
             }
-            // getBuildings();
+            getBuildings();
         });
         $('.building_id').on('change',function(){
             var building_id = $('.building_id').val();
             if(building_id){
                 $('#generate').removeClass("disabled");
             }
-            // getHouseType();
+            getHouseType();
         });
         $('.street_id').on('change',function(){
             const streetID = $(this).val();
