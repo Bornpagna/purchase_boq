@@ -1586,7 +1586,7 @@ class BoqController extends Controller
 									}
 									$item_name = DB::table('items')->where('name',$request["item_".$working_type])->where('status',1)->first();
 									if(!empty($item_name)){
-										$item_name = DB::table('items')->where('cat_id',$item_types_id)->where('name',$request["item_".$working_type])->where('status',1)->first();
+										$item_name = DB::table('items')->where('cat_id',$item_types_id)->where('name',$request["item_".$working_type][$key])->where('status',1)->first();
 										if(!empty($item_name)){
 											$item_ids = $item_name->id;
 										}else{
