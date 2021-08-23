@@ -353,11 +353,11 @@ class UsageFormulaController extends Controller
             }
 
             if($buildingID = $request->input('building_id')){
-                $column = array_merge($column,['block_id' => $buildingID]);
+                $column = array_merge($column,['building_id' => $buildingID]);
             }
 
             if($houseTypeID = $request->input('house_type')){
-                $column = array_merge($column,['block_id' => $houseTypeID]);
+                $column = array_merge($column,['house_type_id' => $houseTypeID]);
             }
 
             if($streetID = $request->input('street_id')){

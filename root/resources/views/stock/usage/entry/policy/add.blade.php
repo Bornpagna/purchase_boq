@@ -1153,13 +1153,15 @@
         });
 
         $('tr.tr-form').each(function(){
-            const itemId = $(this).children().find('.item_id').val();
-            const unitId = $(this).children().find('.unit_id').val();
+            const itemId = $(this).children().find('.line_item').val();
+            const unitId = $(this).children().find('.line_unit').val();
             const unitSelectId = $(this).children().find('.unit_id').attr('id');
             const factor = $('.' + unitSelectId + '-' + unitId).attr('factor');
             const qty = $(this).children().find('.qty').val();
             const boqQty = $(this).children().find('.boq_qty').val();
             const stockQty = $(this).children().find('.stock_qty').val();
+            console.log(itemId);
+            console.log(unitId);
 
             if(itemId && unitId){
 

@@ -4342,7 +4342,17 @@ class ReportController extends Controller
 			$item_id = '';
 		}
 
-    	$sql = "SELECT (SELECT `pr_projects`.`name` FROM `pr_projects` WHERE `pr_projects`.`id`=$project_id)AS project,boq.`trans_by`, boq.`house_id`, (SELECT `pr_houses`.`house_no` FROM `pr_houses` WHERE `pr_houses`.id=boq.`house_id`)AS house_no, (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_houses`.`house_type` FROM `pr_houses` WHERE `pr_houses`.`id`=boq.`house_id`))AS house_type, boqi.`item_id`, (SELECT `pr_items`.`code` FROM `pr_items` WHERE `pr_items`.`id`=boqi.item_id)AS item_code, (SELECT `pr_items`.`name` FROM `pr_items` WHERE `pr_items`.`id`=boqi.item_id)AS item_name, (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`))AS item_type,(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`)AS item_type_id,(SELECT `pr_system_datas`.`desc` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`))AS item_type_desc,(SELECT `pr_items`.`cost_purch` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id` AND `pr_items`.`unit_purch`=boqi.`unit`)AS item_price, boqi.`qty_std`, boqi.`qty_add`, (SELECT `pr_units`.`from_desc` FROM `pr_units` WHERE `pr_units`.`from_code`=boqi.`unit` LIMIT 1)AS unit FROM `pr_boqs` AS boq INNER JOIN `pr_boq_items` AS boqi ON boqi.`boq_id` = boq.`id` AND boq.`house_id` IN(SELECT `pr_houses`.`id` FROM `pr_houses` WHERE `pr_houses`.`house_type`=$house_type) $house_id $item_id ";
+    	$sql = "SELECT (SELECT `pr_projects`.`name` FROM `pr_projects` WHERE `pr_projects`.`id`=$project_id)AS project,boq.`trans_by`, boq.`house_id`,
+		 (SELECT `pr_houses`.`house_no` FROM `pr_houses` WHERE `pr_houses`.id=pr_boq_houses.`house_id`)AS house_no, 
+		 (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_houses`.`house_type` FROM `pr_houses` WHERE `pr_houses`.`id`=pr_boq_houses.`house_id`))AS house_type, boqi.`item_id`,
+		  (SELECT `pr_items`.`code` FROM `pr_items` WHERE `pr_items`.`id`=boqi.item_id)AS item_code, (SELECT `pr_items`.`name` FROM `pr_items` WHERE `pr_items`.`id`=boqi.item_id)AS item_name, 
+		  (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`))AS item_type,
+		  (SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`)AS item_type_id,
+		  (SELECT `pr_system_datas`.`desc` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`))AS item_type_desc,
+		  (SELECT `pr_items`.`cost_purch` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id` AND `pr_items`.`unit_purch`=boqi.`unit`)AS item_price, boqi.`qty_std`, boqi.`qty_add`, 
+		  (SELECT `pr_units`.`from_desc` FROM `pr_units` WHERE `pr_units`.`from_code`=boqi.`unit` LIMIT 1)AS unit FROM `pr_boqs` AS boq JOIN pr_boq_houses ON `pr_boq_houses`.boq_id = boq.id
+		  INNER JOIN `pr_boq_items` AS boqi ON boqi.`boq_house_id` = pr_boq_houses.`id` AND pr_boq_houses.`house_id` IN(SELECT `pr_houses`.`id` FROM `pr_houses` WHERE `pr_houses`.`house_type`=$house_type) $house_id $item_id ";
+		//   print_r($sql);
 
     	$report = DB::select($sql);
 
