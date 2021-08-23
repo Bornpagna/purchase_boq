@@ -17,6 +17,27 @@
     .out-boq{background-color: #ffeb3b !important;}
     .not-set-boq{background-color: #9c74e4 !important;}
     .invalid{background-color: #ff7065 !important;}
+    .loader {
+        margin: 0 auto;
+        border: 8px solid #f3f3f3;
+        border-radius:50% !important;
+        border-top: 8px solid #3498db;
+        width: 60px;
+        height: 60px;
+        -webkit-animation: spin 2s linear infinite; /* Safari */
+        animation: spin 2s linear infinite;
+    }
+
+        /* Safari */
+    @-webkit-keyframes spin {
+        0% { -webkit-transform: rotate(0deg); }
+        100% { -webkit-transform: rotate(360deg); }
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
 <div class="row">
 	<div class="col-md-12">
@@ -185,7 +206,9 @@
                             <!-- Building -->
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="building_id" class="control-label"><strong>{{ trans('lang.building') }}</strong></label>
+                                    <label for="building_id" class="control-label"><strong>{{ trans('lang.building') }}</strong>
+                                        <span class="required"> * </span>
+                                    </label>
                                     <select class="form-control select2 building_id" id="building_id" name="building_id">
                                         
                                     </select>
@@ -220,7 +243,7 @@
                                     <button type="button" class="load_button btn btn-success">{{ trans('lang.load_item') }}</button>
                                 </div> --}}
                                 <div class="form-actions">
-									<a class="btn blue bold" id="load-boq-item">{{trans('lang.load_item')}}</a>
+									<a class="btn blue bold disabled" id="load-boq-item">{{trans('lang.load_item')}}</a>
 								</div>
                             </div>
                            
@@ -340,27 +363,28 @@
         $('.form-message').empty();
 		$(this).prop('disabled', true);
 		// if(chkValid([".reference_no",".trans_date",".warehouse_id",".reference",<?php if(getSetting()->allow_zone==1){echo '".zone_id",';} ?>,<?php if(getSetting()->allow_block==1){echo '".block_id",';} ?>,<?php if(getSetting()->usage_constructor==1){echo '".sub_const",';} ?>".engineer"])){ 
-            // if(onSubmitFormCallback((self,msg) => {
-            //     $(self).addClass('invalid');
-            //     $('.form-message').append($('<li></li>').html(msg));
-            // })){
+        if(chkValid([".reference_no",".trans_date",".warehouse_id",".reference",".zone_id",".block_id",".building_id",<?php if(getSetting()->usage_constructor==1){echo '".sub_const",';} ?>".engineer"])){ 
+            if(onSubmitFormCallback((self,msg) => {
+                $(self).addClass('invalid');
+                $('.form-message').append($('<li></li>').html(msg));
+            })){
 				objRef = GetRef();
 				if (chkReference(objRef, '#reference')) {
 					$("#btnSubmit").val($(this).val());
 					$('#form-stock-entry').submit();
 				}
-                // else{
-				// 	$(this).prop('disabled', false);
-				// 	return false;
-				// }
-			// }else{
-			// 	$(this).prop('disabled', false);
-			// 	return false;
-			// }
-		// }else{
-		// 	$(this).prop('disabled', false);
-		// 	return false;
-		// }
+                else{
+					$(this).prop('disabled', false);
+					return false;
+				}
+			}else{
+				$(this).prop('disabled', false);
+				return false;
+			}
+		}else{
+			$(this).prop('disabled', false);
+			return false;
+		}
 	});
 	
 	document.addEventListener("mousewheel", function(event){
@@ -1477,6 +1501,7 @@
         $('.building_id').on('change',function(){
             const buildingID = $(this).val();
             if(buildingID){
+                $('#load-boq-item').removeClass("disabled");
                 getHouseAllTrigger();
             }
         });
@@ -1484,6 +1509,7 @@
         $('.street_id').on('change',function(){
             const buildingID = $(this).val();
             if(buildingID){
+
                 getHouseAllTrigger();
             }
         });
@@ -1514,6 +1540,7 @@
 	});
 
     $("#load-boq-item").on("click",function(){
+        
 		var params = {
 			zone_id: null,
 			block_id: null,
@@ -1545,11 +1572,14 @@
 		if(houseType){
 			params.house_type = houseType;
 		}
+        var html = "<tr ><td colspan='10'><div class='loader'></div></td></tr>";
+        $("#table-income tbody").append(html);
 		$.ajax({
 			url :'{{url("repository/getBoqItems")}}',
 			type:'GET',
 			data:params,
 			success:function(data){
+                $("#table-income tbody").empty();
 				$.each(data,function(key, val){
                     index++;
 					loadWorkingTypeItem(val,index);

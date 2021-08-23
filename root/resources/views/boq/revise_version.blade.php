@@ -268,7 +268,7 @@
 							<th width="10%" class="text-center">{{ trans('lang.trans_date') }}</th>
 							<th width="10%" class="text-center">{{ trans('lang.trans_by') }}</th>
 							<th width="10%" class="text-center">{{ trans('lang.trans_ref') }}</th>
-							<th width="4%" class="text-center">{{ trans('lang.revise_count') }}</th>
+							<th width="4%" class="text-center">{{ trans('lang.version') }}</th>
 							<th width="8%" class="text-center all">{{ trans('lang.action') }}</th>
 						</tr>
 					</thead>
@@ -286,7 +286,7 @@
 @include('modal.edit_boq')
 @include('modal.revise_boq_house')
 @include('modal.upload')
-<!-- @include('modal.upload_revise') -->
+@include('modal.upload_revise')
 @include('modal.assign_house')
 @include('modal.confirm')
 @endsection()
@@ -631,7 +631,7 @@
 			{data: 'trans_date', name:'trans_date'},
 			{data: 'trans_by', name:'trans_by'},
 			{data: 'trans_type', class:'text-center', name:'trans_type'},
-			{data: 'revise_count', class:'text-center', name:'revise_count'},
+			{data: 'version', class:'text-center', name:'version'},
 			{data: 'action', class :'text-center', orderable: false, searchable: false},
 		],order: [[1, 'desc']]
 	});
@@ -860,21 +860,21 @@
 		});
 
 		$('#boq-zone-preview').on('change', function(){
-			getHousePreView();
+			getHouses();
 		});
 		$('#boq-block-preview').on('change', function(){
-			getHousePreView();
+			getHouses();
 		});
 		$('#boq-building-preview').on('change', function(){
-			getHousePreView();
+			getHouses();
 		});
 		$('#boq-street-preview').on('change', function(){
-			getHousePreView();
+			getHouses();
 		});
 
 		$('#boq-house-type-preview').on('change', function(){
 			var type = $(this).val();
-			getHousePreView();
+			getHouses();
 		});
 
 		function getHouses(){
@@ -917,54 +917,12 @@
 					$("#boq-house").empty();
 					$.each(result,function(key, val){
 						$("#boq-house").append($('<option></option>').val(val.id).text(val.house_no));
+						$("#boq-house-preview").append($('<option></option>').val(val.id).text(val.house_no));
 					});
 				}
 			});
 		}
-		function getHousePreView(){
-			var params = {
-				zone_id: null,
-				block_id: null,
-				building_id : null,
-				street_id: null,
-				house_type: null,
-			};
-			const zoneID    	= $('#boq-zone-preview').val();
-			const blockID   	= $('#boq-block-preview').val();
-			const buildingID    = $('#boq-building-preview').val();
-			const streetID  	= $('#boq-street-preview').val();
-			const houseType 	= $('#boq-house-type-preview').val();
 
-			if(zoneID){
-				params.zone_id = zoneID;
-			}
-
-			if(blockID){
-				params.block_id = blockID;
-			}
-			if(buildingID){
-				params.building_id = buildingID;
-			}
-
-			if(streetID){
-				params.street_id = streetID;
-			}
-
-			if(houseType){
-				params.house_type = houseType;
-			}
-			$.ajax({
-				url:"{{url('repository/getHousesByAllTrigger')}}",
-				type:'GET',
-				data: params,
-				success: function(result){
-					$("#boq-house-preview").empty();
-					$.each(result,function(key, val){
-						$("#boq-house-preview").append($('<option></option>').val(val.id).text(val.house_no));						
-					});
-				}
-			});
-		}
 		$('#zone_id_assign_house').on('change', function(){
 			getHouseNoBoq();
 		});

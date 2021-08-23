@@ -391,42 +391,27 @@ function getBOQs($id=NULL){
 	FROM `pr_boqs` where pr_boqs.status = 1 ".$where;
 	return DB::select($sql);
 }
-function getBOQExport($id=NULL){
+function getBOQReviseVersions($id=NULL){
 	$where = '';
 	if($id && $id!=0){
-		$where = ' and pr_boqs.id = '.$id;
+		$where = ' and pr_boqs.referent_id = '.$id;
 	}
-	$sql = "SELECT
-		pr_boqs.`boq_code`,	
-		pr_boqs.trans_date,	
+	// $sql = "SELECT `pr_boqs`.`id`, pr_boqs.`house_id`, 
+	// (SELECT pr_houses.`house_no` FROM pr_houses WHERE pr_houses.`id` = pr_boqs.`house_id`) AS house_no, 
+	// (SELECT pr_houses.`street_id` FROM pr_houses WHERE pr_houses.`id` = pr_boqs.`house_id` LIMIT 1) AS street_id, 
+	// (SELECT pr_system_datas.`name` FROM pr_system_datas WHERE pr_system_datas.`type` = 'ST' AND pr_system_datas.`id` = (SELECT pr_houses.`street_id` FROM pr_houses WHERE pr_houses.`id` = pr_boqs.`house_id` LIMIT 1) LIMIT 1) AS street, 
+	// pr_boqs.`line_no`, pr_boqs.`trans_date`, pr_boqs.trans_by AS trans_by_id, 
+	// (SELECT pr_users.`name` FROM pr_users WHERE pr_users.`id` = pr_boqs.`trans_by`) AS `trans_by`, pr_boqs.`trans_type` FROM pr_boqs".$where; 
+	// return DB::select($sql);
+	$sql = "SELECT *,
 		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`zone_id`) AS zone_name,
 		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`block_id`) AS block_name,
 		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`building_id`) AS building_name,
 		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`street_id`) AS street_name,
-		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`house_type`) AS house_type,
-		pr_boq_items.`item_id`,
-		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_items.`cat_id`) AS item_type,	
-		pr_items.`name`,
-		pr_items.`desc`,
-		pr_items.`code`,
-		pr_boq_items.`qty_add`,
-		pr_boq_items.`qty_std`,
-		pr_boq_items.`unit`,
-		pr_boq_items.`working_type`,
-		pr_boq_items.`cost`,
-		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_boq_items.`working_type`) AS working_type,
-		pr_houses.`house_no`,
-		pr_houses.`house_desc`
-		FROM
-			pr_boq_items
-		JOIN pr_boqs
-			ON pr_boqs.id = pr_boq_items.boq_id
-		JOIN pr_boq_houses
-			ON pr_boq_houses.boq_id = pr_boqs.id
-		JOIN pr_houses
-			ON pr_houses.id = pr_boq_items.`house_id` 
-		JOIN pr_items
-			ON pr_items.id=pr_boq_items.item_id where pr_boqs.status = 1 ".$where;
+		 pr_boqs.trans_by AS trans_by_id,
+		 (SELECT pr_users.`name` FROM pr_users WHERE pr_users.`id` = pr_boqs.`trans_by`) AS `trans_by`
+
+	FROM `pr_boqs` where pr_boqs.status = 0 ".$where;
 	return DB::select($sql);
 }
 function getBoqWorkingType($id,$house_id = null){
@@ -461,6 +446,18 @@ function getBoqHouses($id=null){
 				(SELECT `pr_houses`.`house_no` FROM `pr_houses` WHERE `pr_houses`.id = `pr_boq_houses`.`house_id`) AS house,
 				(SELECT `pr_houses`.`house_desc` FROM `pr_houses` WHERE `pr_houses`.id = `pr_boq_houses`.`house_id`) AS house_desc
 			FROM `pr_boq_houses` WHERE pr_boq_houses.status = 1 ".$where;
+	return DB::select($sql);
+}
+
+function getReviseBoqHouses($id=null){
+	$where = '';
+	if($id && $id!=0){
+		$where = ' `pr_boq_houses`.`boq_id` = '.$id;
+	}
+	$sql = "SELECT * ,
+				(SELECT `pr_houses`.`house_no` FROM `pr_houses` WHERE `pr_houses`.id = `pr_boq_houses`.`house_id`) AS house,
+				(SELECT `pr_houses`.`house_desc` FROM `pr_houses` WHERE `pr_houses`.id = `pr_boq_houses`.`house_id`) AS house_desc
+			FROM `pr_boq_houses` WHERE ".$where;
 	return DB::select($sql);
 }
 

@@ -552,21 +552,21 @@ class RequestController extends Controller
 			}
 			$boqs = Boq::where('boqs.pro_id',$pro_id)->where($where)->pluck('id');
 			$housesId =  BoqHouse::whereIn('boq_id', $boqs)->pluck('id');
-			$strHouseId = json_encode(str_replace(["[","]"],"",$housesId));
+			
+			$strHouseId = str_replace(["[","]"],"",$housesId);
 			
 			$itemBoq = BoqItem::whereIn('boq_house_id',$housesId)->where(['item_id'=>$item_id])->exists();
 			
 			if($itemBoq){
 				$sql_boq = "SELECT F.item_id, (F.stock_qty / F.boq_qty) AS boq_qty 
-							FROM (SELECT E.item_id, E.stock_qty, (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '$unit'AND pr_units.`to_code` = E.unit_stock) AS boq_qty FROM (SELECT D.item_id, D.unit_stock, SUM(D.stock_qty) AS stock_qty FROM (SELECT C.item_id, C.unit_stock, (C.qty * C.stock_qty) AS stock_qty FROM (SELECT B.*, (CASE WHEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = B.unit AND pr_units.`to_code` = B.unit_stock)!='' THEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = B.unit AND pr_units.`to_code` = B.unit_stock) ELSE 1 END) AS stock_qty FROM (SELECT A.*, (SELECT pr_items.`unit_stock` FROM pr_items WHERE pr_items.`id` = A.item_id) AS unit_stock FROM (SELECT pr_boq_items.`id`, pr_boq_items.`house_id`,pr_boq_items.`boq_house_id`, pr_boq_items.`item_id`, pr_boq_items.`unit`, (pr_boq_items.`qty_std` + pr_boq_items.`qty_add` ) AS qty FROM pr_boq_items WHERE pr_boq_items.`item_id` = $item_id) AS A WHERE A.`boq_house_id` IN ($strHouseId)) AS B) AS C) AS D GROUP BY D.item_id, D.unit_stock) AS E) AS F"; 
-				// print_r($sql_boq);exit;
+							FROM (SELECT E.item_id, E.stock_qty, (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '$unit'AND pr_units.`to_code` = E.unit_stock) AS boq_qty FROM (SELECT D.item_id, D.unit_stock, SUM(D.stock_qty) AS stock_qty FROM (SELECT C.item_id, C.unit_stock, (C.qty * C.stock_qty) AS stock_qty FROM (SELECT B.*, (CASE WHEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = B.unit AND pr_units.`to_code` = B.unit_stock)!='' THEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = B.unit AND pr_units.`to_code` = B.unit_stock) ELSE 1 END) AS stock_qty FROM (SELECT A.*, (SELECT pr_items.`unit_stock` FROM pr_items WHERE pr_items.`id` = A.item_id) AS unit_stock FROM (SELECT pr_boq_items.`id`, pr_boq_items.`house_id`,pr_boq_items.`boq_house_id`, pr_boq_items.`item_id`, pr_boq_items.`unit`, SUM((pr_boq_items.`qty_std` + pr_boq_items.`qty_add` )) AS qty FROM pr_boq_items WHERE pr_boq_items.`item_id` = $item_id AND pr_boq_items.`boq_house_id` IN ($strHouseId)) AS A ) AS B) AS C) AS D GROUP BY D.item_id, D.unit_stock) AS E) AS F"; 
 				$objBOQ = collect(DB::select($sql_boq))->first();
 				
 				if($objBOQ){
 					$boq_set = floatval($objBOQ->boq_qty);				
 					
 					$sql_request = "SELECT (H.stock_qty / H.request_qty) AS request_qty FROM (SELECT G.stock_qty, (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '$unit'AND pr_units.`to_code` = G.unit_stock) AS request_qty FROM (SELECT F.item_id, F.unit_stock, SUM(F.stock_qty) AS stock_qty FROM (SELECT E.item_id, E.unit_stock, (E.qty * E.stock_qty) AS stock_qty FROM (SELECT D.*, (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = D.unit AND pr_units.`to_code` = D.unit_stock) AS stock_qty FROM (SELECT C.*, (SELECT pr_items.`unit_stock` FROM pr_items WHERE pr_items.`id` = C.item_id) AS unit_stock FROM (SELECT B.item_id, B.unit, B.qty FROM (SELECT pr_requests.`id` FROM pr_requests WHERE pr_requests.`pro_id` = $pro_id AND pr_requests.`trans_status` IN (1, 2, 3)) AS A INNER JOIN (SELECT pr_request_items.`pr_id`, pr_request_items.item_id, pr_request_items.`unit`, (pr_request_items.`qty` - pr_request_items.`closed_qty` ) AS qty FROM pr_request_items WHERE pr_request_items.`item_id` = $item_id AND pr_request_items.boq_set!=-1) AS B ON A.`id` = B.pr_id) AS C) AS D) AS E) AS F GROUP BY F.item_id, F.unit_stock) AS G) AS H";
-
+					// print_r($sql_request);
 					$objRequest = collect(DB::select($sql_request))->first();
 
 					if($objRequest){

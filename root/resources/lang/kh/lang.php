@@ -533,4 +533,6 @@ return [
 	'please_select_working_type'	=>	'សូមជ្រើសរើសការងារសម្រាប់បន្ថែម',
 	'warning'		 => 'រំលឹក',
 	'qty_boq_remain'	=>	'Boq Remain',
+	'remain_request'	=>	'ស្នើរសុំនៅសល់',
+	'revise_count'		=>	'ចំនួន Revise',
 ];
