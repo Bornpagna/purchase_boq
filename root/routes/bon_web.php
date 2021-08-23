@@ -74,6 +74,7 @@ Route::group(['prefix' => 'boqs'], function() {
 	Route::post('uploadBoqPreview','BoqController@uploadBoqPreview')->middleware('checkRole:boq_add');
 	Route::get('boqhousesviewdt/{id}','BoqController@boqHousesViewDt');
 	Route::post('assignHouse/{id}','BoqController@assignHouse');
+	Route::get('downloadBoq/{id}','BoqController@downloadBoq');
 });
 
 ///////////////////// route zone ///////////////////////////

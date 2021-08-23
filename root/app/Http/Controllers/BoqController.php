@@ -155,8 +155,8 @@ class BoqController extends Controller
 			return view('boq.revise_boq',$data);
 		}catch (\Exception $e) {
 			DB::rollback();
-			print_r($e->getMessage());exit;
-			// return redirect()->back()->with('error',trans('lang.save_error').' '.$e->getMessage().' '.$e->getLine());
+			// print_r($e->getMessage());exit;
+			return redirect()->back()->with('error',trans('lang.save_error').' '.$e->getMessage().' '.$e->getLine());
 		}
 		
 	}
@@ -545,7 +545,7 @@ class BoqController extends Controller
 			<button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 			  '.trans('lang.action').' <span class="caret"></span>
 			</button><ul class="dropdown-menu dropdown-menu-right">'.
-			'<li><a '.$btnDownload.' title="'.trans('lang.download').'"><i class="fa fa-file-excel-o"></i> '.trans('lang.download').'</a></li>'.
+			'<li><a '.$btnDownload.' title="'.trans('lang.download').'" href="'.url('boqs/downloadBoq').'/'.$row->id.'"><i class="fa fa-file-excel-o"></i> '.trans('lang.download').'</a></li>'.
 			'<li><a '.$btnAssignHouse.' title="'.trans('lang.assign_house').'" row_id="'.$row->id.'" row_rounte="'.$assign_house.'"><i class="fa fa-plus"></i> '.trans('lang.assign_house').'</a></li>'.
 			'<li><a '.$btnView.' title="'.trans('lang.view').'" row_id="'.$row->id.'" row_rounte="'.$rounte_view.'"><i class="fa fa-eye"></i> '.trans('lang.view').'</a></li>'.
 			'<li><a '.$btnRevise.' title="'.trans('lang.manual_revised_boq').'" row_id="'.$row->id.'" row_rounte="'.$rounte_revise.'"><i class="fa fa-pencil-square-o"></i> '.trans('lang.manual_revised_boq').'</a></li>'.
@@ -1190,11 +1190,12 @@ class BoqController extends Controller
    			$excel->sheet('Upload BOQ',function($sheet){
    				$sheet->cell('A1', 'No');
    				$sheet->cell('B1', 'Item Type');
-   				$sheet->cell('C1', 'Items Name');
-   				$sheet->cell('D1', 'UOM');
-  				$sheet->cell('E1', 'Qty Std');
-   				$sheet->cell('F1', 'Qty Add');
-  				$sheet->cell('G1', 'Cost');
+   				$sheet->cell('C1', 'Code');
+   				$sheet->cell('D1', 'Items Name');
+   				$sheet->cell('E1', 'Unit');
+  				$sheet->cell('F1', 'Qty Std');
+   				$sheet->cell('G1', 'Qty Add');
+  				$sheet->cell('H1', 'Cost');
    			});
    		})->download('xlsx');
    	}
@@ -1355,21 +1356,21 @@ class BoqController extends Controller
 				'building_id' 	=> 'required',
 			];
 			$where = ['status'=>1];
-			// if(!empty($request['zone_id'])){
-			// 	$where = array_merge($where, ['zone_id'=>$request['zone_id']]);
-			// }
-			// if(!empty($request['block_id'])){
-			// 	$where = array_merge($where, ['block_id'=>$request['block_id']]);
-			// }
-			// if(!empty($request['building_id'])){
-			// 	$where = array_merge($where, ['building_id'=>$request['building_id']]);
-			// }
-			// if(!empty($request['house_type_id'])){
-			// 	$where = array_merge($where, ['house_type'=>$request['house_type_id']]);
-			// }			
-			// if(!empty($request['street_id'])){
-			// 	$where = array_merge($where, ['street_id'=>$request['street_id']]);
-			// }			
+			if(!empty($request['zone_id'])){
+				$where = array_merge($where, ['zone_id'=>$request['zone_id']]);
+			}
+			if(!empty($request['block_id'])){
+				$where = array_merge($where, ['block_id'=>$request['block_id']]);
+			}
+			if(!empty($request['building_id'])){
+				$where = array_merge($where, ['building_id'=>$request['building_id']]);
+			}
+			if(!empty($request['house_type'])){
+				$where = array_merge($where, ['house_type'=>$request['house_type']]);
+			}			
+			if(!empty($request['street_id'])){
+				$where = array_merge($where, ['street_id'=>$request['street_id']]);
+			}			
 			if(!empty($request['house']) && count($request['house']) > 0){
 				$houses = DB::table('houses')->where($where)->whereIn('id',$request['house'])->get();
 			}else{
@@ -1455,9 +1456,9 @@ class BoqController extends Controller
 												'name'=> !empty($request["item_name_".$working_type][$key])?$request["item_name_".$working_type][$key]:"",
 												'desc'=> !empty($request["item_name_".$working_type][$key])?$request["item_name_".$working_type][$key]:"",
 												'alert_qty'=> 1,
-												'unit_stock'=> !empty($request["uom_".$working_type][$key])?$request["uom_".$working_type][$key]:"",
-												'unit_usage'=> !empty($request["uom_".$working_type][$key])?$request["uom_".$working_type][$key]:"",
-												'unit_purch'=> !empty($request["uom_".$working_type][$key])?$request["uom_".$working_type][$key]:"",
+												'unit_stock'=> !empty($request["unit_".$working_type][$key])?$request["unit_".$working_type][$key]:"",
+												'unit_usage'=> !empty($request["unit_".$working_type][$key])?$request["unit_".$working_type][$key]:"",
+												'unit_purch'=> !empty($request["unit_".$working_type][$key])?$request["unit_".$working_type][$key]:"",
 												'cost_purch'=> 0,
 												'photo'=> "",
 												'status'=> 1,
@@ -1475,7 +1476,7 @@ class BoqController extends Controller
 										'boq_house_id' 	=>	!empty($boq_house_id)?$boq_house_id:0,
 										'house_id'		=>	!empty($house->id)?$house->id:0,
 										'item_id'		=>	!empty($item_ids)?$item_ids:0,
-										'unit'			=>	!empty($request["uom_".$working_type][$key])?$request["uom_".$working_type][$key]:"",
+										'unit'			=>	!empty($request["unit_".$working_type][$key])?$request["unit_".$working_type][$key]:"",
 										'qty_std'		=>	!empty($request["qty_std_".$working_type][$key])?$request["qty_std_".$working_type][$key]:0,
 										'qty_add'		=>	!empty($request["qty_add_".$working_type][$key])?$request["qty_add_".$working_type][$key]:0,
 										'cost'			=>	!empty($request["cost_".$working_type][$key])?$request["cost_".$working_type][$key]:"",
@@ -1483,7 +1484,6 @@ class BoqController extends Controller
 										'working_type'	=>	!empty($working_type_id)?$working_type_id:0,
 										'created_at'	=>	date('Y-m-d H:i:s'),
 										'created_at'	=>	Auth::user()->id,
-										// 'status'		=>	1,
 									];
 									$boq_item = DB::table('boq_items')->insertGetID($item_types);
 								}
@@ -1493,6 +1493,8 @@ class BoqController extends Controller
 				}				
 				DB::commit();
 				return redirect('/boqs')->with('success',trans('lang.save_success'));
+			}else{
+				return redirect('/boqs')->with('error',trans('lang.save_error').' '.$e->getMessage().' '.$e->getLine());
 			}
 		} catch (\Exception $e) {
 			DB::rollback();
@@ -1722,5 +1724,75 @@ class BoqController extends Controller
 			DB::rollback();
 		}
 
+	}
+	public function downloadBoq(Request $request,$boq_id){
+		Excel::create('BOQ.export_'.date('Y_m_d_H_i_s'),function($excel) use($boq_id){
+			$excel->setCreator(Auth::user()->name)->setCompany(config('app.name'));
+			$excel->sheet('BOQ Info',function($sheet) use($boq_id){
+				$cells = 1;
+				$sheet->cell(('A'.$cells),"List BOQ by House");
+				$sheet->mergeCells('A1:Q1');
+				$sheet->cell(("A1"),function($cells){
+					$cells->setFontSize(15);;
+					$cells->setAlignment('center');
+					$cells->setFontWeight('bold');
+					$cells->setFontFamily('Khmer OS Muol');
+				});
+				$cells++;
+				$sheet->cell('A'.$cells,trans('lang.no'));
+				$sheet->cell('B'.$cells,trans('lang.trans_date'));
+				$sheet->cell('C'.$cells,trans('lang.boq_code'));
+				$sheet->cell('D'.$cells,trans('lang.zone'));
+				$sheet->cell('E'.$cells,trans('lang.block'));
+				$sheet->cell('F'.$cells,trans('lang.building'));
+				$sheet->cell('G'.$cells,trans('lang.street'));
+				$sheet->cell('H'.$cells,trans('lang.house_type'));
+				$sheet->cell('I'.$cells,trans('lang.house_no'));
+				$sheet->cell('J'.$cells,trans('lang.working_type'));
+				$sheet->cell('K'.$cells,trans('lang.item_type'));
+				$sheet->cell('L'.$cells,trans('lang.item_code'));
+				$sheet->cell('M'.$cells,trans('lang.item_name'));
+				$sheet->cell('N'.$cells,trans('lang.units'));
+				$sheet->cell('O'.$cells,trans('lang.qty_std'));
+				$sheet->cell('P'.$cells,trans('lang.qty_add'));
+				$sheet->cell('Q'.$cells,trans('lang.cost'));	
+				$sheet->cell(("A$cells:Q$cells"),function($cells){
+					$cells->setBackground('#337ab7');
+					$cells->setAlignment('center');
+					$cells->setFontFamily('Khmer OS Battambang');
+					$cells->setFontColor('#ffffff');
+				});			
+				$boq = getBOQExport($boq_id);
+				$i = 1;
+				if(count($boq)>0){
+					foreach ($boq as $value) {
+						$cells++;
+						$sheet->cell('A'.($cells),$i++);
+						$sheet->cell('B'.($cells),date('d/m/Y', strtotime(str_replace('/', '-', $value->trans_date))));
+						$sheet->cell('C'.($cells),$value->boq_code);
+						$sheet->cell('D'.($cells),$value->zone_name);
+						$sheet->cell('E'.($cells),$value->block_name);
+						$sheet->cell('F'.($cells),$value->building_name);
+						$sheet->cell('G'.($cells),$value->street_name);
+						$sheet->cell('H'.($cells),$value->house_type);
+						$sheet->cell('I'.($cells),$value->house_no);
+						$sheet->cell('J'.($cells),$value->working_type);
+						$sheet->cell('K'.($cells),$value->item_type);
+						$sheet->cell('L'.($cells),$value->code);
+						$sheet->cell('M'.($cells),$value->name);
+						$sheet->cell('N'.($cells),$value->unit);
+						$sheet->cell('O'.($cells),$value->qty_std);
+						$sheet->cell('P'.($cells),$value->qty_add);
+						$sheet->cell('Q'.($cells),$value->cost);
+						$sheet->cell(("A$cells:Q$cells"),function($cells){
+							$cells->setBorder('thin', 'thin', 'thin', 'thin');
+							$cells->setAlignment('center');
+							$cells->setFontFamily('Khmer OS Battambang');
+							$cells->setFontColor('#000000');
+						});			
+					}
+				}
+			});
+		})->download('xlsx');
 	}
 }
