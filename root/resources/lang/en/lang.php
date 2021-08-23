@@ -326,6 +326,8 @@ return [
 	'revise_boq'								   => 'Revise',
 	'revise_boq_house'								=> 'Revise BOQ House',
 	'note_revise_boq_house'							=> 'If you choose this type of revising is effect for only house you selected.',
+	'remain_request'								=>	'Remain Request',
+	'revise_count'									=>	'Revise Count',
 /* S */
 	'set_permission_on_group'  => 'set permission on group',
 	'set_permission_on_user'   => 'set permission on user',

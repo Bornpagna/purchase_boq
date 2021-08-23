@@ -350,6 +350,9 @@ class RepositoryController extends Controller
 		if($blockID = $request->input('block_id')){
 			$houses = $houses->where('block_id',$blockID);
 		}
+		if($buildingID = $request->input('building_id')){
+			$houses = $houses->where('building_id',$buildingID);
+		}
 
 		if($streetID = $request->input('street_id')){
 			$houses = $houses->where('street_id',$streetID);
@@ -380,6 +383,73 @@ class RepositoryController extends Controller
 			$streets = [];
 		}
 		return response()->json($streets,200); 
+	}
+	public function getBuilding(Request $request){
+		$zoneID = $request->zone_id;
+		$blockID = $request->block_id;
+		$where = [];
+		if($zoneID){
+			$where = array_merge($where,['zone_id'=>$zoneID]);
+		}
+		if($blockID){
+			$where = array_merge($where,['block_id'=>$blockID]);
+		}
+			$buildingIds = House::where($where)->pluck('building_id');
+		if($buildingIds){
+			$buildings = SystemData::whereIn('id',$buildingIds)->get();
+		}else{
+			$buildings = [];
+		}
+		return response()->json($buildings,200); 
+	}
+	public function getStreet(Request $request){
+		$zoneID = $request->zone_id;
+		$blockID = $request->block_id;
+		$buildingId = $request->building_id;
+		$where = [];
+		if($zoneID){
+			$where = array_merge($where,['zone_id'=>$zoneID],$where);
+		}
+		if($blockID){
+			$where = array_merge($where,['block_id'=>$blockID]);
+		}
+		if($buildingId){
+			$where = array_merge($where,['building_id'=>$buildingId]);
+		}
+		$buildingIds = House::where($where)->pluck('street_id');
+		if($buildingIds){
+			$buildings = SystemData::whereIn('id',$buildingIds)->get();
+		}else{
+			$buildings = [];
+		}
+		return response()->json($buildings,200); 
+	}
+
+	public function getHouseType(Request $request){
+		$zoneID = $request->zone_id;
+		$blockID = $request->block_id;
+		$buildingId = $request->building_id;
+		$streetID = $request->street_id;
+		$where = [];
+		if($zoneID){
+			$where = array_merge($where,['zone_id'=>$zoneID]);
+		}
+		if($blockID){
+			$where = array_merge($where,['block_id'=>$blockID]);
+		}
+		if($buildingId){
+			$where = array_merge($where,['building_id'=>$buildingId]);
+		}
+		if($streetID){
+			$where = array_merge($where,['street_id'=>$streetID]);
+		}
+		$buildingIds = House::where($where)->pluck('house_type');
+		if($buildingIds){
+			$buildings = SystemData::whereIn('id',$buildingIds)->get();
+		}else{
+			$buildings = [];
+		}
+		return response()->json($buildings,200); 
 	}
 
 	public function getStreetsByBlockID(Request $request,$blockID){
@@ -593,17 +663,22 @@ class RepositoryController extends Controller
 	public function getBoqItems(Request $request){
 		$projectID = $request->session()->get('project');
 		$where = ['boqs.status'=> 1];
+		$whereUsage = 'AND `pr_usages`.`pro_id` = '.$projectID;
 		if(!empty($request["zone_id"])){
 			$where = array_merge($where,['boqs.zone_id'=>$request["zone_id"]]);
+			$whereUsage .= ' AND pr_usages.zone_id = '.$request["zone_id"];
 		}
 		if(!empty($request["block_id"])){
 			$where = array_merge($where,['boqs.block_id'=>$request["block_id"]]);
+			$whereUsage .= ' AND pr_usages.block_id = '.$request["block_id"];
 		}
 		if(!empty($request["building_id"])){
 			$where = array_merge($where,['boqs.building_id'=>$request['building_id']]);
+			$whereUsage .= ' AND pr_usages.building_id = '.$request["building_id"];
 		}
 		if(!empty($request["street_id"])){
 			$where = array_merge($where,['boqs.street_id'=>$request["boqs.street_id"]]);
+			// $whereUsage .= ' AND boqs.street_id = '.$request["street_id"];
 		}
 		if(!empty($request["house_type"])){
 			$where = array_merge($where,['boq_items.working_type'=>$request["house_type"]]);
@@ -624,15 +699,17 @@ class RepositoryController extends Controller
 			'items.unit_stock as unit_stock',
 			'items.unit_purch',
 			'system_datas.name as working_type_name',
-			DB::raw('SUM(pr_boq_items.qty_std) as total_qty'),
-			DB::raw('(SELECT pr_system_datas.name FROM pr_system_datas WHERE pr_system_datas.id = pr_items.cat_id) as item_type')
+			DB::raw('IFNULL(SUM(pr_boq_items.qty_std),0) as total_qty'),
+			DB::raw('(SELECT pr_system_datas.name FROM pr_system_datas WHERE pr_system_datas.id = pr_items.cat_id) as item_type'),
+			DB::raw("IFNULL((SELECT SUM(`pr_usage_details`.`qty`) FROM `pr_usage_details` JOIN pr_usages ON `pr_usage_details`.`use_id` = `pr_usages`.`id` WHERE `pr_usage_details`.`item_id` = `pr_boq_items`.`item_id` {$whereUsage}),0) AS usage_qty"),
+	DB::raw('IFNULL((SELECT SUM(`pr_stocks`.`qty`) FROM `pr_stocks` WHERE `pr_stocks`.`item_id` = `pr_boq_items`.`item_id` AND `pr_stocks`.`trans_ref` = "I" AND `pr_stocks`.`pro_id` = 1 ),0) AS stock_qty') 
 		)->join('boq_houses','boq_houses.id','boq_items.boq_house_id')
 		->join('system_datas','system_datas.id','boq_items.working_type')
 		->join('items','items.id','boq_items.item_id')
 		->join('boqs','boqs.id','boq_houses.boq_id')
 		->where('boqs.pro_id',$projectID);
 		$boqItems = $boqItems->where($where)->groupBy('boq_items.item_id')
-		->orderBy('boq_items.working_type')->toSql();
+		->orderBy('boq_items.working_type')->get();
 		return response()->json($boqItems,200);
 	}
 

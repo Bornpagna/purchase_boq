@@ -69,12 +69,17 @@ Route::group(['prefix' => 'boqs'], function() {
 	Route::get('getBoqItems/{boq_id}/{house_id}/{working_type_id?}','BoqController@getBoqHouseItem');
 	Route::post('reviseBoqHouseView/{boq_id}/{house_id}','BoqController@reviseBoqHouseView');
 	Route::post('reviseBoqHouse/{boq_id}/{house_id}/{working_type}','BoqController@reviseBoqHouse')->middleware('checkRole:revise_boq_house');
-	Route::any('reviseBoqHouses/{boq_id}/{house_id}/{working_type}','BoqController@reviseBoqHouse');
+	Route::post('reviseBoqHouses/{boq_id}/{house_id}/{working_type}','BoqController@reviseBoqHouse')->middleware('checkRole:revise_boq_house');
 	Route::get('viewBoq/{id}/{back}','BoqController@viewBoq')->middleware('checkRole:view_boq');
 	Route::post('uploadBoqPreview','BoqController@uploadBoqPreview')->middleware('checkRole:boq_add');
 	Route::get('boqhousesviewdt/{id}','BoqController@boqHousesViewDt');
 	Route::post('assignHouse/{id}','BoqController@assignHouse');
 	Route::get('downloadBoq/{id}','BoqController@downloadBoq');
+	Route::get('reviseversion/{id}','BoqController@reviseVersion');
+	Route::get('getreviseboqdt/{id}','BoqController@getReviseBoqDt');
+	Route::get('getreviseboqhousedt/{id}','BoqController@reviseBoqHousesDt');
+	Route::get('viewreviseboq/{id}/{back}','BoqController@viewReviseBoq');
+	Route::get('reviseboqhousesviewdts/{id}','BoqController@reviseBoqHousesViewDt');
 });
 
 ///////////////////// route zone ///////////////////////////
@@ -513,3 +518,5 @@ Route::get('repository/fetchCurrentBOQ','RepositoryController@fetchCurrentBOQ');
 Route::get('repository/checkStockQuantity','RepositoryController@checkStockQuantity');
 Route::get('repository/getBoqItems','RepositoryController@getBoqItems');
 Route::get('repository/houseNoBoq','RepositoryController@getHouseNoBoq');
+Route::get('repository/getBuilding','RepositoryController@getBuilding');
+Route::get('repository/getHouseType','RepositoryController@getHouseType');

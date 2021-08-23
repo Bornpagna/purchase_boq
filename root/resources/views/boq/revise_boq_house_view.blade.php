@@ -130,7 +130,7 @@
 @endsection()
 @section('javascript')
 <script type="text/javascript">
-	var index_boq = 0;
+	
 	var index_work_type = 1;
 	var objName = [];
 	var jsonItem = JSON.parse(convertQuot("{{\App\Model\Item::get(['id','cat_id','code','name','unit_stock','unit_purch','unit_usage'])}}"));

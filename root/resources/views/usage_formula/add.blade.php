@@ -75,6 +75,17 @@
                             </div>
                         </div>
                         @endif
+                        {{-- @if(getSetting()->allow_building == 1) --}}
+                        <!-- Block -->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="building_id" class="control-label" style="text-align: left;"><strong>{{trans('lang.building')}}</strong></label>
+                                <select class="form-control select2 building_id" name="building_id" id="building_id">
+                                    <option value=""></option>
+                                </select>
+                            </div>
+                        </div>
+                        {{-- @endif --}}
                         <!-- Street -->
                         <div class="col-md-4">
                             <div class="form-group">
@@ -98,7 +109,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group text-right">
-                                    <button onclick="onGenenerateButtonClicked();" type="button" id="generate" name="generate" value="generate"  class="btn blue bold">{{trans('lang.generate')}}</button>
+                                    <button onclick="onGenenerateButtonClicked();" type="button" id="generate" name="generate" value="generate"  class="btn blue bold disabled">{{trans('lang.generate')}}</button>
                             </div>
                         </div>
                     </div>
@@ -153,7 +164,7 @@
             const val = $(this).val();
             percent += parseFloat(val ? val : 0);
         });
-        
+        console.log(percent);
         if(percent == 100){
             $('#frmUsagePolicy').submit();
         }
@@ -291,11 +302,13 @@
         var params = {
             zone_id: null,
             block_id: null,
+            building_id : null,
             street_id: null,
             house_type: null,
         };
         const zoneID    = $('.zone_id').val();
         const blockID   = $('.block_id').val();
+        const buildingID   = $('.building_id').val();
         const streetID  = $('.street_id').val();
         const houseType = $('.house_type').val();
 
@@ -305,6 +318,10 @@
 
         if(blockID){
             params.block_id = blockID;
+        }
+
+        if(buildingID){
+            params.building_id = buildingID;
         }
 
         if(streetID){
@@ -395,13 +412,80 @@
         return row;
     }
 
+    function getBuildings(){
+        var zone_id = $('.zone_id').val();
+        var block_id = $('.block_id').val();
+        var params = {
+            zone_id: null,
+            block_id: null,
+            street_id: null,
+            house_type: null,
+        };
+        params.zone_id = zone_id;
+        params.block_id = block_id;
+        $.ajax({
+				url :'{{url("repository/getBuilding")}}',
+				type:'GET',
+				async:false,
+				data:params,
+				success:function(data){
+                    $(".building_id").empty();
+                    $(".building_id").select2('val', null);
+                    $(".building_id").append($('<option></option>').val('').text(''));
+                    $.each(data,function(i,val){
+                        $(".building_id").append($('<option></option>').val(val.id).text(val.name));
+                    });
+				},error:function(){
+					console.log('error get qty stock.');
+				}
+			});
+    }
+
+    function getHouseType(){
+        var zone_id = $('.zone_id').val();
+        var block_id = $('.block_id').val();
+        var building_id = $('.building_id').val();
+        var params = {
+            zone_id: null,
+            block_id: null,
+            building_id : null,
+            street_id: null,
+            house_type: null,
+        };
+        params.zone_id = zone_id;
+        params.block_id = block_id;
+        params.building_id = building_id;
+        $.ajax({
+				url :'{{url("repository/getHouseType")}}',
+				type:'GET',
+				async:false,
+				data:params,
+				success:function(data){
+                    $(".house_type").empty();
+                    $(".house_type").select2('val', null);
+                    $(".house_type").append($('<option></option>').val('').text(''));
+                    $.each(data,function(i,val){
+                        $(".house_type").append($('<option></option>').val(val.id).text(val.name));
+                    });
+				},error:function(){
+					console.log('error get qty stock.');
+				}
+			});
+    }
+
     $(document).ready(function(){
         $(".select2").select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
         getStreets(getStreetsSuccess,getStreetsComplete);
-        getHouseTypes(getHouseTypesSuccess,getHouseTypesComplete);
+        // getHouseTypes(getHouseTypesSuccess,getHouseTypesComplete);
         if('{{getSetting()->allow_zone}}' == 1){
             getZones(getZonesSuccess,getZonesComplete);
             $('.zone_id').on('change',function(){
+                var building_id = $('.building_id').val();
+                if(building_id){
+                    $('#generate').removeClass("disabled");
+                }else{
+                    $('#generate').addClass("disabled");
+                }
                 const zoneID = $(this).val();
                 if(zoneID){
                     getBlocksByZoneID(zoneID,getBlocksSuccess,getBlocksComplete);
@@ -413,6 +497,12 @@
         if('{{getSetting()->allow_block}}' == 1){
             getBlocks(getBlocksSuccess,getBlocksComplete);
             $('.block_id').on('change',function(){
+                var building_id = $('.building_id').val();
+                if(building_id){
+                    $('#generate').removeClass("disabled");
+                }else{
+                    $('#generate').addClass("disabled");
+                }
                 const blockID = $(this).val();
                 if(blockID){
                     getStreetsByBlockID(blockID,getStreetsSuccess,getStreetsComplete);
@@ -420,7 +510,20 @@
                 }
             });
         }
-        
+        $('.block_id').on('change',function(){
+            var building_id = $('.building_id').val();
+            if(building_id){
+                $('#generate').removeClass("disabled");
+            }
+            getBuildings();
+        });
+        $('.building_id').on('change',function(){
+            var building_id = $('.building_id').val();
+            if(building_id){
+                $('#generate').removeClass("disabled");
+            }
+            getHouseType();
+        });
         $('.street_id').on('change',function(){
             const streetID = $(this).val();
             if(streetID){

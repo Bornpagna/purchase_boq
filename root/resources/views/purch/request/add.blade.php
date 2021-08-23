@@ -272,7 +272,7 @@
 										<th width="10%" class="text-center all">{{ trans('lang.size') }}</th>
 										<th width="10%" class="text-center all">{{ trans('lang.units') }}</th>
 										<th width="10%" class="text-center all">{{ trans('lang.qty_in_stock') }}</th>
-										<th width="10%" class="text-center all">{{ trans('lang.qty_boq_remain') }}</th>
+										<th width="10%" class="text-center all">{{ trans('lang.remain_request') }}</th>
 										<th width="10%" class="text-center all">{{ trans('lang.qty') }}</th>
 										<th width="15%" class="text-center all">{{ trans('lang.note') }}</th>
 										<th width="15%" class="text-center all">{{ trans('lang.remark') }}</th>
@@ -481,9 +481,9 @@
 				async:false,
 				data:params,
 				success:function(data){
-					console.log(data);
 					$('.line_boq_set_'+row).val(data.boq_set);
 					$('.line_price_'+row).val(data.price);
+					$('.remain_request_'+row).val(data.boq_set);
 				},error:function(){
 					$('.line_boq_set_'+row).val(0);
 					$('.line_price_'+row).val(0);
@@ -552,7 +552,7 @@
 					'	<input class="form-control qty_in_stock qty_in_stock_'+i+'" name="qty_in_stock[]" />'+
 					'</td>'+
 					'<td>'+
-					'	<input class="form-control boq_qty_remain boq_qty_remain_'+i+'" name="boq_qty_remain[]" />'+
+					'	<input class="form-control remain_request remain_request_'+i+'" name="boq_qty_remain[]" />'+
 					'</td>'+
 					'<td>'+
 					'	<input type="number" length="50" step="any" class="form-control noscroll line_qty line_qty_'+i+'" onkeyup="enterQtyRequest(this, '+i+')"  name="line_qty[]" placeholder="{{trans('lang.enter_text')}}"/>'+
@@ -592,6 +592,7 @@
 			    },
 			    async:true,
 			    success:function(data){
+					console.log(data);
 			    	jsonItems = data.data;
 			    },
 			    processResults: function (data) {
@@ -827,8 +828,8 @@
 				html+= '<td><select class="form-control select2 select2_'+index+' line_unit line_unit_'+index+'" name="line_unit[]"> onchange="onChangeUnit(this, '+index+')"' 
 					+'<option value=""></option>'
 				+'</select></td>';
-				html+= '<td><input class="form-control qty_in_stock qty_in_stock_'+index+'" name="qty_in_stock[]" /></td>';
-				html+= '<td><input class="form-control boq_qty_remain boq_qty_remain_'+index+'" name="boq_qty_remain[]" /></td>';
+				html+= '<td><input class="form-control qty_in_stock qty_in_stock_'+index+'" name="qty_in_stock[]" value="'+data.stock_qty+'"/></td>';
+				html+= '<td><input class="form-control remain_request remain_request_'+index+'" name="boq_qty_remain[]"/></td>';
 				html+= '<td><input type="number" length="11" class="form-control line_qty line_qty_'+index+'" onkeyup="enterQtyRequest(this, '+index+')" name="line_qty[]" placeholder="{{trans("lang.enter_number")}}" /><input type="hidden" class="form-control line_boq_set line_boq_set_'+index+'" name="line_boq_set[]"/>'+
 					'	<input type="hidden" class="form-control line_price line_price_'+index+'" name="line_price[]"/></td>';
 				html += '<td><input type="number" length="11" class="form-control line_reference line_reference_'+index+'" name="line_reference[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
@@ -859,7 +860,6 @@
 		if(val!=null && val!=''){
 			var itemSelect = $('.line_item_'+row);
 			var type_id = $('.line_item_type'+row).val();
-			console.log(type_id);
 			itemSelect.select2({
 			  width:'100%',
 			  allowClear:'true',
