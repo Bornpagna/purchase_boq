@@ -9,7 +9,18 @@
 					<h4 class="modal-title"></h4>
 				</div>
 				<div class="modal-body">
-					<div class="form-body">
+					<div class="form-body item_typr">
+						<div class="form-group">
+							<label class="col-md-3 control-label bold">{{trans('lang.parent')}} 
+								<span class="required">*</span>
+							</label>
+							<div class="col-md-8">
+								<select class="form-control select2" name="parent_id">
+									{{getSystemData('IT',NULL,1)}}
+								</select>
+								<span class="help-block font-red bold"></span>
+							</div>
+						</div>
 						<div class="form-group">
 							<label class="col-md-3 control-label bold">{{trans('lang.name')}} 
 								<span class="required">*</span>

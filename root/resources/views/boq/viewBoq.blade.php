@@ -39,20 +39,18 @@
 						<button class="close" data-close="alert"></button><strong>{{trans('lang.error')}}!</strong> {{Session::get('error')}} 
 					</div>
 				<?php endif; ?>
-				<table class="table table-striped table-bordered table-hover" id="my-table">
+				<table class="table table-striped details-table table-responsive"  id="my-table">
 					<thead>
 						<tr>
-							<th style="width: 1%;" class="all"></th>
-							<th style="width: 15%;">{{trans("lang.working_type")}}</th>
-							{{-- <th style="width: 15%;">{{trans("lang.item_code")}}</th>
-							<th style="width: 30%;">{{trans("lang.item_name")}}</th>
-							<th style="width: 10%;">{{trans("lang.units")}}</th>
-							<th style="width: 10%;">{{trans("lang.qty_std")}}</th>
-							<th style="width: 10%;">{{trans("lang.qty_add")}}</th> --}}
-							{{-- <th style="width: 10%;">{{trans("lang.action")}}</th> --}}
+							<th class="all" style="width: 5%;">{{trans("lang.boq_code")}}</th>
+							<th style="width: 15%;">{{trans("lang.boq_code")}}</th>
+							<th style="width: 20%;">{{trans("lang.house_no")}}</th>
+							<th style="width: 15%;">{{trans("lang.house_desc")}}</th>
+							<th style="width: 10%;">{{trans("lang.created_by")}}</th>
+							<th style="width: 10%;">{{trans("lang.created_at")}}</th>
+							{{-- <th style="width: 15%;">{{trans("lang.action")}}</th> --}}
 						</tr>
 					</thead>
-					<tbody></tbody>
 				</table>
 			</div>
 		</div>
@@ -112,27 +110,14 @@
 				data: null,
 				defaultContent: ''
 			},
-			{ data: 'working_type_name', name: 'working_type_name' },
-			// { data: 'code', name: 'code' },
-			// { data: 'name', name: 'name' },
-			// { data: 'unit', name: 'unit' },
-			// { data: 'qty_std', name: 'qty_std' },
-			// { data: 'qty_add', name: 'qty_add' },
+			{ data: 'boq_house_code', name: 'boq_house_code' },
+			{ data: 'house', name: 'house' },
+			{ data: 'house_desc', name: 'house_desc' },
+			{ data: 'created_by', name: 'created_by' },
+			{ data: 'created_at', name: 'created_at' },
 			// { data: 'action', name: 'action', class :'text-center', orderable: false, searchable: false}
 		],order: [[1, 'desc']]
-		// ,'fnCreatedRow':function(nRow,aData,iDataIndex){
-		// 	if (objName) {
-		// 		var obj = {
-		// 			'id':aData['id'],
-		// 			'working_type_name':aData['working_type_name'],
-		// 			// 'item_id':aData['item_id'],
-		// 			// 'unit':aData['unit'],
-		// 			// 'qty_std':aData['qty_std'],
-		// 			// 'qty_add':aData['qty_add'],
-		// 		};
-		// 		objName.push(obj);
-		// 	}
-		// }
+		
 	});
 	function format (d) {
         var str = '';
@@ -169,7 +154,7 @@
 	});
 	
 	function initTable(tableId, data) {
-		console.log(data);
+		// console.log(data);
 		$('#' + tableId).DataTable({
 			processing: true,
 			serverSide: true,

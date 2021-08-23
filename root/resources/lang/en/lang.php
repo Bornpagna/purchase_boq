@@ -37,6 +37,8 @@ return [
 	'approve_purchase_order'   => 'Approve purchase order',
 	'add'					   => 'Add',
 	'add_working_type'		   => 'Add Work Type',
+	'assign_house'			   => 'Assign House',
+	'all'					   => 'All',
 /* B */
 	'backup'         => 'Backup',
 	'backup_list'    => 'Backup List',
@@ -144,6 +146,9 @@ return [
 	'enter_text'         =>'Enter text...',
 	'enter_number'       =>'Enter number...',
 	'ending_balance'     =>'Ending Balance',
+	'exist_boq'			 => 'Exist BOQ',
+	'enter_remark'		 => 'Enter Remark',
+	'excel_import'		 => 'Excel Import',
 /* F */
 	'from_warehouse' => 'From warehouse',
 	'from_house'     => 'From house',
@@ -192,6 +197,9 @@ return [
 	'inventory'      => 'Inventory',
 	'in_warehouse'   => 'In warehouse',
 	'interval'       => 'Interval',
+	'items_type'	 =>	'Item Type',
+	'import_revised_boq'	=>	'Import Excel Revise',
+	'import_excel'	=>	'Import Revise',	
 /* J */
 /* K */
 	'khmer' 		=> 'Khmer',
@@ -201,6 +209,8 @@ return [
 	'logout'        => 'Logout',
 	'login'         => 'Login',
 	'login_project' => 'Login Project',
+	'load_item_from_boq'	=>	'Load Item From BOQ',
+	'load_item'		=>	'Load Item',
 /* M */
 	'message_active'  => 'Are you sure, You want to active ?',
 	'movement'        => 'Movement',
@@ -210,6 +220,10 @@ return [
 	'max_length'      => 'Maximum langth only',
 	'my_tasks'        => 'My tasks',
 	'my_profile'      => 'My profile',
+	'make_order'	  => 'Make Order',
+	'manual_revised_boq'	=>	'Manual Revise',
+	'manual_input'	  => 'Manual Input',
+	
 /* N */
 	'notification'               => 'Notifications',
 	'name'                       => 'Name',
@@ -218,6 +232,9 @@ return [
 	'note'                       => 'Note',
 	'no'                         => 'No',
 	'no_data_available_in_table' => 'No data available in table',
+	'new_boq'					 => 'New BOQ',
+	'none_boq'					 => 'None BOQ',
+	'note_upload_revise_boq'	 =>	'If you revise BOQ with this option all BOQ that you revised by each BOQ house will reset to new BOQ that do revising.',
 /* O */
 	'order'                                      => 'Order',
 	'report_order_items'                         => 'Report Order Items',
@@ -230,6 +247,7 @@ return [
 	'on_house'                                   => 'On house',
 	'on_hand'                                   => 'On Hand',
 	'other'                                      => 'Other',
+	'ordered'									 => 'Ordered',
 /* P */
 	'period'                => 'Period',
 	'parent_role'           => 'Parent role',
@@ -257,6 +275,10 @@ return [
 	'purchase_order_list'   => 'Purchase Order List',
 	'purchase_items'        => 'Purchase Items',
 	'please_choose'         => 'Please Choose',
+	'pr_list'				=> 'Purchase Request List',
+	'po_list'				=> 'Purchase Order List',
+	'preview'				=> 'Preview',
+	'please_select_working_type'	=>	'Please Select Working Type',
 /* Q */
 	'qty'         => 'Qty',
 	'qty_std'     => 'Qty/Std',
@@ -264,6 +286,10 @@ return [
 	'qty_stock'   => 'Qty/Stock',
 	'qty_exactly' => 'Qty/Exactly',
 	'qty_adjust'  => 'Qty/Adjust',
+	'qty_in_stock'=> 'Qty In-Stock',
+	'boq_qty'		  => 'BOQ Qty',
+	'remain_qty'	  => 'Remain Qty',
+	'qty_boq_remain'	=>	'Boq Remain',
 /* R */
 	'reference_no'                                 => 'Reference No',
 	'reference'                                    => 'Reference',
@@ -297,6 +323,9 @@ return [
 	'return_usage'                                 => 'Return Usage',
 	'return_usage_list'                            => 'Return Usage List',
 	'revised_boq'								   => 'Revised BOQ',
+	'revise_boq'								   => 'Revise',
+	'revise_boq_house'								=> 'Revise BOQ House',
+	'note_revise_boq_house'							=> 'If you choose this type of revising is effect for only house you selected.',
 /* S */
 	'set_permission_on_group'  => 'set permission on group',
 	'set_permission_on_user'   => 'set permission on user',
@@ -349,6 +378,7 @@ return [
 	'swetch_project'           => 'Switch project',
 	'size'                     => 'Size',
 	'stock_details'                     => 'Stock Details',
+	'select_working_type'		=>	'Select Working Type',
 	/* T */
 	'to_warehouse'                     => 'To Warehouse',
 	'trans_error'                      => 'Data is used with other transaction.',
@@ -407,6 +437,7 @@ return [
 	'warehouse_list' => 'Warehouse List',
 	'wrong_file'     => 'Upload wrong file!',
 	'working_type'	 =>	'Working Type',
+	'warning'		 => 'Warning',
 /* X */
 /* Y */
 	'yes' => 'Yes',

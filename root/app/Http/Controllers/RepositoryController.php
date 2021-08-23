@@ -8,6 +8,7 @@ use App\Model\Item;
 use App\Model\Order;
 use App\Model\OrderItem;
 use App\Model\Boq;
+use App\Model\BoqHouse;
 use App\Model\BoqItem;
 use App\Model\Usage;
 use App\Model\UsageDetails;
@@ -33,23 +34,31 @@ class RepositoryController extends Controller
     }
 
 	public function checkStockQuantity(Request $request){
+		// print_r($request->input('item_id'));
 		$prefix = DB::getTablePrefix();
 
 		$originalDate = $request->input('trans_date');
 		$tranDate = date("Y-m-d", strtotime($originalDate));
 		$itemId = $request->input('item_id');
 		$unit = $request->input('unit');
+		$sql = "SELECT `StepB`.*, 
+		SUM(StepB.stock_qty) AS stock_qty 
+		FROM (SELECT `StepA`.*, (CASE WHEN StepA.factor < 1 THEN (StepA.qty / StepA.factor) ELSE (StepA.qty * StepA.factor) END) AS stock_qty 
+		FROM (SELECT `pr_stocks`.*, (SELECT (CASE WHEN pr_units.factor=NULL THEN 1 ELSE pr_units.factor END) AS factor 
+		FROM pr_units WHERE pr_units.from_code=pr_items.unit_usage AND pr_units.to_code=pr_items.unit_stock LIMIT 1) AS factor 
+		FROM `pr_stocks` LEFT JOIN `pr_items` ON `pr_stocks`.`item_id` = `pr_items`.`id` WHERE pr_stocks.item_id={$itemId} AND pr_stocks.delete=0) AS StepA) AS StepB group by item_id";
 
 		$columns = [
 			'stocks.*',
-			DB::raw("(SELECT (CASE WHEN {$prefix}units.factor=NULL THEN 1 ELSE {$prefix}units.factor END) AS factor FROM {$prefix}units WHERE {$prefix}units.from_code={$unit} AND {$prefix}units.to_code={$prefix}items.unit_stock LIMIT 1) AS factor"),
+			DB::raw("(SELECT (CASE WHEN {$prefix}units.factor=NULL THEN 1 ELSE {$prefix}units.factor END) AS factor FROM {$prefix}units WHERE {$prefix}units.from_code={$prefix}items.unit_usage AND {$prefix}units.to_code={$prefix}items.unit_stock LIMIT 1) AS factor"),
 		];
 
 		$rawStockSQL = Stock::select($columns)
 					->leftJoin('items','stocks.item_id','items.id')
 					->whereRaw(DB::raw("{$prefix}stocks.item_id={$itemId}"))
 					->whereRaw(DB::raw("{$prefix}stocks.trans_date >= '{$tranDate}'"))
-					->whereRaw(DB::raw("{$prefix}stocks.delete=0"));
+					->whereRaw(DB::raw("{$prefix}stocks.delete=0"))->toSql();
+					// print_r($rawStockSQL);
 
 		$stepAColumns = [
 			'StepA.*',
@@ -57,6 +66,7 @@ class RepositoryController extends Controller
 		];
 
 		$stepAQuery = DB::table(DB::raw("({$rawStockSQL}) AS StepA"))->select($stepAColumns)->toSql();
+		
 
 		$stepBColums = [
 			'StepB.*',
@@ -64,10 +74,11 @@ class RepositoryController extends Controller
 		];
 
 		$stepBQuery = DB::table(DB::raw("({$stepAQuery}) AS StepB"))->select($stepBColums);
+		// print_r($stepBQuery->toSql());
 
 		$finalQuery = $stepBQuery->groupBy(['item_id']);
 		
-		$stocks = $finalQuery->get();
+		$stocks = DB::select($sql);
 
 		return response()->json($stocks,200); 
 	}
@@ -463,6 +474,12 @@ class RepositoryController extends Controller
 		return response()->json($blocks,200);
 	}
 
+	public function getBuildings(Request $request){
+		$projectID = $request->session()->get('project');
+		$buildings = SystemData::select(['id','name'])->where(['type' => "BD"])->get();
+		return response()->json($buildings,200);
+	}
+
 	public function getStreets(Request $request){
 		$projectID = $request->session()->get('project');
 		$streets = SystemData::select(['id','name'])->where(['type' => "ST"])->get();
@@ -571,5 +588,78 @@ class RepositoryController extends Controller
                 ->where('order_items.po_id',$orderID)->get();
         }
         return response()->json($items,200);
+	}
+
+	public function getBoqItems(Request $request){
+		$projectID = $request->session()->get('project');
+		$where = ['boqs.status'=> 1];
+		if(!empty($request["zone_id"])){
+			$where = array_merge($where,['boqs.zone_id'=>$request["zone_id"]]);
+		}
+		if(!empty($request["block_id"])){
+			$where = array_merge($where,['boqs.block_id'=>$request["block_id"]]);
+		}
+		if(!empty($request["building_id"])){
+			$where = array_merge($where,['boqs.building_id'=>$request['building_id']]);
+		}
+		if(!empty($request["street_id"])){
+			$where = array_merge($where,['boqs.street_id'=>$request["boqs.street_id"]]);
+		}
+		if(!empty($request["house_type"])){
+			$where = array_merge($where,['boq_items.working_type'=>$request["house_type"]]);
+		}
+		if(!empty($request["house_id"])){
+			$where = array_merge($where,['boq_houses.house_id'=>$request["house_id"]]);
+		}
+		if(!empty($request["boq_id"])){
+			$where = array_merge($where,['boqs.id'=>$request["boq_id"]]);
+		}
+		if(!empty($request["working_type"])){
+			$where = array_merge($where,['boq_items.working_type'=>$request["working_type"]]);
+		}
+		$boqItems = BoqItem::select(
+			'boq_items.*',
+			'items.cat_id',
+			'items.name as item_name',
+			'items.unit_stock as unit_stock',
+			'items.unit_purch',
+			'system_datas.name as working_type_name',
+			DB::raw('SUM(pr_boq_items.qty_std) as total_qty'),
+			DB::raw('(SELECT pr_system_datas.name FROM pr_system_datas WHERE pr_system_datas.id = pr_items.cat_id) as item_type')
+		)->join('boq_houses','boq_houses.id','boq_items.boq_house_id')
+		->join('system_datas','system_datas.id','boq_items.working_type')
+		->join('items','items.id','boq_items.item_id')
+		->join('boqs','boqs.id','boq_houses.boq_id')
+		->where('boqs.pro_id',$projectID);
+		$boqItems = $boqItems->where($where)->groupBy('boq_items.item_id')
+		->orderBy('boq_items.working_type')->toSql();
+		return response()->json($boqItems,200);
+	}
+
+	public function getHouseNoBoq(Request $request){
+		$boq_house = BoqHouse::groupBy("boq_houses.house_id")->pluck('id');
+		$prefix = DB::getTablePrefix();
+		$houses = House::select([
+			'*' 
+		])->whereNotIn('houses.id',$boq_house);
+
+		if($zoneID = $request->input('zone_id')){
+			$houses = $houses->where('zone_id',$zoneID);
+		}
+
+		if($blockID = $request->input('block_id')){
+			$houses = $houses->where('block_id',$blockID);
+		}
+
+		if($streetID = $request->input('street_id')){
+			$houses = $houses->where('street_id',$streetID);
+		}
+
+		if($houseType = $request->input('house_type')){
+			$houses = $houses->where('house_type',$houseType);
+		}
+		$houses = $houses->get();
+
+		return response()->json($houses,200); 
 	}
 }

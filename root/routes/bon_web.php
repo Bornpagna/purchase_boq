@@ -49,7 +49,7 @@ Route::group(['prefix' => 'boqs'], function() {
 	Route::get('','BoqController@index')->middleware('checkRole:boq');
 	Route::get('dt','BoqController@getDt');
 	Route::post('save','BoqController@save')->middleware('checkRole:boq_add');
-	Route::get('view/{id}/{back}','BoqController@view')->middleware('checkRole:boq');
+	Route::get('view/{id}/{back}/{house_id}','BoqController@view')->middleware('checkRole:view_boq');
 	/* Route::get('view/dt','BoqController@getDt'); */
 	Route::post('edit/{id}','BoqController@update')->middleware('checkRole:boq_edit');
 	Route::get('delete/{id}','BoqController@destroy')->middleware('checkRole:boq_delete');
@@ -59,8 +59,22 @@ Route::group(['prefix' => 'boqs'], function() {
 	Route::post('excel/upload','BoqController@uploadExcel')->middleware('checkRole:boq_download_sample');
 	Route::get('subdt/{id}','BoqController@subDt');
 	Route::get('boqhousesdt/{id}','BoqController@boqHousesDt');
-	Route::get('replicateboq/{id}','BoqController@replicateBoq')->middleware('checkRole:revise_boq');
-	Route::get('reviseboq/{id}','BoqController@reviseBoq');
+	Route::get('boqhouseworkingtypedt/{id}/{house_id}','BoqController@getHouseWorkingType');
+	Route::get('boqworkingtypedt/{id}','BoqController@workingTypeDt');
+	Route::get('boqitemworkingtypedt/{id}','BoqController@subWorkingTypeDt');
+	Route::get('replicateboq/{id}','BoqController@replicateBoq')->middleware('checkRole:replicate_boq');
+	Route::post('reviseboq/{id}','BoqController@reviseBoq')->middleware('checkRole:revise_boq');
+	Route::get('replicateboqworkingtype/{boq_id}/{type_id}','BoqController@replicateBoqByWorkingType')->middleware('checkRole:replicate_boq_by_working_type');
+	Route::post('reviseboqworkingtype/{boq_id}/{type_id}','BoqController@reviseBoqWorkingType')->middleware('checkRole:revise_boq_working_type');
+	Route::get('getBoqItems/{boq_id}/{house_id}/{working_type_id?}','BoqController@getBoqHouseItem');
+	Route::post('reviseBoqHouseView/{boq_id}/{house_id}','BoqController@reviseBoqHouseView');
+	Route::post('reviseBoqHouse/{boq_id}/{house_id}/{working_type}','BoqController@reviseBoqHouse')->middleware('checkRole:revise_boq_house');
+	Route::any('reviseBoqHouses/{boq_id}/{house_id}/{working_type}','BoqController@reviseBoqHouse');
+	Route::get('viewBoq/{id}/{back}','BoqController@viewBoq')->middleware('checkRole:view_boq');
+	Route::post('uploadBoqPreview','BoqController@uploadBoqPreview')->middleware('checkRole:boq_add');
+	Route::get('boqhousesviewdt/{id}','BoqController@boqHousesViewDt');
+	Route::post('assignHouse/{id}','BoqController@assignHouse');
+	Route::get('downloadBoq/{id}','BoqController@downloadBoq');
 });
 
 ///////////////////// route zone ///////////////////////////
@@ -417,6 +431,7 @@ Route::group(['prefix' => 'purch'], function() {
 		Route::get('dt','OrderController@getDt');
 		Route::get('add/{cid?}','OrderController@add')->middleware('checkRole:purchase_order_add');
 		Route::get('edit/{id}','OrderController@edit')->middleware('checkRole:purchase_order_edit');
+		Route::get('makeOrder/{id}','OrderController@makeOrder')->middleware('checkRole:purchase_make_order');
 		Route::post('save','OrderController@save')->middleware('checkRole:purchase_order_add');
 		Route::post('update/{id}','OrderController@update')->middleware('checkRole:purchase_order_edit');
 		Route::get('delete/{id}','OrderController@destroy')->middleware('checkRole:purchase_order_delete');
@@ -481,6 +496,7 @@ Route::get('repository/getHousesByStreetID/{zoneID}','RepositoryController@getHo
 Route::get('repository/getZones','RepositoryController@getZones');
 Route::get('repository/getBlocks','RepositoryController@getBlocks');
 Route::get('repository/getStreets','RepositoryController@getStreets');
+Route::get('repository/getBuildings','RepositoryController@getBuildings');
 Route::get('repository/getHouseTypesByZoneID/{zoneID}','RepositoryController@getHouseTypesByZoneID');
 Route::get('repository/getHouseTypesByBlockID/{zoneID}','RepositoryController@getHouseTypesByBlockID');
 Route::get('repository/getHouseTypesByStreetID/{zoneID}','RepositoryController@getHouseTypesByStreetID');
@@ -495,3 +511,5 @@ Route::get('repository/getAssignedUserByRoleID/{roleID}','RepositoryController@g
 Route::get('repository/getApprovalUsers','RepositoryController@getApprovalUsers');
 Route::get('repository/fetchCurrentBOQ','RepositoryController@fetchCurrentBOQ');
 Route::get('repository/checkStockQuantity','RepositoryController@checkStockQuantity');
+Route::get('repository/getBoqItems','RepositoryController@getBoqItems');
+Route::get('repository/houseNoBoq','RepositoryController@getHouseNoBoq');

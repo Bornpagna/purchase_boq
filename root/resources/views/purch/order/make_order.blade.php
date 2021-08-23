@@ -60,7 +60,7 @@
 								<label for="reference_no" class="control-label"><strong>{{ trans('lang.reference_no') }}</strong>
 									<span class="required"> * </span>
 								</label>
-								<input class="form-control reference_no" length="20" type="text" id="reference_no" name="reference_no" placeholder="{{ trans('lang.enter_text') }}">
+								<input class="form-control reference_no" length="20" type="text" id="reference_no" name="reference_no" value="" placeholder="{{ trans('lang.enter_text') }}">
 								<span class="help-block font-red bold"></span>
 							</div>
 						</div>
@@ -97,7 +97,7 @@
 									<div class="input-group">
 										<select class="form-control select2 delivery_address" name="delivery_address" id="delivery_address">
 											<option value=""></option>
-											{{getWarehouse('all')}}
+											{{getWarehouse($obj->delivery_address)}}
 										</select>
 										<span class="input-group-addon btn blue" id="btnAddWarehouse">
 											<i class="fa fa-plus"></i>
@@ -106,7 +106,7 @@
 								@else
 									<select class="form-control select2 delivery_address" name="delivery_address" id="delivery_address">
 										<option value=""></option>
-										{{getWarehouse('all')}}
+										{{getWarehouse($obj->delivery_address)}}
 									</select>
 								@endif
 								<span class="help-block font-red bold"></span>
@@ -123,7 +123,7 @@
 									<div class="input-group">
 										<select class="form-control select2 supplier" name="supplier" id="supplier">
 											<option value=""></option>
-											{{getSuppliers()}}
+											{{getSuppliers($obj->sup_id)}}
 										</select>
 										<span class="input-group-addon btn blue" id="btnAddSupplier">
 											<i class="fa fa-plus"></i>
@@ -132,7 +132,7 @@
 								@else
 									<select class="form-control select2 supplier" name="supplier" id="supplier">
 										<option value=""></option>
-										{{getSuppliers()}}
+										{{getSuppliers($obj->sup_id)}}
 									</select>
 								@endif
 								<span class="help-block font-red bold"></span>
@@ -170,7 +170,7 @@
 						<div class="col-md-4">
 							<div class="form-group">
 								<label for="term_pay" class="control-label" style="text-align: left;"><strong>{{ trans('lang.term_of_payment') }}</strong></label>
-								<input type="text" class="form-control term_pay" id="term_pay" name="term_pay" length="100" placeholder="{{trans('lang.enter_text')}}">
+								<input type="text" class="form-control term_pay" id="term_pay" name="term_pay" value="{{$obj->term_pay}}" length="100" placeholder="{{trans('lang.enter_text')}}">
 								<span class="help-block font-red bold"></span>
 							</div>
 						</div>
@@ -192,11 +192,11 @@
 						<div class="col-md-12">
 							<div class="form-group">
 								<label for="trans_desc" class="control-label" style="text-align: left;"><strong>{{ trans('lang.note') }}</strong></label>
-								<textarea class="form-control trans_desc" id="trans_desc" name="desc" length="100" rows="8" placeholder="{{ trans('lang.enter_text') }}"></textarea>
+								<textarea class="form-control trans_desc" id="trans_desc" name="desc" length="100" rows="8" value="{{$obj->note}}" placeholder="{{ trans('lang.enter_text') }}"></textarea>
 							</div>
 						</div>
 					</div>
-					
+
 					<div class="portlet-body">
 						<div class="table-scrollable">
 							<table class="table table-striped table-bordered table-hover" width="100%" id="table-income">
@@ -212,7 +212,6 @@
 										<th width="10%" class="text-center all">{{ trans('lang.disc($)') }}</th>
 										<th width="10%" class="text-center all">{{ trans('lang.total') }}</th>
 										<th width="15%" class="text-center all">{{ trans('lang.remark') }}</th>
-										<th width="5%" class="text-center all">{{trans('lang.action')}}</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -283,8 +282,7 @@
 					</div>
 					<div class="clearfix"></div><br/>
 					<div class="form-actions text-right">
-						<button type="submit" id="save_close" name="save_close" value="1" class="btn green bold">{{trans('lang.save')}}</button>
-						<button type="submit" id="save_new" name="save_new" value="2"  class="btn blue bold">{{trans('lang.save_new')}}</button>
+						<button type="submit" id="save_close" name="save_close" value="1" class="btn green bold">{{trans('lang.save_change')}}</button>
 						<a class="btn red bold" rounte="{{$rounteBack}}" id="btnCancel">{{trans('lang.cancel')}}</a>
 					</div>
 				</form>
@@ -298,15 +296,32 @@
 
 @section('javascript')
 <script type="text/javascript">	
-	var jsonUnits = [];
-	var jsonItems = [];
-	var jsonRef   = JSON.parse(convertQuot("{{\App\Model\Order::where('pro_id','=',Session::get('project'))->where('trans_status','!=',0)->get(['ref_no'])}}"));
-	
-	function onRemove(field){
-		$(field).parents('tr').remove();
-		calculateTotal();
+	var jsonUnits  = [];
+	var jsonItems  = [];
+	var jsonRecord = [];
+
+	function GetUnit(unit_stock) {
+		return $.ajax({url:'{{url("/stock/deliv/GetUnit")}}',type:'GET',dataType:'json',data:{unit_stock:unit_stock},async:false}).responseJSON;
 	}
-	
+
+	function GetItem(query) {
+		return $.ajax({url:'{{url("/stock/use/GetItem")}}',type:'GET',dataType:'json',data:{q:query},async:false}).responseJSON;
+	}
+
+	function GetDetail(id) {
+		return $.ajax({url:'{{url("/purch/order/GetDetail")}}',type:'GET',dataType:'json',data:{id:id},async:false}).responseJSON;
+	}
+
+	function GenItem(field,data) {
+		if (data) {
+			$(field).empty();
+			$(field).append($('<option></option>').val('').text(''));
+			$.each(data,function(key,val){
+				$(field).append($('<option></option>').val(val.item_id).text(val.code+' ('+val.name+')'));
+			});
+		}
+	}
+
 	function isSave(){
 		var isValid = true;
 		$(".line_qty").each(function(){
@@ -342,17 +357,12 @@
         });
     };
 
-	$('#save_close,#save_new').on('click',function(){
+	$('#save_close').on('click',function(){
 		$(this).prop('disabled', true);
 		if(chkValid([".pr_no",".reference_no",".trans_date",".delivery_date",".delivery_address",".ordered_by",".supplier",".line_item",".line_unit",".line_qty",".line_price",".line_disc_perc",".line_disc_usd",".disc_perc",".disc_usd"])){
 			if(isSave()){
-				if (chkDublicateRef(jsonRef, '#reference_no')) {
-					$("#btnSubmit").val($(this).val());
-					$('#form-stock-entry').submit();
-				}else{
-					$(this).prop('disabled', false);
-					return false;
-				}
+				$("#btnSubmit").val($(this).val());
+				$('#form-stock-entry').submit();
 			}else{
 				$(this).prop('disabled', false);
 				return false;
@@ -365,7 +375,6 @@
 	
 	function onSetItem(val, row){
 		if(val!=null && val!='' && jsonItems){
-
 			$.each(jsonItems.filter(c=>c.item_id==val), function(key, val){
 				$('.line_unit_'+row).empty();
 				$('.line_unit_'+row).append($('<option></option>').val('').text(''));
@@ -373,7 +382,6 @@
 				$.each(jsonUnits[row], function(k, v){
 					$('.line_unit_'+row).append($('<option></option>').val(v.from_code).text(v.from_code+' ('+v.from_desc+')'));
 				});
-				// $('.line_unit_'+row).select2('val', val.unit_purch);
 			});
 		}
 	}
@@ -382,17 +390,16 @@
 		var item_id = $(".line_item_"+row).val();
 		var po_unit = $(field).val();
 		var new_qty = 0;
-
 		if(item_id!=null && item_id!='' && po_unit!=null && po_unit!='' && jsonItems && jsonUnits[row]){
 			var stock_unit = "";
 			var stock_qty = 0;
 			$.each(jsonItems.filter(c=>c.item_id==item_id), function(key, value){
 				stock_unit = value.unit_stock;
 			});
-			$.each(jsonUnits[row].filter(c=>c.from_code==pr_unit && c.to_code==stock_unit), function(key, value){
+			$.each(jsonUnits[row].filter(c=>c.from_code==pr_unit).filter(d=>d.to_code==stock_unit), function(key, value){
 				stock_qty = parseFloat(value.factor) * parseFloat(pr_qty);
 			});
-			$.each(jsonUnits[row].filter(c=>c.from_code==po_unit && c.to_code==stock_unit), function(key, value){
+			$.each(jsonUnits[row].filter(c=>c.from_code==po_unit).filter(d=>d.to_code==stock_unit), function(key, value){
 				new_qty = parseFloat(stock_qty) / parseFloat(value.factor);
 			});
 		}
@@ -403,6 +410,7 @@
 	}	
 	
 	function enterQty(field, row){
+		console.log(row);
 		var qty_ = $(".line_qty_orig_"+row).val();
 		var qty = $(field).val();
 		if(qty!=null && qty!=''){
@@ -494,8 +502,9 @@
 				sub_total = sub_total + parseFloat(sub_total_);
 			}
 		});
-		$(".sub_total").val(parseFloat(sub_total.toFixed(4)));
 		
+		$(".sub_total").val(parseFloat(sub_total.toFixed(4)));
+
 		calculateGrandTotal();
 	}
 	
@@ -515,29 +524,26 @@
 				'	</select>'+
 				'</td>'+
 				'<td>'+
-				'	<input type="number" value="'+data.qty+'" length="50" step="any" class="form-control noscroll line_qty line_qty_'+data.id+'" onkeyup="enterQty(this, '+data.id+')"  name="line_qty[]" placeholder="{{trans('lang.enter_text')}}"/>'+
+				'	<input type="number" value="'+data.qty+'" length="50" step="any" class="form-control noscroll line_qty line_qty_'+data.id+'" onChange="enterQty(this, '+data.id+')"  name="line_qty[]" placeholder="{{trans('lang.enter_text')}}"/>'+
 				'	<input type="hidden" value="'+data.qty+'" class="line_qty_orig line_qty_orig_'+data.id+'"/>'+
 				'</td>'+
 				'<td>'+
-				'	<input type="number" value="'+(parseFloat(data.price)).toFixed(4)+'" length="50" step="any" class="form-control noscroll line_price line_price_'+data.id+'" onkeyup="calculateRecord('+data.id+')"  name="line_price[]"/>'+
+				'	<input type="number" value="'+data.price+'" length="50" step="any" class="form-control noscroll line_price line_price_'+data.id+'" onkeyup="calculateRecord('+data.id+')"  name="line_price[]"/>'+
 				'</td>'+
 				'<td>'+
-				'	<input type="text" readonly value="'+(parseFloat(data.price) * parseFloat(data.qty)).toFixed(4)+'" class="form-control noscroll line_amount line_amount_'+data.id+'" name="line_amount[]"/>'+
+				'	<input type="text" readonly value="'+data.amount+'" class="form-control noscroll line_amount line_amount_'+data.id+'" name="line_amount[]"/>'+
 				'</td>'+
 				'<td>'+
-				'	<input type="number" length="50" step="any" class="form-control noscroll line_disc_perc line_disc_perc_'+data.id+'" onkeyup="onDiscountPercentage(this, '+data.id+')" value="0" name="line_disc_perc[]"/>'+
+				'	<input type="number" length="50" step="any" class="form-control noscroll line_disc_perc line_disc_perc_'+data.id+'" onkeyup="onDiscountPercentage(this, '+data.id+')" value="'+data.disc_perc+'" name="line_disc_perc[]"/>'+
 				'</td>'+
 				'<td>'+
-				'	<input type="number" length="50" step="any" class="form-control noscroll line_disc_usd line_disc_usd_'+data.id+'" onkeyup="onDiscountDollar(this, '+data.id+')" value="0" name="line_disc_usd[]"/>'+
+				'	<input type="number" length="50" step="any" class="form-control noscroll line_disc_usd line_disc_usd_'+data.id+'" onkeyup="onDiscountDollar(this, '+data.id+')" value="'+data.disc_usd+'" name="line_disc_usd[]"/>'+
 				'</td>'+
 				'<td>'+
-				'	<input type="text" readonly value="'+(parseFloat(data.price) * parseFloat(data.qty)).toFixed(4)+'" class="form-control noscroll line_grend_total line_grand_total_'+data.id+'" name="line_grend_total[]"/>'+
+				'	<input type="text" readonly value="'+data.total+'" class="form-control noscroll line_grend_total line_grand_total_'+data.id+'" name="line_grend_total[]"/>'+
 				'</td>'+
 				'<td>'+
-				'	<input type="text" length="100" class="form-control line_reference line_reference_'+data.id+'" name="line_reference[]" placeholder="{{trans('lang.enter_text')}}"/>'+
-				'</td>'+
-				'<td class="text-center all">'+
-				'	<button type="button" class="btn btn-danger" onclick="onRemove(this)" title="{{trans("lang.delete")}}"><i class="fa fa-remove"></i></button>'+
+				'	<input type="text" length="100" value="'+isNullToString(data.desc)+'" class="form-control line_reference line_reference_'+data.id+'" name="line_reference[]" placeholder="{{trans('lang.enter_text')}}"/>'+
 				'</td>'+
 			'</tr>');
 		$(".line_unit_"+data.id).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
@@ -546,14 +552,11 @@
 		onSetItem(data.item_id, data.id);
 		$(".line_unit_"+data.id).select2('val', data.unit);
 		$('.line_unit_'+data.id).attr("onchange", "onChangeUnit(this, "+data.id+", '"+data.unit+"',"+data.qty+")");
-	}
-
-	function GetItem(po_id) {
-		return $.ajax({url:'{{url("/stock/use/GetItem")}}',type:'GET',dataType:'json',data:{po_id:po_id},async:false}).responseJSON;
-	}
-
-	function GetUnit(unit_stock) {
-		return $.ajax({url:'{{url("/stock/deliv/GetUnit")}}',type:'GET',dataType:'json',data:{unit_stock:unit_stock},async:false}).responseJSON;
+		enterQty("line_qty_"+data.id,data.id);
+		calculateRecord("line_price_"+data.id,data.id);
+		onDiscountPercentage("line_disc_perc_"+data.id,data.id);
+		onDiscountDollar("line_disc_usd_"+data.id,data.id);
+		
 	}
 	
 	document.addEventListener("mousewheel", function(event){
@@ -563,7 +566,7 @@
 			document.activeElement.blur();
 		}
 	});
-	
+
 	@if(hasRole('warehouse_add'))
 		var objWarehouse = JSON.parse(convertQuot('{{\App\Model\Warehouse::where(["pro_id"=>Session::get('project')])->get(["name"])}}'));
 		$("#btnAddWarehouse").on('click', function(event){
@@ -668,43 +671,42 @@
 			$("#grand_total").val(((parseFloat(sub_total) + parseFloat(fee_charge))  - parseFloat(discount)).toFixed(4));
 		}
 	}
-
+	
 	function totalDiscountDollar(field){
 		var sub_total = $("#sub_total").val();
 		var disc = 0;
 		var val = $(field).val();
-		if (sub_total!='' && sub_total!=null && parseFloat(sub_total)!=0) {
-			if(val=='' || val==null){
-				$("#disc_perc").val(0);
-				$("#disc_perc").attr('readonly', false);
-			}else{
-				disc = (parseFloat(val) * 100) / parseFloat(sub_total);
-				$("#disc_perc").val(disc.toFixed(4));
-				$("#disc_perc").attr('readonly', true);
-			}
-			calculateGrandTotal();
+		if(val=='' || val==null){
+			$("#disc_perc").val(0);
+			$("#disc_perc").attr('readonly', false);
+		}else{
+			disc = (parseFloat(val) * 100) / parseFloat(sub_total);
+			$("#disc_perc").val(disc.toFixed(4));
+			$("#disc_perc").attr('readonly', true);
 		}
+
+		calculateGrandTotal();
 	}
 	
 	function totalDiscountPercentage(field){
 		var sub_total = $("#sub_total").val();
 		var disc = 0;
 		var val = $(field).val();
-		if (sub_total!='' && sub_total!=null && parseFloat(sub_total)!=0) {
-			if(val=='' || val==null){
-				$("#disc_usd").val(0);
-				$("#disc_usd").attr('readonly', false);
-			}else{
-				disc = (parseFloat(val) * parseFloat(sub_total)) / 100;
-				$("#disc_usd").val(disc.toFixed(4));
-				$("#disc_usd").attr('readonly', true);
-			}
-			calculateGrandTotal();
-		}		
+		if(val=='' || val==null){
+			$("#disc_usd").val(0);
+			$("#disc_usd").attr('readonly', false);
+		}else{
+			disc = (parseFloat(val) * parseFloat(sub_total)) / 100;
+			$("#disc_usd").val(disc.toFixed(4));
+			$("#disc_usd").attr('readonly', true);
+		}
+
+		calculateGrandTotal();
 	}
 	
 	$(document).ready(function(){
-		$('#trans_date,.delivery_date').val(formatDate('{{date('Y-m-d')}}'));
+		$('#trans_date').val(formatDate('{{$obj->trans_date}}'));
+		$('#delivery_date').val(formatDate('{{$obj->delivery_date}}'));
 		$("#trans_date,.delivery_date").datepicker({
 			format: "{{getSetting()->format_date}}",
             autoclose: true,
@@ -714,11 +716,8 @@
 			var rounte = $(this).attr('rounte');
 			window.location.href=rounte;
 		});
-		$("#reference_no").on('change', function(){
-	    	chkDublicateRef(jsonRef, '#reference_no');
-	    });
-		$('.select2').select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
 		
+		$('.select2').select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
 		$('.pr_no').select2({
 		  width:'100%',
 		  allowClear:'true',
@@ -743,9 +742,69 @@
 		    }
 		  }
 		});
+
+		// $('.pr_no').select2({
+		//   width:'100%',
+		//   allowClear:'true',
+		//   placeholder:'{{trans("lang.please_choose")}}',
+		//   ajax: {
+		//     url: '{{url("/purch/request/GetRef")}}',
+		//     dataType:"json",
+		//     data: function (params) {
+		//       var query = {
+		//         q: params.term,
+		//         pr_id:'{{$obj->pr_id}}'
+		//       }
+		//       return query;
+		//     },
+		//     async:true,
+		//     success:function(data){
+		//     	if (data) {
+		//     		$('.pr_no').empty();
+		//     		$('.pr_no').append(new Option('','',false,false));
+		//     		$.each(data.data,function(key,val){
+		// 				if (val.id==parseInt('{{$obj->pr_id}}')) {
+		// 					$('.pr_no').append(new Option(val.text,val.id,true,true));
+		// 					$('.pr_no').val(val.id).trigger('change');
+		// 				}else{
+		// 					$('.pr_no').append(new Option(val.text,val.id,false,false));
+		// 				}
+		//     		});
+		//     	}
+		//     },
+		//     processResults: function (data) {
+		//       return {
+		//         results: data.data
+		//       };
+		//     }
+		//   }
+		// });
 		
-		$("#pr_no").on('change', function(){
-			var val = $(this).val();
+		// $('.pr_no').empty();
+		// $('.pr_no').append(new Option('','',false,false));
+		$('.pr_no').append(new Option('{{$obj->ref_no}}','{{$obj->id}}',true,true));
+		$("#pr_no").select2('val', '{{$obj->id}}');
+		$("#ordered_by").select2('val', '{{$obj->ordered_by}}');
+		$("#status").select2('val', '{{$obj->trans_status}}');
+		// $("#pr_no option[value!='{{$obj->pr_id}}']").attr('disabled', 'disabled');
+		
+		if(jsonRecord = GetDetail('{{$obj->id}}')){
+			$("#table-income tbody").empty();
+			jsonItems = jsonRecord;
+			$.each(jsonRecord, function(key, val){
+				initTable(val);
+			});
+			$(".sub_total").val('{{$obj->sub_total}}');
+			$(".fee_charge").val('{{$obj->fee_charge}}');
+			$(".deposit").val('{{$obj->deposit}}');
+			$(".disc_perc").val('{{$obj->disc_perc}}');
+			$(".disc_usd").val('{{$obj->disc_usd}}');
+			$(".last_total").val('{{floatval($obj->grand_total) - floatval($obj->deposit)}}');
+			$(".grand_total").val('{{$obj->grand_total}}');
+		}
+		var val = $(".pr_no").val();
+		// $(".pr_no").on('change', function(){
+		// 	var val = $(this).val();
 			if(val!=null && val!=''){
 				var _token = $("input[name=_token]").val();
 				$.ajax({
@@ -777,7 +836,7 @@
 					}
 				});
 			}
-		});
+		// });
 	});
 </script>
 @endsection()

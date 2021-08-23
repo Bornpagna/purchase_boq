@@ -198,6 +198,8 @@ class ZoneController extends Controller
 			$error = '';
 			if(!empty($data) && $data->count()){
 				foreach ($data as $key => $value) {
+					print_r($value);
+					print_r(count($value));exit;
 					if (count($value)==2) {
 						if (($value->name) && ($value->description)) {
 							if (count(DB::table('system_datas')->where('name','=',$value->name)->where('type','=',self::SYSTEM_TYPE)->where('parent_id','=',$pro_id)->get(['id','name'])->toArray())==0) {

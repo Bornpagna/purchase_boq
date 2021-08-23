@@ -11,77 +11,8 @@
             background: url("{{url("assets/upload/temps/details_close.png")}}") no-repeat center center !important;
         }
 		.boq-pointer{
-			cursor: pointer;
-		}
-		#select2-boq-house-results > .select2-results__option {
-		padding-right: 20px;
-		vertical-align: middle;
-		}
-		#select2-boq-house-results > .select2-results__option:before {
-		content: "";
-		display: inline-block;
-		position: relative;
-		height: 20px;
-		width: 20px;
-		border: 2px solid #e9e9e9;
-		border-radius: 4px;
-		background-color: #fff;
-		margin-right: 20px;
-		vertical-align: middle;
-		}
-		#select2-boq-house-results > .select2-results__option[aria-selected=true]:before {
-		font-family:fontAwesome;
-		content: "\f00c";
-		color: #fff;
-		background-color: #3d76cc;
-		border: 0;
-		display: inline-block;
-		padding-left: 3px;
-		}
-		#select2-boq-house-results > .select2-container--default .select2-results__option[aria-selected=true] {
-			background-color: #fff;
-		}
-		#select2-boq-house-results > .select2-container--default .select2-results__option--highlighted[aria-selected] {
-			background-color: #eaeaeb;
-			color: #272727;
-		}
-		#select2-boq-house-results > .select2-container--default .select2-selection--multiple {
-			margin-bottom: 10px;
-		}
-		#select2-boq-house-results > .select2-container--default.select2-container--open.select2-container--below .select2-selection--multiple {
-			border-radius: 4px;
-		}
-		#select2-boq-house-results > .select2-container--default.select2-container--focus .select2-selection--multiple {
-			border-color: #3d76cc;
-			border-width: 2px;
-		}
-		#select2-boq-house-results > .select2-container--default .select2-selection--multiple {
-			border-width: 2px;
-		}
-		#select2-boq-house-results > .select2-container--open .select2-dropdown--below {
-			
-			border-radius: 6px;
-			box-shadow: 0 0 10px rgba(0,0,0,0.5);
-
-		}
-		#select2-boq-house-results > .select2-selection .select2-selection--multiple:after {
-			content: 'hhghgh';
-		}
-		/* select with icons badges single*/
-		#select2-boq-house-results > .select-icon .select2-selection__placeholder .badge {
-			display: none;
-		}
-		#select2-boq-house-results > .select-icon .placeholder {
-			display: none;
-		}
-		#select2-boq-house-results > .select-icon .select2-results__option:before,
-		#select2-boq-house-results > .select-icon .select2-results__option[aria-selected=true]:before {
-			display: none !important;
-			/* content: "" !important; */
-		}
-		#select2-boq-house-results > .select-icon  .select2-search--dropdown {
-			display: none;
-		}
+		cursor: pointer;
+	}
 	</style>
 @endsection
 @section('content')
@@ -94,8 +25,8 @@
 				<div class="portlet-title">
 					<div class="caption">
 						<i class="fa fa-plus font-dark"></i>
-						<span class="caption-subject bold font-dark uppercase">{{ trans('lang.boq') }}</span>
-						<span class="caption-helper">{{ trans('lang.revise_boq') }}</span>
+						<span class="caption-subject bold font-dark uppercase"> {{ trans('lang.boq') }}</span>
+						<span class="caption-helper">{{ trans('lang.revise_boq_house') }}</span>
 					</div>
 					<div class="actions">
 						<a rounte="{{$rounteBack}}" title="Back" class="btn btn-circle btn-icon-only btn-default" id="btnBack">
@@ -107,147 +38,10 @@
 						<div class="form-group">
 							<div class="col-md-12 text-center">
 								<span class="show-message-error-boq center font-red bold"></span>
+								<input type="hidden" value="" name="" />
 							</div>
 						</div>
 						
-						<div class="row">
-							<div class="col-md-4">
-								<div class="form-group">
-									<label for="boq-zone" class="col-md-12 bold">{{trans('lang.zone')}} 
-										<span class="required">*</span>
-									</label>
-									<div class="col-md-12">
-										<select name="zone_id" id="boq-zone" class="form-control boq-zone my-select2">
-											<option value=""></option>
-											{{getSystemData('ZN',$boq ? $boq->zone_id : 0 )}}
-										</select>
-										<span class="help-block font-red bold"></span>
-									</div>
-								</div>
-							</div>
-
-							<div class="col-md-4">
-								<div class="form-group">
-									<label for="boq-block" class="col-md-12 bold">{{trans('lang.block')}} 
-										<span class="required">*</span>
-									</label>
-									<div class="col-md-12">
-										<select name="block_id" id="boq-block" class="form-control boq-block my-select2">
-											<option value=""></option>
-											{{getSystemData('BK',$boq ? $boq->block_id : 0)}}
-										</select>
-										<span class="help-block font-red bold"></span>
-									</div>
-								</div>
-							</div>
-							<div class="col-md-4">
-								<div class="form-group">
-									<label for="boq-building" class="col-md-12 bold">{{trans('lang.building')}} 
-										<span class="required">*</span>
-									</label>
-									<div class="col-md-12">
-										<select name="building_id" id="boq-building" class="form-control boq-building my-select2">
-											<option value=""></option>
-											{{getSystemData('BD',$boq ? $boq->building_id : 0)}}
-										</select>
-										<span class="help-block font-red bold"></span>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-4">
-								<div class="form-group">
-									<label for="boq-street" class="col-md-12 bold">{{trans('lang.street')}} 
-										{{-- <span class="required">*</span> --}}
-									</label>
-									<div class="col-md-12">
-										<select name="street_id" id="boq-street" class="form-control boq-street my-select2">
-											<option value=""></option>
-											{{getSystemData('ST',$boq ? $boq->street_id : 0)}}
-										</select>
-										<span class="help-block font-red bold"></span>
-									</div>
-								</div>
-							</div>
-							<div class="col-md-4">
-								<div class="form-group">
-									<label for="boq-house-type" class="col-md-12 bold">{{trans('lang.house_type')}} 
-										{{-- <span class="required">*</span> --}}
-									</label>
-									<div class="col-md-12">
-										<select name="house_type_id" id="boq-house-type" class="form-control boq-house-type my-select2">
-											<option value=""></option>
-											{{getSystemData('HT',$boq ? $boq->house_type : 0)}}
-										</select>
-										<span class="help-block font-red bold"></span>
-									</div>
-								</div>
-							</div>
-							<div class="col-md-4">
-								<div class="form-group">
-									<label for="boq-house" class="col-md-12 bold " id="label-house">{{trans('lang.house_no')}} 
-										{{-- <span class="required">*</span> --}}
-									</label>
-									<div class="col-md-12">
-										<select name="house[]" id="boq-house" class="form-control boq-house my-select2" multiple>
-										
-										</select>
-										<span class="help-block font-red bold"></span>
-									</div>
-								</div>
-							</div>
-						</div>
-						{{-- <div class="row">
-							<div class="col-md-4">
-								<div class="form-group">
-									<label for="item-type" class="col-md-12 bold" id="label-item-type">
-										{{trans('lang.item_type')}}
-									</label>
-								<div class="col-md-12">
-									<select onchange="ChangeItemTypes()" name="item_type" id="boq-item-type" class="form-control boq-item-type my-select2">
-										<option value=""> {{trans('please_choose')}}</option>
-										{{getSystemData("IT")}}
-									</select>
-									<span class="help-block font-red bold"></span>
-								</div>
-								</div>
-							</div>
-							<div class="col-md-8">
-								<div class="form-group">
-									<label for="item-type" class="col-md-12 bold" id="label-item-name">
-										{{trans('lang.items')}}
-									</label>
-								<div class="col-md-12">
-									<select name="item_name" id="boq-item_name" class="form-control boq-item-name my-select2">
-										<option value=""> {{trans('please_choose')}}</option>
-									</select>
-									<span class="help-block font-red bold"></span>
-								</div>
-								</div>
-							</div>
-						</div> --}}
-						<div class="row">
-							<div class="col-md-5">
-							</div>
-							<div class="col-md-6">
-								<div class="form-group">
-									<label for="boq-working-type" class="col-md-4 bold control-label" id="label-working-type">{{trans('lang.working_type')}}
-										<span class="required">*</span>
-									</label>
-									<div class="col-md-8">
-										<select name="working_type" id="boq-working-type" class="form-control boq-working-type my-select2">
-											<option value=""></option>
-											{{getSystemData('WK')}}
-										</select>
-										<span class="help-block font-red bold"></span>
-									</div>
-								</div>
-							</div>
-							<div class="col-md-1">
-								<button type="button" class="btn btn-success boq-button-add-working-type" >{{trans('lang.add')}}</button>
-							</div>
-						</div>
 						<table class="table table-hover no-footer" id="table_boq">
 							<thead>
 								<tr>
