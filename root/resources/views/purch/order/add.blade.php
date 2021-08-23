@@ -344,7 +344,7 @@
 
 	$('#save_close,#save_new').on('click',function(){
 		$(this).prop('disabled', true);
-		if(chkValid([".pr_no",".reference_no",".trans_date",".delivery_date",".delivery_address",".ordered_by",".supplier",".line_item",".line_unit",".line_qty",".line_price",".line_disc_perc",".line_disc_usd",".disc_perc",".disc_usd"])){
+		if(chkValid([".pr_no",".reference_no",".trans_date",".delivery_date",".delivery_address",".ordered_by",".supplier",".line_item",".line_unit",".line_qty",".line_price",".line_disc_perc",".line_disc_usd",".disc_perc",".disc_usd",".status"])){
 			if(isSave()){
 				if (chkDublicateRef(jsonRef, '#reference_no')) {
 					$("#btnSubmit").val($(this).val());

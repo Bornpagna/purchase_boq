@@ -160,9 +160,9 @@ class UsagePolicyController extends Controller
 	}
 
 	public function save(Request $request){
+		print_r($request->all());
 		try {
 			DB::beginTransaction();
-
 			$rules = [
 				'reference_no' 	=>'required|max:20|unique_stock_use',
 				'trans_date' 	=>'required|max:20',
@@ -236,6 +236,8 @@ class UsagePolicyController extends Controller
 				$usagePolicies = $usagePolicies->where('usage_formulas.block_id',$blockId);
 			}
 
+			// print_r($usagePolicies->toSql());exit;
+
 			if($streetId = $request->input('street_id')){
 				$usagePolicies = $usagePolicies->where('usage_formulas.street_id',$streetId);
 			}
@@ -244,10 +246,12 @@ class UsagePolicyController extends Controller
 				$usagePolicies = $usagePolicies->where('usage_formula_details.house_id',$houseId);
 			}
 
+			
 			$usagePolicies = $usagePolicies->get();
 			
-
+				// print_r($usagePolicies);exit;
 			if(count($usagePolicies) == 0){
+				$usagePolicies = [];
 				throw new \Exception("Usage policy value not found");
 			}
 			$qty =0;
@@ -267,18 +271,18 @@ class UsagePolicyController extends Controller
 
 						//// FILLED USAGE DETAIL ROW ////
 						$detail = [
-							'use_id'         =>$id,
-							'warehouse_id'   =>$request['warehouse_id'],
-							'house_id'       =>$house->id,
-							'street_id'      =>$house->street_id,
-							'line_no'        =>$request['line_index'][$i],
-							'item_id'        =>$request['item_id'][$i],
-							'unit'           =>$request['unit_id'][$i],
+							'use_id'         =>	$id,
+							'warehouse_id'   =>	$request['warehouse_id'],
+							'house_id'       =>	$house->id,
+							'street_id'      =>	$house->street_id,
+							'line_no'        =>	$request['line_index'][$i],
+							'item_id'        =>	$request['item_id'][$i],
+							'unit'           =>	$request['unit_id'][$i],
 							// 'qty'            =>$calQTY,
-							'stock_qty'      =>$request['stock_qty'][$i],
-							'boq_set'        =>(-1),
-							'created_by'     =>Auth::user()->id,
-							'created_at'     =>date('Y-m-d H:i:s'),
+							'stock_qty'      =>	$request['qty'][$i],
+							'boq_set'        =>	(-1),
+							'created_by'     =>	Auth::user()->id,
+							'created_at'     =>	date('Y-m-d H:i:s'),
 							
 						];
 						
