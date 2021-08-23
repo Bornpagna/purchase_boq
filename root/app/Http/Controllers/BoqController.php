@@ -870,7 +870,7 @@ class BoqController extends Controller
 					'zone_id'		=>	$request["zone_id"] ? $request["zone_id"] : 0,
 					'block_id'		=>	$request["block_id"] ? $request["block_id"] : 0,
 					'building_id'	=>	$request["building_id"] ? $request["building_id"] : 0,
-					'house_type'	=>	$request["house_type"] ? $request["house_type"] : 0,
+					'house_type'	=>	$request["house_type_id"] ? $request["house_type_id"] : 0,
 					'street_id'		=>	$request["street_id"] ? $request["street_id"] : 0,
 					'boq_code'		=> "BOQ-".$this->getBoqCode(),
 					// 'line_no'	=>getLineNo($request['house']),
