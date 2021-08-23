@@ -802,7 +802,6 @@ class BoqController extends Controller
 
     public function save(Request $request){
 		try {
-
 			$rules = [
 				'zone_id'	=> 'required',
 				'block_id' 	=> 'required',
