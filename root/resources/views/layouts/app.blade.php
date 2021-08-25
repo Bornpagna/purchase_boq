@@ -377,9 +377,8 @@
 					$(value).each(function(k,v){
 						var len = $(this).attr('length');
 						var val = $(this).val();
-						console.log(this);
+						// console.log(this);
 						if(val == null || val =='' || typeof val == undefined){
-							console.log(111);
 							$(this).css('border','1px solid #e43a45');
 							$(this).next().find('.select2-selection').css('border','1px solid #e43a45');
 							$(this).next('.help-block').html("{{trans('lang.field_required')}}");

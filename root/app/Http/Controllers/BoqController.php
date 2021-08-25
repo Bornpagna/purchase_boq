@@ -943,9 +943,9 @@ class BoqController extends Controller
 			if(!empty($request['block_id'])){
 				$where = array_merge($where, ['block_id'=>$request['block_id']]);
 			}
-			// if(!empty($request['building_id'])){
-			// 	$where = array_merge($where, ['building_id'=>$request['building_id']]);
-			// }
+			if(!empty($request['building_id'])){
+				$where = array_merge($where, ['building_id'=>$request['building_id']]);
+			}
 			if(!empty($request['house_type_id'])){
 				$where = array_merge($where, ['house_type'=>$request['house_type_id']]);
 			}
@@ -989,7 +989,6 @@ class BoqController extends Controller
 					'version'		=>	1,
 				];
 				$boq_id = DB::table('boqs')->insertGetId($boq);
-				
 				
 				foreach($houses as $house_key=>$house){
 					$boq_house = [

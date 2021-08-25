@@ -268,6 +268,8 @@
 		$('.select2').select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
 		/* button click save */
 		$("#btnAdd").on("click",function(){
+			var type = "{{$types}}";
+			console.log(type);
 			var rounte = $(this).attr('rounte');
 			$('.system-form').attr('action',rounte);
 			$('.system-modal').children().find('div').children().find('h4').html('{{trans("lang.add_new")}}');
@@ -277,6 +279,10 @@
 			$('.button-submit').attr('id','btnSave').attr('name','btnSave');
 			$('.button-submit').html('{{trans("lang.save")}}');
 			$('.system-modal').modal('show');
+			if(type==''){
+				$('.parent_id').hide();
+			}
+			
 			
 			$("#btnSave").on('click',function(){
 				if(chkValid([".sys-name",".sys-desc"])){

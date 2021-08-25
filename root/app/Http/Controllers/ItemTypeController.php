@@ -36,6 +36,7 @@ class ItemTypeController extends Controller
 				],
 			],			
 			'rounte'		=> url("item_type/dt"),
+			'types'			=> 'item_type',
 		];
 		
 		if(hasRole('item_type_add')){

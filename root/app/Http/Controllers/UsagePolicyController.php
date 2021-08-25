@@ -160,7 +160,6 @@ class UsagePolicyController extends Controller
 	}
 
 	public function save(Request $request){
-		print_r($request->all());
 		try {
 			DB::beginTransaction();
 			$rules = [
@@ -255,6 +254,7 @@ class UsagePolicyController extends Controller
 				throw new \Exception("Usage policy value not found");
 			}
 			$qty =0;
+			
 			if(count($request['line_index']) > 0){
 				
 				for($i=0;$i<count($request['line_index']);$i++){
@@ -267,8 +267,6 @@ class UsagePolicyController extends Controller
 							throw new \Exception("House not found");
 						}
 						// $id = 1;
-						
-
 						//// FILLED USAGE DETAIL ROW ////
 						$detail = [
 							'use_id'         =>	$id,

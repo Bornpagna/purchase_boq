@@ -149,9 +149,9 @@
 										<th width="25%" class="text-center all">{{ trans('lang.items') }}</th>
 										<th width="15%" class="text-center all">{{ trans('lang.units') }}</th>
 										<th width="10%" class="text-center all">{{ trans('lang.qty') }}</th>
-										@if(getSetting()->is_costing==1)
+										{{-- @if(getSetting()->is_costing==1)
 										<th width="10%" class="text-center all">{{ trans('lang.cost') }}</th>
-										@endif
+										@endif --}}
 										<th width="10%" class="text-center all">{{ trans('lang.to_warehouse') }}</th>
 										<th width="10%" class="text-center all">{{ trans('lang.remark') }}</th>
 										<th width="5%" class="text-center all">{{trans('lang.action')}}</th>
@@ -323,11 +323,11 @@
 			str += '<input type="hidden" value="'+data.qty+'" class="line_qty_orig line_qty_orig_'+data.id+'"/>';
 			str += '<input type="hidden" value="'+data.price+'" name="line_price[]" class="line_price line_price_'+data.id+'"/>';
 			str += '</td>';
-			if (parseInt("{{getSetting()->is_costing}}")==1) {
-				str += '<td>';
-				str += '<input type="number" length="50" step="any" class="form-control noscroll line_cost line_cost_'+data.id+'" name="line_cost[]" value="'+data.price+'"/>';
-				str += '</td>';
-			}
+			// if (parseInt("{{getSetting()->is_costing}}")==1) {
+			// 	str += '<td>';
+			// 	str += '<input type="number" length="50" step="any" class="form-control noscroll line_cost line_cost_'+data.id+'" name="line_cost[]" value="'+data.price+'"/>';
+			// 	str += '</td>';
+			// }
 			str += '<td>';
 			str += '<select class="form-control line_warehouse line_warehouse_'+data.id+'" name="line_warehouse[]">';
 			str += '<option value=""></option>';
