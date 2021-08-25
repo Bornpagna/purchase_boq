@@ -892,7 +892,7 @@
                 html+= '</td>';
 				html += '<td><input type="number" length="11" class="form-control line_reference line_usage_qty_'+index+'" id="qty_'+ index +'" name="qty[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
 				html += '<td><input type="text" length="11" class="form-control  line_remark line_remark_'+index+'" name="remark[]" value="" placeholder="{{trans("lang.enter_remark")}}" /></td>';
-				html += '<td><a class="row_'+index+' btn btn-sm" onclick="DeleteRowBOQ('+index+')"><i class="fa fa-trash"></i></a></td>';
+				html += '<td><a class="row_'+index+' btn btn-sm" onclick="onRemove(this)"><i class="fa fa-trash"></i></a></td>';
 			html+='</tr>';
             
 			
@@ -948,7 +948,7 @@
         const itemId = $(self).val();
         const selectUnitID = '#unit_id_' + index;
         const mainTR = ".tr-" + index;
-        console.log(index);
+        // console.log(index);
 
         $(mainTR).removeClass('invalid');
         $(mainTR).removeClass('out-stock');
@@ -969,7 +969,7 @@
             $(".label-stock-qty-" + index).html(0);
             if(res.length > 0){
                 $.each(res,function(key,val){
-
+                    console.log(val);
                     const boq           = (val.qty_std_x + val.qty_add_x) - val.usage_qty_x;
                     const boqWithUnit   = boq + ' | ' + val.unit;
                     const stockWithUnit = val.stock_qty_x + ' | ' + val.unit;
@@ -1013,7 +1013,7 @@
                 checkStockQuantity(params,function(res){
                     if(res.length > 0){
                         $.each(res,function(key,val){
-                            console.log(val);
+                            // console.log(val);
                             const boq           = (val.qty_std_x + val.qty_add_x) - val.usage_qty_x;
                             const boqWithUnit   = "{{trans('lang.none_boq')}}";
                             const stockWithUnit = val.stock_qty_x + ' | ' + val.unit;
@@ -1112,7 +1112,7 @@
 				dupArray[i] = id;
 			}
         })
-        console.log(dupArray);
+        // console.log(dupArray);
 
         if (isDuplicateArray(dupArray)==true) {
             result(this,'{{trans("lang.some_record_is_dublicate")}}');
@@ -1154,7 +1154,7 @@
 
         $('tr.tr-form').each(function(){
             const itemId = $(this).children().find('.line_item').val();
-            const unitId = $(this).children().find('.line_unit').val();
+            const unitId = $(this).children().find('.unit_id').val();
             const unitSelectId = $(this).children().find('.unit_id').attr('id');
             const factor = $('.' + unitSelectId + '-' + unitId).attr('factor');
             const qty = $(this).children().find('.qty').val();
@@ -1403,6 +1403,7 @@
 		$(self).select2('val', null);
         $(self).append($('<option></option>').val('').text(''));
         $.each(res,function(i,val){
+            console.log(val);
             const className = index + '-' + val.from_code;
             $(self).append($('<option class='+ className +' factor='+ val.factor +' to_code='+ val.to_code +'></option>').val(val.from_code).text(val.from_desc));
         });
@@ -1602,22 +1603,22 @@
                     html+= '<input type="hidden" value="'+lineNo((index),3)+'" name="line_no[]" class="line_no line_no_'+index+'" />';
                 html+='</td>';
 				// html+= '<td>'+data.item_type+'<input type="hidden" name="line_item_type[]" class="line_item_type'+index+'" value="'+data.cat_id+'" /></td>';
-				html+= '<td>'+data.item_name+'<input type="hidden" class="line_item line_item_'+index+'" name="item_id[]" value="'+data.item_id+'" /></td>';
+				html+= '<td>'+data.item_name+'<input type="hidden" class="line_item line_item_'+index+'" id="item_id_'+index+'" name="item_id[]" value="'+data.item_id+'" /></td>';
 				html+= '<td><input type="text" length="11" class="form-control size line_size line_size_'+index+'" name="size[]" placeholder="{{trans("lang.size")}}" /></td>';
 				html+= '<td>';
-                    html+= '<select class="form-control select2 select2_'+index+' line_unit line_unit_'+index+'" name="unit_id[]"> onchange="onChangeUnit(this, '+index+')"' 
+                    html+= '<select class="form-control select2 select2_'+index+' line_unit unit_id line_unit_'+index+'" id="unit_id_'+index+'" name="unit_id[]"> onchange="onChangeUnit(this, '+index+')"' 
                         html+= '<option value=""></option>';
                     html+= '</select>';
                     html += '<input type="hidden" id="unit_factor_'+ index +'" name="unit_factor[]" class="form-control unit_factor" />';
                     html += '<input type="hidden" id="boq_unit_'+ index +'" name="boq_unit[]" class="form-control boq_unit" />';
                 html+= '</td>';
-                html+= '<td><input type="hidden" length="11" class="form-control size line_size line_qty_stock_'+index+'" name="stock_qty[]" placeholder="{{trans("lang.size")}}" /><span class="label-stock-qty-'+index+'"></span></td>';
-                html+= '<td><input type="hidden" length="11" class="form-control size line_size line_boq_qty_'+index+'" name="qty[]" placeholder="{{trans("lang.size")}}" /><span class="label-boq-qty-'+index+'"></span></td>';
+                html+= '<td><input type="hidden" length="11" class="form-control size line_size stock_qty line_qty_stock_'+index+'" id="stock_qty_'+index+'" name="stock_qty[]" placeholder="{{trans("lang.size")}}" /><span class="label-stock-qty-'+index+'"></span></td>';
+                html+= '<td><input type="hidden" length="11" class="form-control size line_size boq_qty line_boq_qty_'+index+'" id="boq_qty_'+index+'" name="boq_qty[]" placeholder="{{trans("lang.size")}}" /><span class="label-boq-qty-'+index+'"></span></td>';
 				html+= '<td><input type="hidden" length="11" class="form-control line_qty line_remain_qty_'+index+'" name="remain_qty[]" placeholder="{{trans("lang.enter_number")}}" /><input type="hidden" class="form-control line_boq_set line_boq_set_'+index+'" name="boq_set[]"/>'+
 					    '<input type="hidden" class="form-control line_price line_price_'+index+'" name="line_price[]"/><span class="label-remain-qty-'+index+'"></span></td>';
-				html += '<td><input type="number" length="11" class="form-control line_reference line_usage_qty_'+index+'" name="qty[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
+				html += '<td><input type="number" length="11" class="form-control line_reference qty line_usage_qty_'+index+'" id="qty_'+index+'" name="qty[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
 				html += '<td><input type="text" length="11" class="form-control  line_remark line_remark_'+index+'" name="remark[]" value="" placeholder="{{trans("lang.enter_remark")}}" /></td>';
-				html += '<td><a class="row_'+index+' btn btn-sm" onclick="DeleteRowBOQ('+index+')"><i class="fa fa-trash"></i></a></td>';
+				html += '<td><a class="row_'+index+' btn btn-sm" onclick="onRemove(this)"><i class="fa fa-trash"></i></a></td>';
 			html+='</tr>';
 		table_boq.append(html);
 		
@@ -1627,7 +1628,8 @@
 		$('.line_unit_'+index).append($('<option></option>').val('').text(''));
 		jsonUnits = GetUnit(data.unit_stock);
 		$.each(jsonUnits, function(k, v){
-			$('.line_unit_'+index).append($('<option></option>').val(v.from_code).text(v.from_code+' ('+v.from_desc+')'));
+            const className = index + '-' + v.from_code;
+			$('.line_unit_'+index).append($('<option class="unit_id_'+className+'" factor='+ v.factor +' to_code='+ v.to_code +'></option>').val(v.from_code).text(v.from_code+' ('+v.from_desc+')'));
 		});
 		@if(!isset($head))
 			$('.line_unit_'+index).select2('val', data.unit_purch);
@@ -1655,9 +1657,9 @@
 
             if(res){
                 $.each(res,function(key,val){
-
+                    console.log(val);
                     const boq           = (val.qty_std_x + val.qty_add_x);
-                    const boq_remain    = (val.qty_std_x + val.qty_add_x) - val.usage_qty_x;
+                    const boq_remain    = (val.qty_std_x + val.qty_add_x) + val.usage_qty_x;
                     const boqWithUnit   = boq + ' | ' + val.unit_usage;
                     const stockWithUnit = val.stock_qty_x + ' | ' + val.unit;
                     const boq_remain_unit = boq_remain + ' | ' + val.unit_usage;
@@ -1749,7 +1751,7 @@
 				async:false,
 				data:params,
 				success:function(data){
-					console.log(data);
+					// console.log(data);
 					$('.line_boq_set_'+row).val(data.boq_set);
 					$('.line_price_'+row).val(data.price);
 				},error:function(){
@@ -1768,7 +1770,7 @@
 		if(val!=null && val!=''){
 			var itemSelect = $('.item_id_'+row);
 			var type_id = $('.line_item_type'+row).val();
-			console.log(itemSelect.select2({allowClear:'false'}));
+			// console.log(itemSelect.select2({allowClear:'false'}));
             // var query = {
 			// 		cat_id : type_id,
 			// 		q: "",
@@ -1802,7 +1804,7 @@
 			    url: '{{url("/stock/use/GetItem")}}',
 			    dataType:"json",
 			    data: function (params) {
-                    console.log(params);
+                    // console.log(params);
 			      var query = {
 					cat_id : type_id,
 					q: params.term,
@@ -1811,7 +1813,7 @@
 			    },
 			    async:true,
 			    success:function(data){
-                    console.log(data);
+                    // console.log(data);
 			    	jsonItems = data.data;
 
 			    },

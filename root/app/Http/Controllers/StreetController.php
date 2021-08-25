@@ -38,6 +38,7 @@ class StreetController extends Controller
 					],
 			],
 			'rounte'		=> url("street/dt"),
+			'types'			=> ''
 		];
 		
 		if(hasRole('street_add')){
