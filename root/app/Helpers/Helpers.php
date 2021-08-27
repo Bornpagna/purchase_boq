@@ -391,6 +391,75 @@ function getBOQs($id=NULL){
 	FROM `pr_boqs` where pr_boqs.status = 1 ".$where;
 	return DB::select($sql);
 }
+function getBOQExcel($id=NULL){
+	$where = '';
+	if($id && $id!=0){
+		$where = ' and pr_boq_items.boq_house_id = '.$id.' GROUP BY pr_boq_items.id';
+	}      
+	$sql = "SELECT pr_boq_items.*,
+	(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_items.`cat_id`) AS item_type,	
+	pr_items.`name`,
+	pr_items.`desc`,
+	pr_items.`code`	
+	FROM pr_boq_items 
+	JOIN pr_boqs
+		ON pr_boqs.id = pr_boq_items.boq_id 
+	JOIN pr_items
+		ON pr_items.id=pr_boq_items.item_id	
+	WHERE pr_boqs.status = 1 ".$where;
+	return DB::select($sql);
+}
+function getBOQWorkType($id=NULL){
+	$where = '';
+	if($id && $id!=0){
+		$where = ' and pr_boq_items.boq_house_id = '.$id.' GROUP BY pr_boq_items.working_type';
+	}      
+	$sql = "SELECT pr_boq_items.*,
+	(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_boq_items.`working_type`) AS working_type_name
+	FROM pr_boq_items 
+	JOIN pr_boqs
+		ON pr_boqs.id = pr_boq_items.boq_id 
+	WHERE pr_boqs.status = 1 ".$where;
+	return DB::select($sql);
+}
+function getBOQExport($id=NULL){
+	$where = '';
+	if($id && $id!=0){
+		$where = ' and pr_boqs.id = '.$id;
+	}
+	$sql = "SELECT
+		pr_boqs.`boq_code`,	
+		pr_boqs.trans_date,	
+		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`zone_id`) AS zone_name,
+		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`block_id`) AS block_name,
+		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`building_id`) AS building_name,
+		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`street_id`) AS street_name,
+		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`house_type`) AS house_type,
+		pr_boq_items.`item_id`,
+		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_items.`cat_id`) AS item_type,	
+		pr_items.`name`,
+		pr_items.`desc`,
+		pr_items.`code`,
+		pr_boq_items.`qty_add`,
+		pr_boq_items.`qty_std`,
+		pr_boq_items.`unit`,
+		pr_boq_items.`working_type`,
+		pr_boq_items.`cost`,
+		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_boq_items.`working_type`) AS working_type,
+		pr_houses.`house_no`,
+		pr_houses.`house_desc`
+		FROM
+			pr_boq_items
+		JOIN pr_boqs
+			ON pr_boqs.id = pr_boq_items.boq_id
+		JOIN pr_boq_houses
+			ON pr_boq_houses.boq_id = pr_boqs.id
+		JOIN pr_houses
+			ON pr_houses.id = pr_boq_items.`house_id` 
+		JOIN pr_items
+			ON pr_items.id=pr_boq_items.item_id where pr_boqs.status = 1 ".$where;
+	return DB::select($sql);
+}
 function getBOQReviseVersions($id=NULL){
 	$where = '';
 	if($id && $id!=0){

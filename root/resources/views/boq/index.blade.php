@@ -286,7 +286,7 @@
 @include('modal.edit_boq')
 @include('modal.revise_boq_house')
 @include('modal.upload')
-<!-- @include('modal.upload_revise') -->
+@include('modal.upload_revise')
 @include('modal.assign_house')
 @include('modal.confirm')
 @endsection()
@@ -323,15 +323,18 @@
 			$('.displayNone').css('display','block');
 			$('#btn_upload_excel').on('click',function(){
 				if(onUploadExcel()){}else{return false}
-			}); 
+			}); 			
 		});
+		$('#btn_upload_excel_revise').on('click',function(){				
+			var name = 'revise';
+			if(onUploadExcelRevise(name)){}else{return false}
+		}); 
 	});	
-	
 	function DeleteRowBOQ(id){
 		// var table_boq = $('#table_boq').DataTable();
 		// table_boq.row($('.row_'+id).parents('tr')).remove().draw( false );
 		
-		// table_boq.rows().eq(0).each(function(index_boq){
+		// table_boq.rows().eq(0).each(function(index_boq){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 		// 	var cell = table_boq.cell(index_boq,0);
 		// 	$(cell.node()).find(".line").text(lineNo(parseFloat(index_boq)+1,3));
 		// 	$(cell.node()).find(".line_no").val(lineNo(parseFloat(index_boq)+1,3));
@@ -429,7 +432,7 @@
 		var working_type = $("input[name='working_type_no[]']").map(function(){return $(this).val();}).get();
 		var data = $('.boq-working-type-add').select2('data');
 		var table_boq = $('#table_boq');
-		console.log(data[0].id );
+		// console.log(data[0].id );
 		if(data[0].id != ""){
 			if(jQuery.inArray(data[0].id, working_type) !== -1){
 			}else{
@@ -637,9 +640,7 @@
 	});
 	$('#my-table tbody').on('click', 'td.details-control', function () {
 		var tr = $(this).closest('tr');
-		console.log(tr);
 		var row = my_table.row(tr);
-		// console.log(my_table);
 		var tableId = 'sub-' + row.data().id;
 		if(row.child.isShown()) {
 			row.child.hide();
@@ -683,7 +684,7 @@
 		});
 		var tr = $(this).closest('tr');
 		// var row = my_tablew.row(tr);
-		console.log(tr);
+		// console.log(tr);
 		// var tableIds = 'sub-' + row.data().id;
 		// row.child(formatBoqWorkingType(row.data())).show();
 		// 	initailBoqWorkingType(tableIds,row.data());
@@ -975,7 +976,7 @@
 			getHouseNoBoq();
 		});
 		$('#street_id_assign_house').on('change', function(){
-			console.log($('#street_id_assign_house').val());
+			// console.log($('#street_id_assign_house').val());
 			getHouseNoBoq();
 		});
 
@@ -1041,9 +1042,9 @@
 			$('.boq-street-add').select2('val', null);
 			$("#checkbox-house").click(function(){
 				if($("#checkbox-house").is(':checked') ){
-					console.log(11); 
-					$(".boq-house-add > option").prop("selected","selected");
-					$(".boq-house-add").trigger("change");
+					// console.log(11); 
+					$(".boq-house > option").prop("selected","selected");
+					$(".boq-house").trigger("change");
 				}else{
 					$(".boq-house-add > option").removeAttr("selected");
 					$(".boq-house-add").trigger("change");
@@ -1087,14 +1088,13 @@
 		}
 	});
 	function  onExcelRevise(field){
-		console.log(field);
 		var id = $(field).attr('row_id');
 		var rounte = $(field).attr('row_rounte');
 		var _token = $("input[name=_token]").val();
 		$('.upload-excel-revise-form').attr('action',rounte);
+		$('.download_example_revise').attr('href',"{{url('boqs/excel/downloadExampleById')}}/"+id);
 		$('.modal-upload-excel-revise-form').children().find('div').children().find('h4').html('{{trans("lang.import_revised_boq")}}');
 		if(jsonHouse){
-			console.log(jsonHouse);
 			$.each(objName.filter(c=>c.id==id),function(key,val){
 				$.each(jsonHouse.filter(c=>c.id==val.house_id),function(k, v){
 					$("#boq-street-edit").select2('val', v.street_id);
@@ -1130,11 +1130,10 @@
 		$("#btnExcelReviseBoq").on('click',function(){
 			
 			$('#btnUpdate').prop('disabled', true);
-			var working_type = $("#working_type").val();
-			
+			var working_type = $("#working_type").val();			
 			if(chkValid([".working_type"])){
 				rounte = rounte + "?working_type="+working_type;
-				console.log(rounte);
+				// console.log(rounte);
 				$('.upload-excel-revise-form').attr('action',rounte);
 				$('.upload-excel-revise-form').submit();
 			}else{
@@ -1244,7 +1243,7 @@
 		var el = $("#working_type").select2();
 		$("#checkbox-excel").click(function(){
 			if($("#checkbox-excel").is(':checked') ){
-				console.log(11); 
+				// console.log(11); 
 				$("#working_type_excel > option").prop("selected","selected");
 				$("#working_type_excel").trigger("change");
 			}else{
@@ -1255,7 +1254,7 @@
 		$("#checkbox").click(function(){
 			
 			if($("#checkbox").is(':checked') ){
-				console.log(11); 
+				// console.log(11); 
 				$("#working_type > option").prop("selected","selected");
 				$("#working_type").trigger("change");
 			}else{
@@ -1272,7 +1271,7 @@
 			if(chkValid([".working_type"])){
 
 				rounte = rounte + "?working_type="+working_type;
-				console.log(rounte);
+				// console.log(rounte);
 				$('.form-revise-boq-house').attr('action',rounte);
 				$('.form-revise-boq-house').submit();
 			}else{
@@ -1357,14 +1356,14 @@
 	}
 
 	function  onAssignHouse(field){
-		console.log(field);
+		// console.log(field);
 		var id = $(field).attr('row_id');
 		var rounte = $(field).attr('row_rounte');
 		var _token = $("input[name=_token]").val();
 		$('.assign-house-form').attr('action',rounte);
 		$('.assign-house-modal').children().find('div').children().find('h4').html('{{trans("lang.assign_house")}}');
 		if(objName && jsonHouse){
-			console.log(jsonHouse);
+			// console.log(jsonHouse);
 			$.each(objName.filter(c=>c.id==id),function(key,val){
 				$.each(jsonHouse.filter(c=>c.id==val.house_id),function(k, v){
 					$("#boq-street-edit").select2('val', v.street_id);
@@ -1405,7 +1404,7 @@
 			if(chkValid([".assign-house"])){
 
 				rounte = rounte + "?working_type="+working_type;
-				console.log(rounte);
+				// console.log(rounte);
 				$('.assign-house-form').attr('action',rounte);
 				$('.assign-house-form').submit();
 			}else{

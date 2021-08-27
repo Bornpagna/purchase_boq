@@ -448,7 +448,6 @@
 		
 		function onUploadExcel(){
             var isValid = true;
-			console.log($('#excel'));
             var file = $('#excel').val();
 			console.log(file);
             if (file==null || file=='' || file==undefined) {
@@ -468,7 +467,26 @@
             }
             return isValid;
         }
-		
+		function onUploadExcelRevise($name){
+            var isValid = true;
+            var file = $('#excel_'+$name).val();
+            if (file==null || file=='' || file==undefined) {
+                isValid = false;
+                $('.excel').attr('style','border : 1px solid #e43a45 !important;');
+                $('.error-excel').html("{{trans('lang.doc_required')}}");
+            }else{
+                var exe = file.split('.').pop();
+                if (exe.toUpperCase()!='CSV' && exe.toUpperCase()!='XLS' && exe.toUpperCase()!='XLSX') {
+                    isValid = false;
+                    $('.excel').attr('style','border : 1px solid #e43a45 !important;');
+                    $('.error-excel').html("{{trans('lang.excel_mimes')}}");
+                }else{
+                    $('.excel').attr('style','border : 1px solid #c2cad8 !important;');
+                    $('.error-excel').html("");
+                }
+            }
+            return isValid;
+        }
 		function setThemeStyle(field,value){
 			var _token = $("input[name=_token]").val();
 			$.ajax({

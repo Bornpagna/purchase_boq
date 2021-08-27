@@ -55,7 +55,7 @@ Route::group(['prefix' => 'boqs'], function() {
 	Route::get('delete/{id}','BoqController@destroy')->middleware('checkRole:boq_delete');
 	Route::get('sub/delete/{id}','BoqController@destroySub');
 	Route::get('excel/download/{id}','BoqController@downloadExcel')->middleware('checkRole:boq_download');
-	Route::get('excel/example','BoqController@downloadExample')->middleware('checkRole:boq_download_sample');
+	Route::get('excel/example','BoqController@downloadExample')->middleware('checkRole:boq_download_sample');	
 	Route::post('excel/upload','BoqController@uploadExcel')->middleware('checkRole:boq_download_sample');
 	Route::get('subdt/{id}','BoqController@subDt');
 	Route::get('boqhousesdt/{id}','BoqController@boqHousesDt');
@@ -80,6 +80,9 @@ Route::group(['prefix' => 'boqs'], function() {
 	Route::get('getreviseboqhousedt/{id}','BoqController@reviseBoqHousesDt');
 	Route::get('viewreviseboq/{id}/{back}','BoqController@viewReviseBoq');
 	Route::get('reviseboqhousesviewdts/{id}','BoqController@reviseBoqHousesViewDt');
+	Route::get('excel/downloadExampleById/{id}','BoqController@downloadExampleById');
+	Route::post('reviseBoqHouseViewExcel/{boq_id}/{house_id}','BoqController@reviseBoqHouseViewExcel');
+	Route::post('uploadBoqPreviewRevise','BoqController@uploadBoqPreviewRevise');
 });
 
 ///////////////////// route zone ///////////////////////////
