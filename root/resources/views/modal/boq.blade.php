@@ -45,7 +45,7 @@
 										<span class="required">*</span>
 									</label>
 									<div class="col-md-12">
-										<select name="zone_id" id="boq-zone" class="form-control boq-zone my-select2">
+										<select name="zone_id" id="boq-zone" class="form-control boq-zone-add my-select2">
 											<option value=""></option>
 											{{getSystemData('ZN')}}
 										</select>
@@ -60,7 +60,7 @@
 										<span class="required">*</span>
 									</label>
 									<div class="col-md-12">
-										<select name="block_id" id="boq-block" class="form-control boq-block my-select2">
+										<select name="block_id" id="boq-block" class="form-control boq-block-add my-select2">
 											<option value=""></option>
 											{{getSystemData('BK')}}
 										</select>
@@ -74,7 +74,7 @@
 										<span class="required">*</span>
 									</label>
 									<div class="col-md-12">
-										<select name="building_id" id="boq-building" class="form-control boq-building my-select2">
+										<select name="building_id" id="boq-building" class="form-control boq-building-add my-select2">
 											<option value=""></option>
 											{{getSystemData('BD')}}
 										</select>
@@ -90,7 +90,7 @@
 										{{-- <span class="required">*</span> --}}
 									</label>
 									<div class="col-md-12">
-										<select name="street_id" id="boq-street" class="form-control boq-street my-select2">
+										<select name="street_id" id="boq-street" class="form-control boq-street-add my-select2">
 											<option value=""></option>
 											{{getSystemData('ST')}}
 										</select>
@@ -104,7 +104,7 @@
 										{{-- <span class="required">*</span> --}}
 									</label>
 									<div class="col-md-12">
-										<select name="house_type_id" id="boq-house-type" class="form-control boq-house-type my-select2">
+										<select name="house_type_id" id="boq-house-type" class="form-control boq-house-type-add my-select2">
 											<option value=""></option>
 											{{getSystemData('HT')}}
 										</select>
@@ -120,7 +120,7 @@
 									<div class="col-md-12 boq-house-wrapper">
 										<div class="row">
 											<div class="col-md-9">
-											<select name="house[]" id="boq-house" class="form-control boq-house my-select2" multiple>
+											<select name="house[]" id="boq-house" class="form-control boq-house-add my-select2" multiple>
 											
 											</select>
 											<span class="help-block font-red bold"></span>
@@ -171,7 +171,7 @@
 										<span class="required">*</span>
 									</label>
 									<div class="col-md-8">
-										<select name="working_type" id="boq-working-type" class="form-control boq-working-type my-select2">
+										<select name="working_type" id="boq-working-type" class="form-control boq-working-type-add my-select2">
 											<option value=""></option>
 											{{getSystemData('WK')}}
 										</select>

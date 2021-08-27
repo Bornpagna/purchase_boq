@@ -427,7 +427,7 @@
 	}
 	$('.boq-button-add-working-type').on('click',function(){
 		var working_type = $("input[name='working_type_no[]']").map(function(){return $(this).val();}).get();
-		var data = $('.boq-working-type').select2('data');
+		var data = $('.boq-working-type-add').select2('data');
 		var table_boq = $('#table_boq');
 		console.log(data[0].id );
 		if(data[0].id != ""){
@@ -1037,16 +1037,16 @@
 			$('.boq-button-submit').attr('id','btnEnterBoq').attr('name','btnEnterBoq');
 			$('.boq-button-submit').html('{{trans("lang.save")}}');
 			
-			$('.boq-house').select2('val', null);
-			$('.boq-street').select2('val', null);
+			$('.boq-house-add').select2('val', null);
+			$('.boq-street-add').select2('val', null);
 			$("#checkbox-house").click(function(){
 				if($("#checkbox-house").is(':checked') ){
 					console.log(11); 
-					$(".boq-house > option").prop("selected","selected");
-					$(".boq-house").trigger("change");
+					$(".boq-house-add > option").prop("selected","selected");
+					$(".boq-house-add").trigger("change");
 				}else{
-					$(".boq-house > option").removeAttr("selected");
-					$(".boq-house").trigger("change");
+					$(".boq-house-add > option").removeAttr("selected");
+					$(".boq-house-add").trigger("change");
 				}
 			});
 			
@@ -1056,12 +1056,13 @@
 			$('.enter-boq-modal').modal('show');
 			
 			$("#btnEnterBoq").on('click',function(){
-				// if(chkValid([".boq-zone",".boq-block",".boq-building",".line_item_type",".line_item",".line_unit",".line_qty_std",".line_qty_add"])){
+				if(chkValid([".boq-zone-add",".boq-block-add",".boq-building-add",".line_item_type",".line_item",".line_unit",".line_qty_std"])){
 					$('.enter-boq-form').submit();
-				// }else{
-				// 	$('.boq-button-submit').prop('disabled', false);
-				// 	return false;
-				// }
+				}else{
+					console.log(123);
+					$('.boq-button-submit').prop('disabled', false);
+					return false;
+				}
 			});
 		});
 		/* end button click save */

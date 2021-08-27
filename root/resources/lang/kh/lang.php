@@ -535,4 +535,5 @@ return [
 	'qty_boq_remain'	=>	'Boq Remain',
 	'remain_request'	=>	'ស្នើរសុំនៅសល់',
 	'revise_count'		=>	'ចំនួន Revise',
+	'document_support'	=>	'ហ្វាល់សំអាង',
 ];

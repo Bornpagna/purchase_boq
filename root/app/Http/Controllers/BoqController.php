@@ -241,7 +241,7 @@ class BoqController extends Controller
 		return $boqItems;
 	}
 
-	public function reviseBoq(Request $request,$id){
+ 	public function reviseBoq(Request $request,$id){
 		try {
 			DB::beginTransaction();
 			// Get old BOQ
@@ -315,7 +315,7 @@ class BoqController extends Controller
 						'building_id'	=>	$request["building_id"] ? $request["building_id"] : 0,
 						'house_type'	=>	$request["house_type"] ? $request["house_type"] : 0,
 						'street_id'		=>	$request["street_id"] ? $request["street_id"] : 0,
-						'boq_code'		=> "BOQ-".$this->getBoqCode(),
+						'boq_code'		=> $oldBoq->boq_code."-".$oldBoq->version,
 						// 'line_no'	=>getLineNo($request['house']),
 						'trans_date'	=>	date('Y-m-d'),
 						'trans_by'		=>	Auth::user()->id,
@@ -331,7 +331,7 @@ class BoqController extends Controller
 						$boq_house = [
 							'boq_id'			=>	$boq_id,
 							'house_id'			=>	$house->id,
-							'boq_house_code'	=>	"BOQ-".$this->getBoqHouseCode($house->id,3),
+							'boq_house_code'	=>$oldBoq->boq_code."-".$oldBoq->version."-HOUSE-".$this->getBoqHouseCode($house->id,3),
 							'created_by'		=>	Auth::user()->id,
 							'created_at'		=>	date('Y-m-d H:i:s'),
 							'created_by'		=> Auth::user()->id,
@@ -367,6 +367,11 @@ class BoqController extends Controller
 						}
 					}
 				}
+
+				if ($request->hasFile('document_support')) {
+					$photo = upload($request,'document_support','assets/upload/document_support/');
+					DB::table('boq_document_support')->insertGetID(['boq_id'=>$id,'file'=>$photo,'created_by'=>Auth::user()->id,'created_at'=>date('Y-m-d H:i:s')]);
+				}
 			
 				$oldBoq->status = 0;
 				$oldBoq->is_revise = 1;
@@ -384,7 +389,7 @@ class BoqController extends Controller
 			return redirect('/boqs');
 		}catch (\Exception $e) {
 			DB::rollback();
-			// print_r($e->getMessage());exit;
+			print_r($e->getMessage());exit;
 			return redirect()->back()->with('error',trans('lang.save_error').' '.$e->getMessage().' '.$e->getLine());
 		}
 	}
@@ -566,22 +571,6 @@ class BoqController extends Controller
 			if($row->revise_count <= 0){
 				$disableClass = "disabled";
 			}
-			// return
-			// 	'<a '.$btnDownload.' title="'.trans('lang.download').'" class="btn btn-xs view-record">'.
-			// 	'	<i class="fa fa-file-excel-o"></i><br /><span>'.trans('lang.download').'</span>'.
-			// 	'</a>'.
-			// 	'<a '.$btnView.' title="'.trans('lang.view').'" class="btn btn-xs view-record" row_id="'.$row->id.'" row_rounte="'.$rounte_view.'">'.
-			// 	'	<i class="fa fa-eye"></i><br /><span>'.trans('lang.view').'</span>'.
-			// 	'</a>'.
-			// 	'<a '.$btnRevise.' title="'.trans('lang.revised_boq').'" class="btn btn-xs view-record" row_id="'.$row->id.'" row_rounte="'.$rounte_revise.'">'.
-			// 	'	<i class="fa fa-pencil-square-o"></i><br /><span>'.trans('lang.revised_boq').'</span>'.
-			// 	'</a>'.
-			// 	'<a '.$btnDelete.' title="'.trans('lang.delete').'" class="btn btn-xs delete-boq-record" row_id="'.$row->id.'" row_rounte="'.$rounte_delete.'">'.
-			// 	'	<i class="fa fa-trash"></i><br /><span>'.trans('lang.delete').'</span>'.
-			// 	'</a>'.
-			// 	'<a '.$btnAddType.' title="'.trans('lang.add_working_type').'" class="btn btn-xs delete-boq-record" row_id="'.$row->id.'" row_rounte="'.$route_add_type.'">'.
-			// 	'	<i class="fa fa-plus"></i><br /><span>'.trans('lang.add_working_type').'</span>'.
-			// 	'</a>'; 
 			return '<div class="dropdown">
 			<button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 			  '.trans('lang.action').' <span class="caret"></span>
@@ -970,7 +959,8 @@ class BoqController extends Controller
 			// 	}
 			// }			
 			DB::beginTransaction();
-			$pro_id = $request->session()->get('project');		
+			$pro_id = $request->session()->get('project');
+			$boqCode = 	"BOQ-".$this->getBoqCode();	
 			if(count($houses) > 0){
 				$boq = [
 					'pro_id'		=>	$pro_id,
@@ -979,7 +969,7 @@ class BoqController extends Controller
 					'building_id'	=>	$request["building_id"] ? $request["building_id"] : 0,
 					'house_type'	=>	$request["house_type_id"] ? $request["house_type_id"] : 0,
 					'street_id'		=>	$request["street_id"] ? $request["street_id"] : 0,
-					'boq_code'		=> "BOQ-".$this->getBoqCode(),
+					'boq_code'		=> $boqCode,
 					// 'line_no'	=>getLineNo($request['house']),
 					'trans_date'	=>	date('Y-m-d'),
 					'trans_by'		=>	Auth::user()->id,
@@ -989,12 +979,13 @@ class BoqController extends Controller
 					'version'		=>	1,
 				];
 				$boq_id = DB::table('boqs')->insertGetId($boq);
+
 				
 				foreach($houses as $house_key=>$house){
 					$boq_house = [
 						'boq_id'			=>	$boq_id,
 						'house_id'			=>	$house->id,
-						'boq_house_code'	=>	"BOQ-".$this->getBoqHouseCode($house->id,3),
+						'boq_house_code'	=>	$boqCode."-HOUSE-".$this->getBoqHouseCode($house->id,3),
 						'created_by'		=>	Auth::user()->id,
 						'created_at'		=>	date('Y-m-d H:i:s'),
 						'created_by'	=> Auth::user()->id,
@@ -1777,7 +1768,7 @@ class BoqController extends Controller
 					//Add new Value to BOQ
 					$newBoqHouse->created_at = date('Y-m-d H:i:s');
 					$newBoqHouse->revise_by = Auth::user()->id;
-					// $newBoqHouse->version = $boqHouse->version + 1;
+					$newBoqHouse->version = $boqHouse->version + 1;
 					$newBoqHouse->revise_count = $newBoqHouse->revise_count + 1;
 					$newBoqHouse->status = 1;
 					$newBoqHouse->boq_id = $newBoqID;
@@ -1853,6 +1844,10 @@ class BoqController extends Controller
 						}
 					}
 				}
+			}
+			if ($request->hasFile('document_support')) {
+				$photo = upload($request,'document_support','assets/upload/document_support/');
+				DB::table('boq_document_support')->insertGetID(['boq_id'=>$boq_id,'file'=>$photo,'created_by'=>Auth::user()->id,'created_at'=>date('Y-m-d H:i:s')]);
 			}
 	
 			DB::commit();

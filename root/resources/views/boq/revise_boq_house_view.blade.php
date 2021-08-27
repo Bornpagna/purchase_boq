@@ -35,12 +35,49 @@
 					</div>
 				</div>
 				<div class="portlet-body form">
-						<div class="form-group">
-							<div class="col-md-12 text-center">
-								<span class="show-message-error-boq center font-red bold"></span>
-								<input type="hidden" value="" name="" />
+					<div class="row">
+						<label for="boq-working-type" class="col-md-4 bold " id="label-working-type">{{trans('lang.document_support')}}
+							<span class="required font-red">*</span>
+						</label>
+						<div class="col-md-12">
+							<div class="fileinput fileinput-new input-group excel" data-provides="fileinput">
+								<div class="form-control" data-trigger="fileinput">
+									<i class="glyphicon glyphicon-file fileinput-exists"></i> 
+									<span class="fileinput-filename"></span>
+								</div>
+								<span class="input-group-addon btn btn-success btn-file">
+									<span class="fileinput-new bold">{{trans('lang.select_doc')}}</span>
+									<span class="fileinput-exists bold">{{trans('lang.change')}}</span>
+									<input type="file" id="document_support" class="document_support" name="document_support" />
+								</span>
+									<a href="#" class="input-group-addon btn btn-danger fileinput-exists bold" data-dismiss="fileinput">{{trans('lang.delete')}}</a>
+							</div>
+							<span class="help-block error-excel font-red bold"></span>
+						</div>
+					</div>
+					<br />
+					<br />
+					<div class="row">
+						<div class="col-md-5">
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label for="boq-working-type" class="col-md-4 bold control-label" id="label-working-type">{{trans('lang.working_type')}}
+									<span class="required">*</span>
+								</label>
+								<div class="col-md-8">
+									<select name="working_type" id="boq-working-type" class="form-control boq-working-type my-select2">
+										<option value=""></option>
+										{{getSystemData('WK')}}
+									</select>
+									<span class="help-block font-red bold"></span>
+								</div>
 							</div>
 						</div>
+						<div class="col-md-1">
+							<button type="button" class="btn btn-success boq-button-add-working-type" >{{trans('lang.add')}}</button>
+						</div>
+					</div>
 						
 						<table class="table table-hover no-footer" id="table_boq">
 							<thead>
@@ -122,7 +159,7 @@
 				</div>
 	
 		<div class="form-actions text-right">
-			<button type="submit" id="save_close" name="save_close" value="1" class="btn green bold">Save</button>
+			<button type="button" id="save_close" name="save_close" value="1" class="btn green bold">Save</button>
 			<a class="btn red bold" rounte="http://localhost/purchase_boq/purch/order" id="btnCancel">Cancel</a>
 		</div>
 	</div>
@@ -130,7 +167,7 @@
 @endsection()
 @section('javascript')
 <script type="text/javascript">
-	
+	var index_boq = "{{$index_boq}}";
 	var index_work_type = 1;
 	var objName = [];
 	var jsonItem = JSON.parse(convertQuot("{{\App\Model\Item::get(['id','cat_id','code','name','unit_stock','unit_purch','unit_usage'])}}"));
@@ -313,6 +350,7 @@
 		}
 	});
 	function loadWorkingTypeItem(row,type_id,selected_item_type,selected_item){
+		index_boq++;
 		console.log(selected_item_type);
 		var table_boq = $('#working_type_'+row+'_'+type_id);
 		var rowCount = $('#working_type_'+row+'_'+type_id+' tr').length;
@@ -338,7 +376,7 @@
 		table_boq.append(html);
 		$.fn.select2.defaults.set('theme','classic');
 			$(".select2_"+index_boq+'_'+type_id).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true,select:selected_item_type});
-			index_boq++;
+			
 			$('.line_item_type_'+index_boq+'_'+type_id).select2('data', {id: selected_item_type, text: 'res_data.primary_email'});
 			// $('.line_item_type_'+index_boq+'_'+type_id).select2('selected',selected_item_type);
 			// $('.line_item_type_'+index_boq+'_'+type_id).val(selected_item_type); // Select the option with a value of '1'
@@ -347,6 +385,7 @@
 			// $('.line_item_'+index_boq+'_'+type_id).trigger('change');
 	}
 	function addWorkingTypeItem(row,type_id){
+		index_boq++;
 		var table_boq = $('#working_type_'+row+'_'+type_id);
 		var rowCount = $('#working_type_'+row+'_'+type_id+' tr').length;
 		var itemIndex = "'"+index_boq+"_"+type_id+"'";
@@ -370,7 +409,6 @@
 		table_boq.append(html);
 		$.fn.select2.defaults.set('theme','classic');
 			$(".select2_"+index_boq+'_'+type_id).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true});
-			index_boq++;
 	}
 	// $('.boq-pointer').on('click', function(){
 	// 	var table_boq = $('#table_boq').DataTable();
@@ -650,33 +688,23 @@
 			var type = $(this).val();
 			getHouses();
 		});
-
-		
-		
 		/* button click save */
-		$("#btnAdd").on("click",function(){
-			var rounte = $(this).attr('rounte');
-			$('.enter-boq-form').attr('action',rounte);
-			$('.enter-boq-modal').children().find('div').children().find('h4').html('{{trans("lang.enter_boq")}}');
-			$('.boq-button-submit').attr('id','btnEnterBoq').attr('name','btnEnterBoq');
-			$('.boq-button-submit').html('{{trans("lang.save")}}');
-			
-			$('.boq-house').select2('val', null);
-			$('.boq-street').select2('val', null);
-			
-			// var table_boq = $('#table_boq').DataTable();
-			// table_boq.row().clear();
-			$('.boq-pointer').trigger('click');
-			$('.enter-boq-modal').modal('show');
-			
-			$("#btnEnterBoq").on('click',function(){
-				if(chkValid([".boq-zone",".boq-block",".boq-building",".line_item_type",".line_item",".line_unit",".line_qty_std",".line_qty_add"])){
-					$('.enter-boq-form').submit();
-				}else{
-					$('.boq-button-submit').prop('disabled', false);
-					return false;
-				}
-			});
+		$("#save_close").on('click',function(){
+			var file = $(".document_support").val();
+			console.log(file);
+			if (file==null || file=='' || file==undefined) {
+				$('.excel').attr('style','border : 1px solid #e43a45 !important;');
+				$('.error-excel').html("{{trans('lang.doc_required')}}");
+			}else{
+				$('.excel').attr('style','border : 1px solid #c2cad8 !important;');
+				$('.error-excel').html("");
+			}
+			if(chkValid([".boq-zone",".boq-block",".boq-building",".line_item_type",".line_item",".line_unit",".line_qty_std",".line_qty_add",".document_support"])){
+				$('.enter-boq-form').submit();
+			}else{
+				$('.boq-button-submit').prop('disabled', false);
+				return false;
+			}
 		});
 		/* end button click save */
 	});	
