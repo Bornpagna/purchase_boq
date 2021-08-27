@@ -129,6 +129,7 @@ return [
 	'close_error'                                   => 'Close has been error',
 	'dublicate_at_record'                           => '*Dublicate at record ',  
 	'delivery_qty_can_not_greater_then_ordered_qty' => '*Delivery Qty can\'t greater then ordered qty',	
+	'document_support'								=>	'Document Support',
 /* E */
 	'enter_boq'          => 'Enter BOQ',
 	'engineer'           => 'Engineer',
