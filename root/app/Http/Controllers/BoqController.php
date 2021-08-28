@@ -803,7 +803,7 @@ class BoqController extends Controller
 			$btnView = 'onclick="onViewBoqHouse(this)"';
 			$rounte_view = url('boqs/view/'.encrypt($row->boq_id).'/'.encrypt(1)."/".encrypt($row->house_id));
 			
-			if(!hasRole('boq_edit')){
+			if(!hasRole('boq_edit')){ 
 				$btnEdit = "disabled";
 			}
 			// if(UsageDetails::where(['house_id'=>$row->house_id,'item_id'=>$row->item_id])->exists()){
@@ -2085,7 +2085,7 @@ class BoqController extends Controller
 
 				
 				if(count($request["working_type_no"]) > 0){
-					foreach($request["working_type_no"] as $key=>$working_type){
+					foreach($request["working_type_no"] as $key=>$working_type){ 
 						DB::table('boq_items')->where('boq_house_id',$oldBoqHouseId->id)->where('working_type',$working_type)->delete();
 						if(count($request["line_item_type_".$working_type]) > 0){
 							foreach($request['line_item_type_'.$working_type] as $key=>$item_type){
