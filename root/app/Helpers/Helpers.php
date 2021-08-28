@@ -547,7 +547,7 @@ function getBoqHouseItems($id,$house_id = null ,$working_type=null){
 	if($working_type != null){
 		$boqItems = $boqItems->where('boq_items.working_type',$working_type);
 	}
-	$boqItems = $boqItems->groupBy('boq_items.item_id')
+	$boqItems = $boqItems->groupBy('boq_items.id')
 	->orderBy('boq_items.working_type')->get();
 	
 	return $boqItems; 

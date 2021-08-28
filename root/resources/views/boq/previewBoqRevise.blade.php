@@ -19,6 +19,7 @@
 	<?php $items = \App\Model\Item::get(['id','cat_id','code','name','unit_stock','unit_purch','unit_usage']); ?>
 	{{csrf_field()}}
 	<input type="hidden" name="boq_id" value="{{$boq_id}}" />
+	<input type="hidden" name="house_id" value="{{$house_id}}" />
 	<div class="row" role="dialog">
 		<div class="col-md-12">
 			<div class="portlet light bordered">
