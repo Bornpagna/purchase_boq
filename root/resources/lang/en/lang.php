@@ -401,6 +401,7 @@ return [
 	'term_payment'                     => 'Term payment',
 	'total_after_deposit_and_discount' => 'Total After Deposit & Discount',
 	'trans_line' => 'Trans Line',
+	'tree_view' => 'Tree View',
 	/* U */
 	'url'                => 'URL',
 	'units'              => 'Unit',

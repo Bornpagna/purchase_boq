@@ -8465,4 +8465,30 @@ class ReportController extends Controller
 
 		return view('reports.inventory.print.inventory_valuation_summary_print')->with($data);
 	}
+	public function boqTreeView(Request $request){
+		$data = [
+			'title'       => trans('lang.tree_view'),
+			'icon'        => 'fa fa-shopping-cart',
+			'small_title' => trans('lang.report'),
+			'background'  => '',
+			'link'        => [
+				'home'	=> [
+						'url' 		=> url('/'),
+						'caption' 	=> trans('lang.home'),
+				],
+				'report'	=> [
+						'url' 		=> '#',
+						'caption' 	=> trans('lang.report'),
+				],
+				'purchase'	=> [
+						'url' 		=> '#',
+						'caption' 	=> trans('lang.tree_view'),
+				],
+				'request'	=> [
+						'caption' 	=> trans('lang.request'),
+				],
+			],
+		];
+		return view('reports.boq.tree')->with($data);
+	}
 }

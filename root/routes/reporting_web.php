@@ -21,6 +21,9 @@ Route::group(['prefix'=>'report'],function(){
 		});
 	});
 });
+/////////////////// Tree View //////////////////////
+Route::match(['get','post'],'report/boqTreeView','ReportController@boqTreeView');
+/////////////////// End Tree View //////////////////
 /*/////////////////Request Print//////////////////*/
 Route::get('/purch/request/print/{id}','ReportController@print_request')->middleware('checkRole:purchase_request_print');
 Route::get('/purch/order/print/{id}','ReportController@print_order')->middleware('checkRole:purchase_order_print');

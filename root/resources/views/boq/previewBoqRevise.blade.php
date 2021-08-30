@@ -154,14 +154,6 @@
 				$(this).css("border", "1px solid #ccc");
 			}
 		});
-		$(".qty_add_boq").each(function () {
-			if ($(this).val()=='' || $(this).val()==null) {
-				isValid = false;
-				$(this).css("border", "1px solid red");
-			} else {
-				$(this).css("border", "1px solid #ccc");
-			}
-		});
 		$(".cost_boq").each(function () {
 			if ($(this).val()=='' || $(this).val()==null) {
 				isValid = false;

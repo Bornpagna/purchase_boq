@@ -206,7 +206,56 @@
 		}
 	});
 	function onSubmit(){
-		return true;
+		var isValid = true;
+		$(".item_type_boq").each(function () {
+			if ($(this).val()=='' || $(this).val()==null) {
+				isValid = false;
+				$(this).css("border", "1px solid red");
+			} else {
+				$(this).css("border", "1px solid #ccc");
+			}
+		});
+		$(".code_boq").each(function () {
+			if ($(this).val()=='' || $(this).val()==null) {
+				isValid = false;
+				$(this).css("border", "1px solid red");
+			} else {
+				$(this).css("border", "1px solid #ccc");
+			}
+		});
+		$(".item_name_boq").each(function () {
+			if ($(this).val()=='' || $(this).val()==null) {
+				isValid = false;
+				$(this).css("border", "1px solid red");
+			} else {
+				$(this).css("border", "1px solid #ccc");
+			}
+		});
+		$(".unit_boq").each(function () {
+			if ($(this).val()=='' || $(this).val()==null) {
+				isValid = false;
+				$(this).css("border", "1px solid red");
+			} else {
+				$(this).css("border", "1px solid #ccc");
+			}
+		});
+		$(".qty_std_boq").each(function () {
+			if ($(this).val()=='' || $(this).val()==null) {
+				isValid = false;
+				$(this).css("border", "1px solid red");
+			} else {
+				$(this).css("border", "1px solid #ccc");
+			}
+		});
+		$(".cost_boq").each(function () {
+			if ($(this).val()=='' || $(this).val()==null) {
+				isValid = false;
+				$(this).css("border", "1px solid red");
+			} else {
+				$(this).css("border", "1px solid #ccc");
+			}
+		});
+		return isValid;
 	}
 	var value_row = 0;
 	var add_value = 1;	
