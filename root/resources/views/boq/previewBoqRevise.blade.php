@@ -53,7 +53,7 @@
 									<th width="15%" class="text-left all" style="min-width:100px;">{{ trans('lang.qty_std') }}</th>
 									<th width="10%" class="text-left all" style="min-width:100px;">{{ trans('lang.qty_add') }}</th>
 									<th width="10%" class="text-left all" style="min-width:100px;">{{ trans('lang.cost') }}</th>
-									<th width="2%" class="text-center all" ><i class='fa fa-plus boq-pointer'> </i></th>
+									<th width="2%" class="text-center all"><i class='fa fa-plus boq-pointer'> </i></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -234,7 +234,6 @@
 		});
 
 		function getHouses(){
-			console.log(12121212);
 			var params = {
 				zone_id: null,
 				block_id: null,

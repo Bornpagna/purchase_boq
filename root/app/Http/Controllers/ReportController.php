@@ -8491,4 +8491,7 @@ class ReportController extends Controller
 		];
 		return view('reports.boq.tree')->with($data);
 	}
+	public function getBoq(Request $request){
+		print_r($request->all());exit;
+	}
 }

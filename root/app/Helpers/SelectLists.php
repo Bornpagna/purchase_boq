@@ -135,6 +135,11 @@ function getSystemData($type=NULL,$val=NULL,$parent_only=NULL){
 		}
 	}
 }
+function getSystemDatas($type=NULL,$zone=NULL,$block=Null,$building=Null,$street=Null,$house=Null){	
+	$pro_id = Session::get('project');
+	$data = DB::table('system_datas')->where('type',$type)->where('parent_id',$pro_id)->where('status','1')->get();
+	return $data;
+}
 function getSystemDataVal($type=NULL,$val=NULL){
 	$pro_id = Session::get('project');
 	$where = [
