@@ -10,8 +10,11 @@
         tr.shown td.details-control {
             background: url("{{url("assets/upload/temps/details_close.png")}}") no-repeat center center !important;
         }
-        .dd3-content{
+        .boq-items{
             cursor: pointer;
+        }
+        .boq-items:hover{
+            text-decoration: none;
         }
         .dd3-item > button{
             margin-left:0px !important;
@@ -41,31 +44,89 @@
                                 <span class="caption-subject font-purple-soft bold uppercase"> Tree Boq </span>
                             </div>                                
                         </div>
-                        <div id="permission_tree" class="dd">
-                            <ol class="dd-list">
+                        <link class="cssdeck" rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/css/bootstrap.min.css">
+                        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" class="cssdeck">
+
+                        <div class="well" style="width:300px; padding: 8px 0;">
+                            <div style="overflow-y: scroll; overflow-x: hidden; height: 500px;">
+                                <ul class="nav nav-list">
+                                    <li><label class="tree-toggler nav-header">Header 1</label>
+                                        <ul class="nav nav-list tree">
+                                            <li><a href="#">Link</a></li>
+                                            <li><a href="#">Link</a></li>
+                                            <li><label class="tree-toggler nav-header">Header 1.1</label>
+                                                <ul class="nav nav-list tree">
+                                                    <li><a href="#">Link</a></li>
+                                                    <li><a href="#">Link</a></li>
+                                                    <li><label class="tree-toggler nav-header">Header 1.1.1</label>
+                                                        <ul class="nav nav-list tree">
+                                                            <li><a href="#">Link</a></li>
+                                                            <li><a href="#">Link</a></li>
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li><label class="tree-toggler nav-header">Header 2</label>
+                                        <ul class="nav nav-list tree">
+                                            <li><a href="#">Link</a></li>
+                                            <li><a href="#">Link</a></li>
+                                            <li><label class="tree-toggler nav-header">Header 2.1</label>
+                                                <ul class="nav nav-list tree">
+                                                    <li><a href="#">Link</a></li>
+                                                    <li><a href="#">Link</a></li>
+                                                    <li><label class="tree-toggler nav-header">Header 2.1.1</label>
+                                                        <ul class="nav nav-list tree">
+                                                            <li><a href="#">Link</a></li>
+                                                            <li><a href="#">Link</a></li>
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li><label class="tree-toggler nav-header">Header 2.2</label>
+                                                <ul class="nav nav-list tree">
+                                                    <li><a href="#">Link</a></li>
+                                                    <li><a href="#">Link</a></li>
+                                                    <li><label class="tree-toggler nav-header">Header 2.2.1</label>
+                                                        <ul class="nav nav-list tree">
+                                                            <li><a href="#">Link</a></li>
+                                                            <li><a href="#">Link</a></li>
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <script class="cssdeck" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+                        <script class="cssdeck" src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+                        <div id="" class="">
+                            <ol class="lists">
                                 @foreach(getSystemDatas('ZN') as $rows)                                
-                                <li class="dd-item dd3-item" data-id="setup_option" id="{{$rows->id}}">                        
-                                    <div class="dd3-content" data="{{$rows->id}}" style="font-weight: bold !important;padding-left:0px !important;border:0px !important;">
+                                <li class="items" id="{{$rows->id}}">                        
+                                    <a class="boq-items zone_items" zone_id="{{$rows->id}}" >
                                         {{$rows->name}}
-                                    </div>
-                                    <ol class="dd-list subb_{{$rows->id}}" style="">
-                                        <li class="dd-item dd3-item dd-collapsed" data-id="zone" idb="{{$rows->id}}">
-                                            <div class="dd3-content" style="font-weight: bold !important;padding-left:0px !important;border:0px !important;">
-    
-                                            </div>
-                                            <ol class="dd-list" style="display: none;">
-        
-                                                <li class="dd-item dd3-item" data-id="" idbd="{{$rows->id}}">
-                                                    <div class="dd3-content" style="font-weight: bold !important;padding-left:0px !important;border:0px !important;">
+                                    </a>
+                                    <ol class="list subb_{{$rows->id}}" style="">
+                                        <li class=" item collapsed" data-id="zone" zone_id="{{$rows->id}}">
+                                            <div class="content" style="font-weight: bold !important;padding-left:0px !important;border:0px !important;"></div>
+                                            <ol class="list" style="display: none;">        
+                                                <li class="item" data-id="" idbd="{{$rows->id}}">
+                                                    <div class="content" style="font-weight: bold !important;padding-left:0px !important;border:0px !important;">
         
                                                     </div>
-                                                    <ol class="dd-list" style="display: none;">
-                                                        <li class="dd-item dd3-item" data-id="" idst="{{$rows->id}}">
-                                                            <div class="dd3-content" style="font-weight: bold !important;padding-left:0px !important;border:0px !important;">
+                                                    <ol class="list" style="display: none;">
+                                                        <li class="item" data-id="" idst="{{$rows->id}}">
+                                                            <div class="content" style="font-weight: bold !important;padding-left:0px !important;border:0px !important;">
                                                             </div>
-                                                            <ol class="dd-list" style="display: none;">
-                                                                <li class="dd-item dd3-item" data-id="" idh="{{$rows->id}}">
-                                                                    <div class="dd3-content" style="font-weight: bold !important;padding-left:0px !important;border:0px !important;">
+                                                            <ol class="list" style="display: none;">
+                                                                <li class="tem" data-id="" idh="{{$rows->id}}">
+                                                                    <div class="content" style="font-weight: bold !important;padding-left:0px !important;border:0px !important;">
                                                                     </div>                                                                    
                                                                 </li>
                                                             </ol>
@@ -132,6 +193,9 @@
 <script src="{{asset('assets/global/plugins/jquery-nestable/jquery.nestable.js')}}" type="text/javascript"></script>
 <script type="text/javascript">		
 	$(function(){
+        $('label.tree-toggler').click(function () {
+            $(this).parent().children('ul.tree').toggle(300);
+        });
         $('#permission_tree').nestable();
         $('.dd').nestable('collapseAll');
 		$("#btnBack, #btnCancel").on("click",function(){
@@ -140,16 +204,83 @@
 		});
         var table = $('#my-table').DataTable();
 	});
-    $('.dd-item').click(function(){
-        // console.log($(this).attr('id'));
-        var id = $(this).attr('id');
-        $.get('{{url("report/boqTreeView/getBoq")}}?zone_id='+id,function(val){
-
+    $('.zone_items').click(function(){
+        var zone_id = $(this).attr('zone_id');
+        $.get('{{url("report/boqTreeView/getBoq")}}?zone_id='+zone_id,function(val){
+            var str = '';
+            $.each(val,function(index,DataRow){
+                str+='<li class="item" data-id="" zone_id="'+zone_id+'">';
+                    str+='<a onclick="blockItem('+zone_id+','+DataRow.block_id+')" class="boq-items block_items" zone_id="'+zone_id+'" block_id="'+DataRow.block_id+'" >';
+                        str+=DataRow.block_name;
+                    str+='</a>';
+                str+='</li><ol class="list subbl_'+DataRow.block_id+'"></ol>';
+            });
+            $('.subb_'+zone_id).html("");
+            $('.subb_'+zone_id).html(str);
         });
-        // $(this).removeClass('dd-collapsed');
-        // $(this).addClass('showcollapsed');
-        // $('.subb_'+id).css('display','block');
     });
+    function blockItem(zone_id,block_id){
+        $.get('{{url("report/boqTreeView/getBoq")}}?zone_id='+zone_id+'&block_id='+block_id,function(val){
+            var str = '';
+            $.each(val,function(index,DataRow){
+                str+='<li class="item" data-id="" id="'+DataRow.block_id+'">';
+                    str+='<a onclick="blockBuilding('+zone_id+','+DataRow.block_id+','+DataRow.building_id+')"  class="boq-items block_items" zone_id="'+zone_id+'"                                                                                                                                                                                                                           ="'+DataRow.block_id+'" >';
+                        str+=DataRow.building_name;
+                    str+='</a>';
+                str+='</li><ol class="list subs_'+DataRow.building_id+'"></ol>';
+            });
+            $('.subbl_'+block_id).html("");
+            $('.subbl_'+block_id).html(str);
+        });
+    }
+    
+    function blockBuilding(zone_id,block_id,building_id){
+        console.log(building_id);
+        $.get('{{url("report/boqTreeView/getBoq")}}?zone_id='+zone_id+'&block_id='+block_id,function(val){
+            var str = '';
+            $.each(val,function(index,DataRow){
+                str+='<li class="item" data-id="" id="'+DataRow.block_id+'">';
+                    str+='<a onclick="blockStreet('+zone_id+','+DataRow.block_id+','+DataRow.building_id+','+DataRow.street_id+')" class="boq-items street_items" zone_id="'+zone_id+'"                                                                                                                                                                                                                           ="'+DataRow.block_id+'" >';
+                        str+=DataRow.street_name;
+                    str+='</a>';
+                str+='</li><ol class="list subs_'+DataRow.building_id+'"></ol>';
+            });
+            $('.subs_'+building_id).html("");
+            $('.subs_'+building_id).html(str);
+        });
+    }
+    function blockStreet(zone_id,block_id,building_id,street_id){
+        $.get('{{url("report/boqTreeView/getBoq")}}?zone_id='+zone_id+'&block_id='+block_id,function(val){
+            var str = '';
+            $.each(val,function(index,DataRow){
+                str+='<li class="item" data-id="" id="'+DataRow.block_id+'">';
+                    str+='<a class="boq-items block_items" zone_id="'+zone_id+'"                                                                                                                                                                                                                           ="'+DataRow.block_id+'" >';
+                        str+=DataRow.building_name;
+                    str+='</a>';
+                str+='</li><ol class="list subs_'+DataRow.building_id+'"></ol>';
+            });
+            console.log(str);
+            $('.subbl_'+block_id).html("");
+            $('.subbl_'+block_id).html(str);
+        });
+    }
+    // $('.block_items').click(function(){
+        // var zone_id = $(this).attr('zone_id');
+        // var block_id = $(this).attr('block_id');
+        // $.get('{{url("report/boqTreeView/getBoq")}}?zone_id='+zone_id+'&block_id='+block_id,function(val){
+        //     var str = '';
+        //     $.each(val,function(index,DataRow){
+        //         str+='<li class="item" data-id="" id="'+DataRow.block_id+'">';
+        //             str+='<a class="boq-items block_items" zone_id="'+zone_id+'"                                                                                                                                                                                                                           ="'+DataRow.block_id+'" >';
+        //                 str+=DataRow.block_name;
+        //             str+='</a>';
+        //         str+='</li><ol class="list subbl_'+DataRow.block_id+'"></ol>';
+        //     });
+        //     console.log(str);
+        //     $('.subbl_'+block_id).html("");
+        //     $('.subbl_'+block_id).html(str);
+        // });
+    // });
     // $('.showcollapsed').click(function(){
     //     var id = $(this).attr('id');
     //     console.log($(this).attr('id'));

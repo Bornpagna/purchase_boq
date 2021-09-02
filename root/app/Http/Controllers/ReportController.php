@@ -8453,7 +8453,6 @@ class ReportController extends Controller
 		}else{
 			$warehouse = false;
 		}
-
 		$data = [
 			'report' => $report,
 			'title'  => trans('lang.inventory_valuation_summary'),
@@ -8492,6 +8491,20 @@ class ReportController extends Controller
 		return view('reports.boq.tree')->with($data);
 	}
 	public function getBoq(Request $request){
-		print_r($request->all());exit;
+		$where = [
+			'boqs.status'=>'1'
+		];	
+		if(!empty($request->zone_id)){
+			$where = array_merge($where, ['boqs.zone_id'=>$request->zone_id]);
+		}
+		$table = DB::table('boqs')
+		->select(
+			'boqs.*',
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`block_id`) AS block_name'),
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`building_id`) AS building_name'),
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`street_id`) AS street_name'),
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`house_type`) AS house_type')
+		)->where($where)->get();
+		return response()->json($table);
 	}
 }
