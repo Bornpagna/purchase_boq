@@ -8480,11 +8480,65 @@ class ReportController extends Controller
 		$zone = DB::table('system_datas')->where('type','ZN')->where('parent_id',$pro_id)->where('status','1')->get();
 		$li_html='';
 		foreach($zone as $row_zone){
-			$li_html.=$row_zone->name;
-			foreach($){
-
-			}			
+			$li_html.='<li><a>'.$row_zone->name.'</a></li>';
+			$li_html.='<ul>';
+				$block = DB::table('houses')->select('houses.zone_id','houses.block_id',DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`block_id`) AS block_name'))
+				->where('status',1)->where('houses.zone_id',$row_zone->id)
+				->groupBy('houses.zone_id')->get();
+				foreach($block as $blocks){
+					$li_html.='<li>';
+						$li_html.='<a>'.$blocks->block_name.'</a>';
+						$li_html.='<ul>';
+							$building = DB::table('houses')->select('houses.zone_id','houses.block_id','houses.building_id',
+							DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`building_id`) AS building_name'))
+							->where('status',1)->where('houses.zone_id',$row_zone->id)->where('houses.block_id',$blocks->block_id)
+							->groupBy('houses.block_id')->get();
+							foreach($building as $buildings){
+								$li_html.='<li>';
+									$li_html.='<a>'.$buildings->building_name.'</a>';
+									$li_html.='<ul>';
+										$street = DB::table('houses')->select('houses.zone_id','houses.block_id','houses.building_id','houses.street_id',
+										DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`street_id`) AS street_name'))
+										->where('status',1)->where('houses.zone_id',$row_zone->id)->where('houses.block_id',$blocks->block_id)
+										->where('houses.building_id',$buildings->building_id)
+										->groupBy('houses.building_id')->get();
+										foreach($street as $streets){
+											$li_html.='<li>';
+												$li_html.='<a>'.$streets->street_name.'</a>';
+												$li_html.='<ul>';
+													$house_type = DB::table('houses')->select('houses.zone_id','houses.block_id','houses.building_id','houses.street_id','houses.house_type',
+													DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`house_type`) AS house_type_name'))
+													->where('status',1)->where('houses.zone_id',$row_zone->id)->where('houses.block_id',$blocks->block_id)
+													->where('houses.building_id',$buildings->building_id)->where('houses.street_id',$streets->street_id)
+													->groupBy('houses.street_id')->get();
+													foreach($house_type as $house_types){
+														$li_html.='<li>';
+															$li_html.='<a>'.$house_types->house_type_name.'</a>';
+															$li_html.='<ul>';
+																$house_type = DB::table('houses')->select('houses.*')
+																->where('status',1)->where('houses.zone_id',$row_zone->id)->where('houses.block_id',$blocks->block_id)
+																->where('houses.building_id',$buildings->building_id)->where('houses.street_id',$streets->street_id)
+																->groupBy('houses.zone_id')->get();
+																foreach($house_type as $house_types){
+																	$li_html.='<li>';
+																		$li_html.='<a>'.$house_types->house_type_name.'</a>';
+																	$li_html.='</li>';
+																}		
+															$li_html.='</ul>';
+														$li_html.='</li>';
+													}		
+												$li_html.='</ul>';
+											$li_html.='</li>';
+										}		
+									$li_html.='</ul>';
+								$li_html.='</li>';
+							}		
+						$li_html.='</ul>';	
+					$li_html.='</li>';
+				}		
+			$li_html.='</ul>';	
 		}
+		print_r($li_html);exit;
 		$data = [
 			'title'       => trans('lang.tree_view'),
 			'icon'        => 'fa fa-shopping-cart',
