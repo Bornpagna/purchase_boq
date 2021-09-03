@@ -47,7 +47,7 @@
                         <link class="cssdeck" rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/css/bootstrap.min.css">
                         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" class="cssdeck">
 
-                        <div class="well" style="width:300px; padding: 8px 0;">
+                        <div class="well" style="width:auto; padding: 8px 0;">
                             <div style="overflow-y: scroll; overflow-x: hidden; height: 500px;">
                                 <ul class="nav nav-list">
                                     <li><label class="tree-toggler nav-header">Header 1</label>
