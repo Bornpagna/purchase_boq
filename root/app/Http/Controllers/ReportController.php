@@ -8465,9 +8465,30 @@ class ReportController extends Controller
 		return view('reports.inventory.print.inventory_valuation_summary_print')->with($data);
 	}
 	public function boqTreeView(Request $request){
+		$pro_id = Session::get('project');
+		
+		$house = DB::table('houses')
+		->select(
+			'houses.*',
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`zone_id`) AS zone_name'),
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`block_id`) AS block_name'),
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`building_id`) AS building_name'),
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`street_id`) AS street_name'),
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`house_type`) AS house_type_name')
+		)->where('status',1)->get();
+
+		$zone = DB::table('system_datas')->where('type','ZN')->where('parent_id',$pro_id)->where('status','1')->get();
+		$li_html='';
+		foreach($zone as $row_zone){
+			$li_html.=$row_zone->name;
+			foreach($){
+
+			}			
+		}
 		$data = [
 			'title'       => trans('lang.tree_view'),
 			'icon'        => 'fa fa-shopping-cart',
+			// 'house'       => $house,
 			'small_title' => trans('lang.report'),
 			'background'  => '',
 			'link'        => [
@@ -8488,23 +8509,22 @@ class ReportController extends Controller
 				],
 			],
 		];
+		
 		return view('reports.boq.tree')->with($data);
 	}
 	public function getBoq(Request $request){
-		$where = [
-			'boqs.status'=>'1'
-		];	
-		if(!empty($request->zone_id)){
-			$where = array_merge($where, ['boqs.zone_id'=>$request->zone_id]);
-		}
-		$table = DB::table('boqs')
+		$house = DB::table('houses')
 		->select(
-			'boqs.*',
-			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`block_id`) AS block_name'),
-			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`building_id`) AS building_name'),
-			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`street_id`) AS street_name'),
-			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`house_type`) AS house_type')
-		)->where($where)->get();
-		return response()->json($table);
+			'houses.*',
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`block_id`) AS block_name'),
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`building_id`) AS building_name'),
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`street_id`) AS street_name'),
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`house_type`) AS house_type_name')
+		)->where('status',1);
+		if(!empty($request->zone_id)){
+			$house = $house->where('houses.zone_id',$request->zone_id)->groupBy('houses.building_id');
+		}
+		$house = $house->get();
+		return response()->json($house);
 	}
 }
