@@ -10,14 +10,79 @@
         tr.shown td.details-control {
             background: url("{{url("assets/upload/temps/details_close.png")}}") no-repeat center center !important;
         }
-        .boq-items{
+        .branch a{
             cursor: pointer;
+            
         }
         .boq-items:hover{
             text-decoration: none;
         }
         .dd3-item > button{
             margin-left:0px !important;
+        }
+
+        .tree, .tree ul {
+            margin:0;
+            padding:0;
+            list-style:none
+        }
+        .tree ul {
+            margin-left:1em;
+            position:relative
+        }
+        .tree ul ul {
+            margin-left:.5em
+        }
+        .tree ul:before {
+            content:"";
+            display:block;
+            width:0;
+            position:absolute;
+            top:0;
+            bottom:0;
+            left:0;
+            border-left:1px solid
+        }
+        .tree li {
+            margin:0;
+            padding:5px 1em;
+            line-height:2em;
+            color:#369;
+            font-weight:700;
+            position:relative
+        }
+        .tree ul li:before {
+            content:"";
+            display:block;
+            width:10px;
+            height:0;
+            border-top:1px solid;
+            margin-top:-1px;
+            position:absolute;
+            top:1em;
+            left:0
+        }
+        .tree ul li:last-child:before {
+            background:#fff;
+            height:auto;
+            top:1em;
+            bottom:0
+        }
+        .indicator {
+            margin-right:5px;
+        }
+        .tree li a {
+            text-decoration: none;
+            color:#369;
+        }
+        .tree li button, .tree li button:active, .tree li button:focus {
+            text-decoration: none;
+            color:#369;
+            border:none;
+            background:transparent;
+            margin:0px 0px 0px 0px;
+            padding:0px 0px 0px 0px;
+            outline: 0;
         }
 	</style>
 @endsection
@@ -44,66 +109,24 @@
                                 <span class="caption-subject font-purple-soft bold uppercase"> Tree Boq </span>
                             </div>                                
                         </div>
-                        <link class="cssdeck" rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/css/bootstrap.min.css">
-                        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" class="cssdeck">
-
-                        <div class="well" style="width:auto; padding: 8px 0;">
-                            <div style="overflow-y: scroll; overflow-x: hidden; height: 500px;">
-                                <ul class="nav nav-list">
-                                    <li><label class="tree-toggler nav-header">Header 1</label>
-                                        <ul class="nav nav-list tree">
-                                            <li><a href="#">Link</a></li>
-                                            <li><a href="#">Link</a></li>
-                                            <li><label class="tree-toggler nav-header">Header 1.1</label>
-                                                <ul class="nav nav-list tree">
-                                                    <li><a href="#">Link</a></li>
-                                                    <li><a href="#">Link</a></li>
-                                                    <li><label class="tree-toggler nav-header">Header 1.1.1</label>
-                                                        <ul class="nav nav-list tree">
-                                                            <li><a href="#">Link</a></li>
-                                                            <li><a href="#">Link</a></li>
-                                                        </ul>
-                                                    </li>
-                                                </ul>
-                                            </li>
+                        <ul id="tree1">
+                            @foreach(getSystemDatas('ZN') as $rows)
+                            <li zone_id="{{$rows->id}}">
+                                <a href="#">{{$rows->name}}</a>
+                                <ul class="add_tree_{{$rows->id}}">
+                                    @foreach(getSystemDatas('ZN') as $rows)
+                                    <li zone_id="{{$rows->id}}">
+                                        <a href="#">{{$rows->name}}</a>
+                                        <ul class="add_tree_{{$rows->id}}">
+                                            
                                         </ul>
                                     </li>
-                                    <li class="divider"></li>
-                                    <li><label class="tree-toggler nav-header">Header 2</label>
-                                        <ul class="nav nav-list tree">
-                                            <li><a href="#">Link</a></li>
-                                            <li><a href="#">Link</a></li>
-                                            <li><label class="tree-toggler nav-header">Header 2.1</label>
-                                                <ul class="nav nav-list tree">
-                                                    <li><a href="#">Link</a></li>
-                                                    <li><a href="#">Link</a></li>
-                                                    <li><label class="tree-toggler nav-header">Header 2.1.1</label>
-                                                        <ul class="nav nav-list tree">
-                                                            <li><a href="#">Link</a></li>
-                                                            <li><a href="#">Link</a></li>
-                                                        </ul>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li><label class="tree-toggler nav-header">Header 2.2</label>
-                                                <ul class="nav nav-list tree">
-                                                    <li><a href="#">Link</a></li>
-                                                    <li><a href="#">Link</a></li>
-                                                    <li><label class="tree-toggler nav-header">Header 2.2.1</label>
-                                                        <ul class="nav nav-list tree">
-                                                            <li><a href="#">Link</a></li>
-                                                            <li><a href="#">Link</a></li>
-                                                        </ul>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </li>
+                                    @endforeach  
                                 </ul>
-                            </div>
-                        </div>
-
-                        <script class="cssdeck" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+                            </li>
+                            @endforeach                                       
+                        </ul>
+                        <!-- <script class="cssdeck" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
                         <script class="cssdeck" src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
                         <div id="" class="">
                             <ol class="lists">
@@ -139,7 +162,7 @@
                                 </li>
                                 @endforeach
                             </ol>
-                        </div>
+                        </div> -->
                     </div>                    
                     <div class="col-md-10">
                         <div class="portlet light bordered">
@@ -192,10 +215,88 @@
 <script src="{{asset('assets/global/plugins/jstree/dist/jstree.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('assets/global/plugins/jquery-nestable/jquery.nestable.js')}}" type="text/javascript"></script>
 <script type="text/javascript">		
-	$(function(){
-        $('label.tree-toggler').click(function () {
-            $(this).parent().children('ul.tree').toggle(300);
+    $.fn.extend({
+    treed: function (o) {
+      
+      var openedClass = 'glyphicon-minus-sign';
+      var closedClass = 'glyphicon-plus-sign';
+      
+      if (typeof o != 'undefined'){
+        if (typeof o.openedClass != 'undefined'){
+        openedClass = o.openedClass;
+        }
+        if (typeof o.closedClass != 'undefined'){
+        closedClass = o.closedClass;
+        }
+      };
+      
+        //initialize each of the top levels
+        var tree = $(this);
+        tree.addClass("tree");
+        tree.find('li').has("ul").each(function () {
+            var branch = $(this); //li with children ul
+            var zone_id = $(this).attr('zone_id');
+            branch.prepend("<i class='indicator glyphicon " + closedClass + "'></i>");
+            branch.addClass('branch');
+            branch.on('click', function (e) {
+                $.get('{{url("report/boqTreeView/getBoq")}}?zone_id='+zone_id,function(val){
+                    var str = '';
+                    $.each(val,function(index,DataRow){
+                        str+='<li class="branch" zone_id="'+zone_id+'" block_id="'+DataRow.block_id+'">';
+                            str+='<a href="#">';
+                                str+=DataRow.block_name;
+                            str+='</a>';
+                            str+='<ul class="add_tree_block_{{$rows->id}}"></ul>';
+                        str+='</li>';
+                    });
+                    // $('.add_tree_'+zone_id).html("");
+                    // $('.add_tree_'+zone_id).html(str);
+                });                
+                if (this == e.target) {
+                    var icon = $(this).children('i:first');
+                    icon.toggleClass(openedClass + " " + closedClass);
+                    $(this).children().children().toggle();
+                }
+            })
+            branch.children().children().toggle();
         });
+        //fire event from the dynamically added icon
+      tree.find('.branch .indicator').each(function(){
+        $(this).on('click', function () {
+            $(this).closest('li').click();
+        });
+      });
+        //fire event to open branch if the li contains an anchor instead of text
+        tree.find('.branch>a').each(function () {
+            $(this).on('click', function (e) {
+                $(this).closest('li').click();
+                e.preventDefault();
+            });
+        });
+        //fire event to open branch if the li contains a button instead of text
+        tree.find('.branch>button').each(function () {
+            $(this).on('click', function (e) {
+                $(this).closest('li').click();
+                e.preventDefault();
+            });
+        });
+    }
+});
+
+//Initialization of treeviews
+
+$('#tree1').treed();
+
+$('#tree2').treed({openedClass:'glyphicon-folder-open', closedClass:'glyphicon-folder-close'});
+
+$('#tree3').treed({openedClass:'glyphicon-chevron-right', closedClass:'glyphicon-chevron-down'});
+
+	$(function(){
+        $('.tree-toggle').click(function () {	$(this).parent().children('ul.tree').toggle(200);
+        });
+        $(function(){
+        $('.tree-toggle').parent().children('ul.tree').toggle(200);
+        })
         $('#permission_tree').nestable();
         $('.dd').nestable('collapseAll');
 		$("#btnBack, #btnCancel").on("click",function(){
