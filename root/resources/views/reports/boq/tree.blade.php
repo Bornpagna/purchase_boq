@@ -161,7 +161,7 @@
 		</div>
 	</div>
 </div>
-<div class="invoice" style="display: nones;">
+<div class="invoice" style="display: none;">
     @include('reports.header')
     <div class="invoice-items">
         <div class="div-table">
@@ -304,10 +304,11 @@
         });
     }
     function onPrint(house_id,condition){        
+        $('.invoice').css('display','block');
         if(condition==1){
             var strInvioce=$('.invoice').html();
             var styleInvoice = $('.style-invoice').html();
-            var popupWin = window.open('', '_blank', 'width=714,height=800');
+            var popupWin = window.open('', '_self', 'width=1000,height=800');
             var printInvoice = '<html>';
                 printInvoice += '<head>';
                 printInvoice += '<title></title>';
@@ -319,10 +320,18 @@
                 printInvoice += '</html>';
             popupWin.document.open();
             popupWin.document.write(printInvoice);
-            popupWin.print();
+            popupWin.print()
         }else{
             window.location.href ='{{url("report/boqTreeView/getBoqexport")}}?export=1&house_id='+house_id;
         }        
+    }
+    window.onafterprint = function(){
+        window.close();
+        $('.invoice').css('display','none');
+    }
+    window.close() = function(){
+        $('.invoice').css('display','none');
+        window.close();        
     }
 </script>
 @endsection()
