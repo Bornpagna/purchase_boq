@@ -8604,6 +8604,55 @@ class ReportController extends Controller
 		}
 		return response()->json($report);
 	}
+	public function getBoqprint(Request $request){
+		$report ="";
+		$project_id = Session::get('project');
+		if(!empty($request->house_id)){
+			$sql = "SELECT pr_boq_items.*,
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_boq_items.`working_type`) AS working_type,
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_items.`cat_id`) AS item_type,	
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`house_type`) AS house_type,
+			pr_items.`name`,
+			pr_items.`desc`,
+			pr_items.`code`,
+			pr_houses.`house_no`,
+			pr_houses.`house_desc`	
+			FROM pr_boq_items 
+			JOIN pr_houses
+				ON pr_houses.id = pr_boq_items.`house_id`
+			JOIN pr_boqs
+				ON pr_boqs.id = pr_boq_items.boq_id 
+			JOIN pr_items
+				ON pr_items.id=pr_boq_items.item_id	
+			WHERE pr_boqs.status = 1 AND pr_boq_items.house_id=$request->house_id";
+			$house = DB::select($sql);
+		}
+		$data = [
+			'title'       => trans('lang.tree_view'),
+			'icon'        => 'fa fa-shopping-cart',
+			'house'		  => $house,	
+			'small_title' => trans('lang.report'),
+			'background'  => '',
+			'link'        => [
+				'home'	=> [
+						'url' 		=> url('/'),
+						'caption' 	=> trans('lang.home'),
+				],
+				'report'	=> [
+						'url' 		=> '#',
+						'caption' 	=> trans('lang.report'),
+				],
+				'purchase'	=> [
+						'url' 		=> '#',
+						'caption' 	=> trans('lang.tree_view'),
+				],
+				'request'	=> [
+						'caption' 	=> trans('lang.request'),
+				],
+			],
+		];
+		return view('reports.boq.print_tree')->with($data);
+	}
 	public function getBoqexport(Request $request){
 		$report ="";
 		$project_id = Session::get('project');
