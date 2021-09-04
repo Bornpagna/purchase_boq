@@ -85,6 +85,9 @@
             padding:0px 0px 0px 0px;
             outline: 0;
         }
+        h1.report-title{
+            font-size:15px !important;
+        }
 	</style>
 @endsection
 
@@ -120,14 +123,14 @@
                                     <i class="icon-social-dribbble font-purple-soft"></i>
                                     <span class="caption-subject font-purple-soft bold uppercase"> BOQ & ITEM </span>
                                 </div>
-                                <!-- <div class="actions">
-                                    <a title="{{trans('lang.print')}}" onclick="onPrint(this);" version="print" class="btn btn-circle btn-icon-only btn-default">
+                                <div class="actions actionPD">
+                                    <!-- <a title="{{trans('lang.print')}}" onclick="onPrint(this);" version="print" class="btn btn-circle btn-icon-only btn-default">
                                         <i class="fa fa-print"></i>
                                     </a>
                                     <a title="{{trans('lang.download')}}" onclick="onPrint(this);" version="excel"  class="btn btn-circle btn-icon-only btn-default">
                                         <i class="fa fa-file-excel-o"></i>
-                                    </a>
-                                </div> -->
+                                    </a> -->
+                                </div>
                             </div>
                             <div class="portlet-body">
                                 <div class="div-table">
@@ -157,6 +160,32 @@
             </div>
 		</div>
 	</div>
+</div>
+<div class="invoice" style="display: nones;">
+    @include('reports.header')
+    <div class="invoice-items">
+        <div class="div-table">
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th width="10%" class="all">{{ trans('lang.working_type') }}</th>
+                        <th width="10%" class="all">{{ trans('lang.house_type') }}</th>
+                        <th width="10%" class="all">{{ trans('lang.house_no') }}</th>
+                        <th width="10%" class="all">{{ trans('lang.item_type') }}</th>
+                        <th width="10%" class="all">{{ trans('lang.item_code') }}</th>
+                        <th width="10%" class="all">{{ trans('lang.item_name') }}</th>
+                        <th width="10%" class="all">{{ trans('rep.boq_qty') }}</th>
+                        <th width="10%" class="all">{{ trans('rep.add_qty') }}</th>
+                        <th width="10%" class="all">{{ trans('lang.units') }}</th>
+                        <th width="10%" class="all">{{ trans('lang.price') }}</th>
+                        <!-- <th width="10%" class="all">{{ trans('lang.total') }}</th> -->
+                    </tr>
+                </thead>
+                <tbody class="invoice-table-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+    @include('reports.footer')
 </div>
 <!-- Modal Varian -->
 @endsection()
@@ -230,8 +259,17 @@
         
 	});
     function geBOQFromHouse (house_id){
+        $('.actionPD').html();
+        var str='<a title="{{trans('lang.print')}}" onclick="onPrint('+house_id+',1);" version="print" class="btn btn-circle btn-icon-only btn-default" style="margin-right: 5px;">';
+                str+='<i class="fa fa-print"></i>';
+            str+='</a>';
+            str+='<a title="{{trans('lang.download')}}" onclick="onPrint('+house_id+',2);" version="excel"  class="btn btn-circle btn-icon-only btn-default">';
+                str+='<i class="fa fa-file-excel-o"></i>';
+            str+='</a>';
+        $('.actionPD').html(str);
+        table.clear().draw();
         $.get('{{url("report/boqTreeView/getBoq")}}?house_id='+house_id,function(val){        
-            $.each(val,function(index,DataRow){
+            $.each(val,function(index,DataRow){               
                 table.row.add([
                     DataRow.working_type,
                     DataRow.house_type,
@@ -246,8 +284,45 @@
                     // formatDollar((parseFloat(DataRow.qty_std+DataRow.qty_add)*parseFloat(DataRow.cost))),
                 ]).draw();
             });
+            var strtb = '';
+            $.each(val,function(index,DataRow){
+                strtb+='<tr>';
+                    strtb+='<td style="text-align: center;">'+DataRow.working_type+'</td>';
+                    strtb+='<td style="text-align: center;">'+DataRow.house_type+'</td>';
+                    strtb+='<td style="text-align: center;">'+DataRow.house_no+'</td>';
+                    strtb+='<td style="text-align: center;">'+DataRow.item_type+'</td>';
+                    strtb+='<td style="text-align: center;">'+DataRow.code+'</td>';
+                    strtb+='<td style="text-align: center;">'+DataRow.name+'</td>';
+                    strtb+='<td style="text-align: center;">'+DataRow.qty_std+'</td>';
+                    strtb+='<td style="text-align: center;">'+DataRow.qty_add+'</td>'; 
+                    strtb+='<td style="text-align: center;">'+DataRow.unit+'</td>'; 
+                    strtb+='<td style="text-align: center;">'+formatDollar(DataRow.cost)+'</td>'; 
+                strtb+='</tr>';
+            });
+            $('.invoice-table-tbody').html();
+            $('.invoice-table-tbody').html(strtb);
         });
     }
-   
+    function onPrint(house_id,condition){        
+        if(condition==1){
+            var strInvioce=$('.invoice').html();
+            var styleInvoice = $('.style-invoice').html();
+            var popupWin = window.open('', '_blank', 'width=714,height=800');
+            var printInvoice = '<html>';
+                printInvoice += '<head>';
+                printInvoice += '<title></title>';
+                printInvoice += styleInvoice;
+                printInvoice += '</head>';
+                printInvoice += '<body>';
+                printInvoice += strInvioce;
+                printInvoice += '</body>';
+                printInvoice += '</html>';
+            popupWin.document.open();
+            popupWin.document.write(printInvoice);
+            popupWin.print();
+        }else{
+            window.location.href ='{{url("report/boqTreeView/getBoqexport")}}?export=1&house_id='+house_id;
+        }        
+    }
 </script>
 @endsection()

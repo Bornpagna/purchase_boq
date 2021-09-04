@@ -8586,7 +8586,7 @@ class ReportController extends Controller
 			$sql = "SELECT pr_boq_items.*,
 			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_boq_items.`working_type`) AS working_type,
 			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_items.`cat_id`) AS item_type,	
-			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`house_type`) AS house_type,
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`house_type`) AS house_type,
 			pr_items.`name`,
 			pr_items.`desc`,
 			pr_items.`code`,
@@ -8603,5 +8603,82 @@ class ReportController extends Controller
 			$report = DB::select($sql);
 		}
 		return response()->json($report);
+	}
+	public function getBoqexport(Request $request){
+		$report ="";
+		$project_id = Session::get('project');
+		if(!empty($request->house_id)){
+			$sql = "SELECT pr_boq_items.*,
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_boq_items.`working_type`) AS working_type,
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_items.`cat_id`) AS item_type,	
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`house_type`) AS house_type,
+			pr_items.`name`,
+			pr_items.`desc`,
+			pr_items.`code`,
+			pr_houses.`house_no`,
+			pr_houses.`house_desc`	
+			FROM pr_boq_items 
+			JOIN pr_houses
+				ON pr_houses.id = pr_boq_items.`house_id`
+			JOIN pr_boqs
+				ON pr_boqs.id = pr_boq_items.boq_id 
+			JOIN pr_items
+				ON pr_items.id=pr_boq_items.item_id	
+			WHERE pr_boqs.status = 1 AND pr_boq_items.house_id=$request->house_id";
+			$report = DB::select($sql);
+		}
+		Excel::create('Tree BOQ.export_'.date('Y_m_d_H_i_s'),function($excel) use($report){
+			$excel->setCreator(Auth::user()->name)->setCompany(config('app.name'));
+			$excel->sheet('Tree BOQ Info',function($sheet) use($report){
+				$cells = 1;
+				$sheet->cell(('A'.$cells),"List BOQ by House");
+				$sheet->mergeCells('A1:J1');
+				$sheet->cell(("A1"),function($cells){
+					$cells->setFontSize(15);;
+					$cells->setAlignment('center');
+					$cells->setFontWeight('bold');
+					$cells->setFontFamily('Khmer OS Muol');
+				});
+				$cells++;
+				$sheet->cell('A'.$cells,trans('lang.working_type'));
+				$sheet->cell('B'.$cells,trans('lang.house_type'));
+				$sheet->cell('C'.$cells,trans('lang.house_no'));
+				$sheet->cell('D'.$cells,trans('lang.item_type'));
+				$sheet->cell('E'.$cells,trans('lang.item_code'));
+				$sheet->cell('F'.$cells,trans('lang.item_name'));
+				$sheet->cell('G'.$cells,trans('lang.boq_qty'));
+				$sheet->cell('H'.$cells,trans('lang.add_qty'));
+				$sheet->cell('I'.$cells,trans('lang.units'));
+				$sheet->cell('J'.$cells,trans('lang.price'));	
+				$sheet->cell(("A$cells:J$cells"),function($cells){
+					$cells->setBackground('#337ab7');
+					$cells->setAlignment('center');
+					$cells->setFontFamily('Khmer OS Battambang');
+					$cells->setFontColor('#ffffff');
+				});			
+				$i = 1;
+				if(count($report)>0){
+					foreach ($report as $value) {
+						$cells++;
+						$sheet->cell('A'.($cells),$value->working_type);
+						$sheet->cell('B'.($cells),$value->house_type);
+						$sheet->cell('C'.($cells),$value->house_no);
+						$sheet->cell('D'.($cells),$value->item_type);
+						$sheet->cell('E'.($cells),$value->code);
+						$sheet->cell('F'.($cells),$value->name);
+						$sheet->cell('G'.($cells),$value->qty_std);
+						$sheet->cell('H'.($cells),$value->qty_add);
+						$sheet->cell('I'.($cells),$value->unit);
+						$sheet->cell('J'.($cells),$value->cost);
+						$sheet->cell(("A$cells:J$cells"),function($cells){
+							$cells->setBorder('thin', 'thin', 'thin', 'thin');
+							$cells->setAlignment('center');
+							$cells->setFontFamily('Khmer OS Battambang');
+							$cells->setFontColor('#000000');
+						});			
+					}
+				}
+			});
+		})->download('xlsx');
 	}
 }
