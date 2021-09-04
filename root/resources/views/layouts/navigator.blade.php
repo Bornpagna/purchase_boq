@@ -422,6 +422,7 @@
 			<ul class="sub-menu">
 				@if(hasRole('report_boq'))
 					<li class="nav-item start <?php if(Request::is('report/sub_boq') 
+							|| Request::is('report/boqTreeView') 
 							|| Request::is('report/boq_detail') 
 							|| Request::is('report/boq/reportRemainingBOQ')
 							|| Request::is('report/boq/reportRemainingBOQTotal')
@@ -430,12 +431,22 @@
 							<i class="fa fa-bitcoin"></i>
 							<span class="title">{{ trans('lang.boq') }}</span>
 							<span class="arrow <?php if(Request::is('report/sub_boq') 
+								|| Request::is('report/boqTreeView') 
 								|| Request::is('report/boq_detail') 
 								|| Request::is('report/boq/reportRemainingBOQ')
 								|| Request::is('report/boq/reportRemainingBOQTotal')
 							){echo "open";} ?>"></span>
 						</a>
 						<ul class="sub-menu">
+							@if(hasRole('report_boq_detail'))
+								<li class="nav-item <?php if(Request::is('report/boqTreeView')){echo "active open";} ?>">
+									<a href="{{url('report/boqTreeView')}}" class="nav-link ">
+										<i class="fa fa-building-o"></i>
+										<span class="title">{{ trans('lang.tree_view') }}</span>
+										<span class="<?php if(Request::is('report/boq_detail')){echo "selected";} ?>"></span>
+									</a>
+								</li> 
+							@endif
 							@if(hasRole('report_boq_detail'))
 								<li class="nav-item <?php if(Request::is('report/boq_detail')){echo "active open";} ?>">
 									<a href="{{url('report/boq_detail')}}" class="nav-link ">

@@ -387,7 +387,6 @@ function getBOQs($id=NULL){
 		(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_boqs`.`street_id`) AS street_name,
 		 pr_boqs.trans_by AS trans_by_id,
 		 (SELECT pr_users.`name` FROM pr_users WHERE pr_users.`id` = pr_boqs.`trans_by`) AS `trans_by`
-
 	FROM `pr_boqs` where pr_boqs.status = 1 ".$where;
 	return DB::select($sql);
 }

@@ -8453,7 +8453,6 @@ class ReportController extends Controller
 		}else{
 			$warehouse = false;
 		}
-
 		$data = [
 			'report' => $report,
 			'title'  => trans('lang.inventory_valuation_summary'),
@@ -8464,5 +8463,222 @@ class ReportController extends Controller
 		];
 
 		return view('reports.inventory.print.inventory_valuation_summary_print')->with($data);
+	}
+	public function boqTreeView(Request $request){
+		$pro_id = Session::get('project');
+		
+		$house = DB::table('houses')
+		->select(
+			'houses.*',
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`zone_id`) AS zone_name'),
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`block_id`) AS block_name'),
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`building_id`) AS building_name'),
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`street_id`) AS street_name'),
+			DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`house_type`) AS house_type_name')
+		)->where('status',1)->get();
+
+		$zone = DB::table('system_datas')->where('type','ZN')->where('parent_id',$pro_id)->where('status','1')->get();
+		$li_html='';
+		foreach($zone as $row_zone){
+			$li_html.='<li><a>'.$row_zone->name.'</a>';
+				$li_html.='<ul>';
+					$block = DB::table('houses')->select('houses.zone_id','houses.block_id',DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`block_id`) AS block_name'))
+					->where('status',1)->where('houses.zone_id',$row_zone->id)
+					->groupBy('houses.zone_id')->get();
+					foreach($block as $blocks){
+						$li_html.='<li>';
+							$li_html.='<a>'.$blocks->block_name.'</a>';
+							$li_html.='<ul>';
+								$building = DB::table('houses')->select('houses.zone_id','houses.block_id','houses.building_id',
+								DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`building_id`) AS building_name'))
+								->where('status',1)->where('houses.zone_id',$row_zone->id)->where('houses.block_id',$blocks->block_id)
+								->groupBy('houses.block_id')->get();
+								foreach($building as $buildings){
+									$li_html.='<li>';
+										$li_html.='<a>'.$buildings->building_name.'</a>';
+										$li_html.='<ul>';
+											$street = DB::table('houses')->select('houses.zone_id','houses.block_id','houses.building_id','houses.street_id',
+											DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`street_id`) AS street_name'))
+											->where('status',1)->where('houses.zone_id',$row_zone->id)->where('houses.block_id',$blocks->block_id)
+											->where('houses.building_id',$buildings->building_id)
+											->groupBy('houses.building_id')->get();
+											foreach($street as $streets){
+												$li_html.='<li>';
+													$li_html.='<a>'.$streets->street_name.'</a>';
+													$li_html.='<ul>';
+														$house_type = DB::table('houses')->select('houses.zone_id','houses.block_id','houses.building_id','houses.street_id','houses.house_type',
+														DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`house_type`) AS house_type_name'))
+														->where('status',1)->where('houses.zone_id',$row_zone->id)->where('houses.block_id',$blocks->block_id)
+														->where('houses.building_id',$buildings->building_id)->where('houses.street_id',$streets->street_id)
+														->groupBy('houses.street_id')->get();
+														foreach($house_type as $house_types){
+															$li_html.='<li>';
+																$li_html.='<a>'.$house_types->house_type_name.'</a>';
+																$li_html.='<ul>';
+																	$house = DB::table('houses')->select('houses.*')
+																	->where('status',1)->where('houses.zone_id',$row_zone->id)->where('houses.block_id',$blocks->block_id)
+																	->where('houses.building_id',$buildings->building_id)->where('houses.street_id',$streets->street_id)->get();
+																	foreach($house as $houses){
+																		$li_html.='<li>';
+																			$li_html.='<a style="padding-left:7px;" onclick="geBOQFromHouse('.$houses->id.')">'.$houses->house_no.'</a>';
+																		$li_html.='</li>';
+																	}		
+																$li_html.='</ul>';
+															$li_html.='</li>';
+														}		
+													$li_html.='</ul>';
+												$li_html.='</li>';
+											}		
+										$li_html.='</ul>';
+									$li_html.='</li>';
+								}		
+							$li_html.='</ul>';	
+						$li_html.='</li>';
+					}		
+				$li_html.='</ul>';	
+			$li_html.='</li>';	
+		}
+		$data = [
+			'title'       => trans('lang.tree_view'),
+			'icon'        => 'fa fa-shopping-cart',
+			// 'house'       => $house,
+			'li_html'     =>$li_html,
+			'small_title' => trans('lang.report'),
+			'background'  => '',
+			'link'        => [
+				'home'	=> [
+						'url' 		=> url('/'),
+						'caption' 	=> trans('lang.home'),
+				],
+				'report'	=> [
+						'url' 		=> '#',
+						'caption' 	=> trans('lang.report'),
+				],
+				'purchase'	=> [
+						'url' 		=> '#',
+						'caption' 	=> trans('lang.tree_view'),
+				],
+				'request'	=> [
+						'caption' 	=> trans('lang.request'),
+				],
+			],
+		];
+		
+		return view('reports.boq.tree')->with($data);
+	}
+	public function getBoq(Request $request){
+		$report ="";
+		$project_id = Session::get('project');
+		if(!empty($request->house_id)){
+			// $sql = "SELECT (SELECT `pr_projects`.`name` FROM `pr_projects` WHERE `pr_projects`.`id`=$project_id)AS project,boq.`trans_by`, 
+			// pr_boq_houses.`house_id`,
+			// (SELECT `pr_houses`.`house_no` FROM `pr_houses` WHERE `pr_houses`.id=pr_boq_houses.`house_id`)AS house_no, 
+			// (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_houses`.`house_type` FROM `pr_houses` WHERE `pr_houses`.`id`=pr_boq_houses.`house_id`))AS house_type, boqi.`item_id`,
+			// (SELECT `pr_items`.`code` FROM `pr_items` WHERE `pr_items`.`id`=boqi.item_id)AS item_code, (SELECT `pr_items`.`name` FROM `pr_items` WHERE `pr_items`.`id`=boqi.item_id)AS item_name, 
+			// (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`))AS item_type,
+			// (SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`)AS item_type_id,
+			// (SELECT `pr_system_datas`.`desc` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`))AS item_type_desc,
+			// (SELECT `pr_items`.`cost_purch` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id` AND `pr_items`.`unit_purch`=boqi.`unit`)AS item_price, boqi.`qty_std`, boqi.`qty_add`, 
+			// (SELECT `pr_units`.`from_desc` FROM `pr_units` WHERE `pr_units`.`from_code`=boqi.`unit` LIMIT 1)AS unit 
+			// FROM `pr_boqs` AS boq 
+			// JOIN pr_boq_houses ON `pr_boq_houses`.boq_id = boq.id
+			// JOIN `pr_boq_items` AS boqi ON boqi.`boq_house_id` WHERE  pr_boq_houses.`house_id`= $request->house_id";
+			$sql = "SELECT pr_boq_items.*,
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_boq_items.`working_type`) AS working_type,
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_items.`cat_id`) AS item_type,	
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`house_type`) AS house_type,
+			pr_items.`name`,
+			pr_items.`desc`,
+			pr_items.`code`,
+			pr_houses.`house_no`,
+			pr_houses.`house_desc`	
+			FROM pr_boq_items 
+			JOIN pr_houses
+				ON pr_houses.id = pr_boq_items.`house_id`
+			JOIN pr_boqs
+				ON pr_boqs.id = pr_boq_items.boq_id 
+			JOIN pr_items
+				ON pr_items.id=pr_boq_items.item_id	
+			WHERE pr_boqs.status = 1 AND pr_boq_items.house_id=$request->house_id";
+			$report = DB::select($sql);
+		}
+		return response()->json($report);
+	}
+	public function getBoqexport(Request $request){
+		$report ="";
+		$project_id = Session::get('project');
+		if(!empty($request->house_id)){
+			$sql = "SELECT pr_boq_items.*,
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_boq_items.`working_type`) AS working_type,
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_items.`cat_id`) AS item_type,	
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`house_type`) AS house_type,
+			pr_items.`name`,
+			pr_items.`desc`,
+			pr_items.`code`,
+			pr_houses.`house_no`,
+			pr_houses.`house_desc`	
+			FROM pr_boq_items 
+			JOIN pr_houses
+				ON pr_houses.id = pr_boq_items.`house_id`
+			JOIN pr_boqs
+				ON pr_boqs.id = pr_boq_items.boq_id 
+			JOIN pr_items
+				ON pr_items.id=pr_boq_items.item_id	
+			WHERE pr_boqs.status = 1 AND pr_boq_items.house_id=$request->house_id";
+			$report = DB::select($sql);
+		}
+		Excel::create('Tree BOQ.export_'.date('Y_m_d_H_i_s'),function($excel) use($report){
+			$excel->setCreator(Auth::user()->name)->setCompany(config('app.name'));
+			$excel->sheet('Tree BOQ Info',function($sheet) use($report){
+				$cells = 1;
+				$sheet->cell(('A'.$cells),"List BOQ by House");
+				$sheet->mergeCells('A1:J1');
+				$sheet->cell(("A1"),function($cells){
+					$cells->setFontSize(15);;
+					$cells->setAlignment('center');
+					$cells->setFontWeight('bold');
+					$cells->setFontFamily('Khmer OS Muol');
+				});
+				$cells++;
+				$sheet->cell('A'.$cells,trans('lang.working_type'));
+				$sheet->cell('B'.$cells,trans('lang.house_type'));
+				$sheet->cell('C'.$cells,trans('lang.house_no'));
+				$sheet->cell('D'.$cells,trans('lang.item_type'));
+				$sheet->cell('E'.$cells,trans('lang.item_code'));
+				$sheet->cell('F'.$cells,trans('lang.item_name'));
+				$sheet->cell('G'.$cells,trans('lang.boq_qty'));
+				$sheet->cell('H'.$cells,trans('lang.add_qty'));
+				$sheet->cell('I'.$cells,trans('lang.units'));
+				$sheet->cell('J'.$cells,trans('lang.price'));	
+				$sheet->cell(("A$cells:J$cells"),function($cells){
+					$cells->setBackground('#337ab7');
+					$cells->setAlignment('center');
+					$cells->setFontFamily('Khmer OS Battambang');
+					$cells->setFontColor('#ffffff');
+				});			
+				$i = 1;
+				if(count($report)>0){
+					foreach ($report as $value) {
+						$cells++;
+						$sheet->cell('A'.($cells),$value->working_type);
+						$sheet->cell('B'.($cells),$value->house_type);
+						$sheet->cell('C'.($cells),$value->house_no);
+						$sheet->cell('D'.($cells),$value->item_type);
+						$sheet->cell('E'.($cells),$value->code);
+						$sheet->cell('F'.($cells),$value->name);
+						$sheet->cell('G'.($cells),$value->qty_std);
+						$sheet->cell('H'.($cells),$value->qty_add);
+						$sheet->cell('I'.($cells),$value->unit);
+						$sheet->cell('J'.($cells),$value->cost);
+						$sheet->cell(("A$cells:J$cells"),function($cells){
+							$cells->setBorder('thin', 'thin', 'thin', 'thin');
+							$cells->setAlignment('center');
+							$cells->setFontFamily('Khmer OS Battambang');
+							$cells->setFontColor('#000000');
+						});			
+					}
+				}
+			});
+		})->download('xlsx');
 	}
 }

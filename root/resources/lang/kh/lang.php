@@ -536,4 +536,5 @@ return [
 	'remain_request'	=>	'ស្នើរសុំនៅសល់',
 	'revise_count'		=>	'ចំនួន Revise',
 	'document_support'	=>	'ហ្វាល់សំអាង',
+	'tree_view' => 'ទិដ្ឋភាពដើមឈើ',
 ];
