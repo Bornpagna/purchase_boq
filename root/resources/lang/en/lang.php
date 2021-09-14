@@ -94,6 +94,8 @@ return [
 	'con_password_not_match' => 'The password confirmation does not match.',
 	'con_password_min_max'   => 'The password confirm must be between 6 and 15 characters.',
 	'condition'				 =>	'Condition',
+	'closed_qty'			 =>	'Closeed Qty',
+	'close_make_new_order'	 => 'Close & Make new Order',
 	/* D */
 	'day_ago'                                       => 'day ago',
 	'driver'                                        => 'Driver',
@@ -130,6 +132,7 @@ return [
 	'dublicate_at_record'                           => '*Dublicate at record ',  
 	'delivery_qty_can_not_greater_then_ordered_qty' => '*Delivery Qty can\'t greater then ordered qty',	
 	'document_support'								=>	'Document Support',
+	'do_you_want_to_make_new_order'  				=> 'Do you want to make order for left items.',
 /* E */
 	'enter_boq'          => 'Enter BOQ',
 	'engineer'           => 'Engineer',
@@ -224,7 +227,7 @@ return [
 	'make_order'	  => 'Make Order',
 	'manual_revised_boq'	=>	'Manual Revise',
 	'manual_input'	  => 'Manual Input',
-	
+	'make_delivery'		=> 'Make Delivery',
 /* N */
 	'notification'               => 'Notifications',
 	'name'                       => 'Name',
@@ -246,9 +249,10 @@ return [
 	'order_date'                                 => 'Order Date',
 	'order_no'                                   => 'Order No',
 	'on_house'                                   => 'On house',
-	'on_hand'                                   => 'On Hand',
+	'on_hand'                                    => 'On Hand',
 	'other'                                      => 'Other',
 	'ordered'									 => 'Ordered',
+	'ordered_qty'								 =>	'Ordered Qty',
 /* P */
 	'period'                => 'Period',
 	'parent_role'           => 'Parent role',
@@ -280,6 +284,7 @@ return [
 	'po_list'				=> 'Purchase Order List',
 	'preview'				=> 'Preview',
 	'please_select_working_type'	=>	'Please Select Working Type',
+	'parent'				=>	'Parent',
 /* Q */
 	'qty'         => 'Qty',
 	'qty_std'     => 'Qty/Std',
@@ -329,6 +334,7 @@ return [
 	'note_revise_boq_house'							=> 'If you choose this type of revising is effect for only house you selected.',
 	'remain_request'								=>	'Remain Request',
 	'revise_count'									=>	'Revise Count',
+	'recieve_qty'									=>	'Recieve Qty',
 /* S */
 	'set_permission_on_group'  => 'set permission on group',
 	'set_permission_on_user'   => 'set permission on user',
@@ -402,9 +408,10 @@ return [
 	'total_after_deposit_and_discount' => 'Total After Deposit & Discount',
 	'trans_line' => 'Trans Line',
 	'tree_view' => 'Tree View',
+	'order_closed_message'			   => 'This order was Closed and Order was partial Deliver',
 	/* U */
 	'url'                => 'URL',
-	'units'              => 'Unit',
+	'units'              => 'UOM',
 	'units_list'         => 'Units List',
 	'usage'              => 'Usage',
 	'usage_list'         => 'Usage List',
@@ -442,6 +449,7 @@ return [
 	'wrong_file'     => 'Upload wrong file!',
 	'working_type'	 =>	'Working Type',
 	'warning'		 => 'Warning',
+	'working_type_list'	=> 'Working Type List',
 /* X */
 /* Y */
 	'yes' => 'Yes',
@@ -608,7 +616,7 @@ return [
 	'out_of_boq'  => 'Out of BOQ',
 	'not_set_boq'  => 'BOQ not set',
 	'normal'  => 'Normal',
-	'usage_with_policy'  => 'Usage by Zone',
+	'usage_with_policy'  => 'Usage by Building',
 	// Report Usage with ,BOQ
 	'report_usage_with_boq' => 'Usage VS BOQ',
 	'report_remaining_boq'  => 'Remaining BOQ (Each House)',

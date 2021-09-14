@@ -15,8 +15,10 @@
 		<li class="nav-item <?php if(
 			Request::is('usageFormula') ||
 			Request::is('zone') || 
-			Request::is('block') || 
+			Request::is('block') ||
+			Request::is('building') ||  
 			Request::is('street') || 
+			Request::is('working_type') ||
 			Request::is('constr') || 
 			Request::is('warehouse')){echo "active open";} ?>">
 			<a  class="nav-link nav-toggle">
@@ -29,6 +31,7 @@
 					Request::is('block') || 
 					Request::is('building') || 
 					Request::is('street') || 
+					Request::is('working_type') || 
 					Request::is('constr') || 
 					Request::is('warehouse')){echo "open";}?>"></span>
 			</a>
@@ -72,6 +75,15 @@
 						<i class="fa fa-road"></i>
 						<span class="title">{{ trans('lang.street') }}</span>
 						<?php if(Request::is('street')){echo '<span class="selected"></span>';} ?>
+					</a>
+				</li>
+			@endif
+			@if(hasRole('working_type'))
+				<li class="nav-item <?php if(Request::is('working_type')){echo "active open";} ?>">
+					<a href="{{url('working_type')}}" class="nav-link ">
+						<i class="fa fa-road"></i>
+						<span class="title">{{ trans('lang.working_type') }}</span>
+						<?php if(Request::is('working_type')){echo '<span class="selected"></span>';} ?>
 					</a>
 				</li>
 			@endif

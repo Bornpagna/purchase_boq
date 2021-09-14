@@ -87,7 +87,7 @@
                         </div>
                         {{-- @endif --}}
                         <!-- Street -->
-                        <div class="col-md-4">
+                        {{-- <div class="col-md-4">
                             <div class="form-group">
                                 <label for="street_id" class="control-label" style="text-align: left;"><strong>{{trans('lang.street')}}</strong></label>
                                 <select class="form-control select2 street_id" name="street_id" id="street_id">
@@ -103,7 +103,7 @@
                                     <option value=""></option>
                                 </select>
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                     <!-- Generate Button -->
                     <div class="row">
@@ -242,14 +242,14 @@
             complete: complete
         });
     }
-    getStreetsSuccess = function(response){
-        $(".street_id").empty();
-		$(".street_id").select2('val', null);
-        $(".street_id").append($('<option></option>').val('').text(''));
-        $.each(response,function(i,val){
-            $(".street_id").append($('<option></option>').val(val.id).text(val.name));
-        });
-    }
+    // getStreetsSuccess = function(response){
+    //     $(".street_id").empty();
+	// 	$(".street_id").select2('val', null);
+    //     $(".street_id").append($('<option></option>').val('').text(''));
+    //     $.each(response,function(i,val){
+    //         $(".street_id").append($('<option></option>').val(val.id).text(val.name));
+    //     });
+    // }
     getStreetsComplete = function(response){
         $(".street_id").select2('val', null);
     }
@@ -305,6 +305,7 @@
             building_id : null,
             street_id: null,
             house_type: null,
+            // house_policy : 1
         };
         const zoneID    = $('.zone_id').val();
         const blockID   = $('.block_id').val();
@@ -475,7 +476,7 @@
 
     $(document).ready(function(){
         $(".select2").select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
-        getStreets(getStreetsSuccess,getStreetsComplete);
+        // getStreets(getStreetsSuccess,getStreetsComplete);
         // getHouseTypes(getHouseTypesSuccess,getHouseTypesComplete);
         if('{{getSetting()->allow_zone}}' == 1){
             getZones(getZonesSuccess,getZonesComplete);
@@ -489,8 +490,8 @@
                 const zoneID = $(this).val();
                 if(zoneID){
                     getBlocksByZoneID(zoneID,getBlocksSuccess,getBlocksComplete);
-                    getStreetsByZoneID(zoneID,getStreetsSuccess,getStreetsComplete);
-                    getHouseTypesByZoneID(zoneID,getHouseTypesSuccess,getHouseTypesComplete);
+                    // getStreetsByZoneID(zoneID,getStreetsSuccess,getStreetsComplete);
+                    // getHouseTypesByZoneID(zoneID,getHouseTypesSuccess,getHouseTypesComplete);
                 }
             });
         }
@@ -505,8 +506,8 @@
                 }
                 const blockID = $(this).val();
                 if(blockID){
-                    getStreetsByBlockID(blockID,getStreetsSuccess,getStreetsComplete);
-                    getHouseTypesByBlockID(blockID,getHouseTypesSuccess,getHouseTypesComplete);
+                    // getStreetsByBlockID(blockID,getStreetsSuccess,getStreetsComplete);
+                    // getHouseTypesByBlockID(blockID,getHouseTypesSuccess,getHouseTypesComplete);
                 }
             });
         }
@@ -522,12 +523,12 @@
             if(building_id){
                 $('#generate').removeClass("disabled");
             }
-            getHouseType();
+            // getHouseType();
         });
         $('.street_id').on('change',function(){
             const streetID = $(this).val();
             if(streetID){
-                getHouseTypesByStreetID(streetID,getHouseTypesSuccess,getHouseTypesComplete);
+                // getHouseTypesByStreetID(streetID,getHouseTypesSuccess,getHouseTypesComplete);
             }
         });     
 

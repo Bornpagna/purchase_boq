@@ -485,7 +485,7 @@ return [
 	'out_of_boq'  => 'ប្រើប្រាស់ BOQ អស់',
 	'not_set_boq'  => 'មិនបានកំណត់ BOQ',
 	'normal'  => 'ធម្មតា',
-	'usage_with_policy'  => 'បើកឥវ៉ាន់តាមតំបន់',
+	'usage_with_policy'  => 'បើកសម្ភារៈតាមអគារ',
 	// Report Usage with ,BOQ
 	'report_usage_with_boq' => 'ដកឥវ៉ាន់ប្រើធៀបជាមួយ BOQ',
 	'report_remaining_boq'  => 'BOQ នៅសល់(តាមផ្ទះ)',
@@ -537,4 +537,12 @@ return [
 	'revise_count'		=>	'ចំនួន Revise',
 	'document_support'	=>	'ហ្វាល់សំអាង',
 	'tree_view' => 'ទិដ្ឋភាពដើមឈើ',
+	'ordered_qty'		=>	'ចំនួនបានបញ្ជាទិញ',
+	'closed_qty'		=>	'ចំនួនបិទការស្នើសុំទិញ',
+	'order_closed_message'			   => 'ការកម្មង់មួយនេះត្រូវបានបិទនិងមានសម្ភារៈនៅសល់។',
+	'do_you_want_to_make_new_order'  => 'តើអ្នកចង់បង្កើតការកម្មង់សម្រាប់សម្ភារៈដែរនៅសល់ដែលឫទេ។',
+	'make_delivery'		=> 'បង្កើតការទទួលទំនិញ',
+	'recieve_qty'		=>	'ចំនួនទទួល',
+	'working_type_list'	=> 'បញ្ចីប្រភេទការងារ',
+	'parent'			=>	'Parent',
 ];

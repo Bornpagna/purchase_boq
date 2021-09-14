@@ -77,6 +77,8 @@ class DeliveryController extends Controller
 				],
 			],
 			'rounte'		=> url("stock/deliv/dt"),
+			'rounteOrder'	=> url("purch/order/dt/1/1"),
+			
 			''	=> url(''),
 		];
 		
@@ -139,6 +141,38 @@ class DeliveryController extends Controller
 				'obj'	=> $obj,
 			];
 			return view('stock.delivery.entry.edit',$data);
+		}else{
+			return redirect()->back();
+		}
+	}
+
+	public function makeDelivery(Request $request, $id){
+		$id = $id;
+		$obj = Order::find($id);
+		if($obj){
+			$data = [
+				'title'			=> trans('lang.delivery'),
+				'icon'			=> 'fa fa-edit',
+				'small_title'	=> trans('lang.edit'),
+				'background'	=> '',
+				'link'			=> [
+					'home'	=> [
+							'url' 		=> url('/'),
+							'caption' 	=> trans('lang.home'),
+					],
+					'index'	=> [
+							'url' 		=> url('stock/deliv'),
+							'caption' 	=> trans('lang.delivery'),
+					],
+					'edit'	=> [
+							'caption' 	=> trans('lang.edit'),
+					],
+				],
+				'rounteSave'	=> url('stock/deliv/save'),		
+				'rounteBack'	=> url('stock/deliv'),		
+				'obj'	=> $obj,
+			];
+			return view('stock.delivery.entry.make_delivery',$data);
 		}else{
 			return redirect()->back();
 		}
@@ -249,22 +283,24 @@ class DeliveryController extends Controller
 	}
 
     public function save(Request $request){
+		
 		$rules = [
 			'reference_no' 	=>'required|max:20|unique_delivery',
 			'trans_date' 	=>'required|max:20',
 			'supplier' 		=>'required|max:11',
 			'po_no' 		=>'required|max:11',
 		];
-		if(count($request['line_index']) > 0){
-			for($i=0;$i<count($request['line_index']);$i++){
-				$rules['line_index.'.$i]		= 'required';
-				$rules['line_item.'.$i]			= 'required|max:11';
-				$rules['line_unit.'.$i]			= 'required';
-				$rules['line_qty.'.$i]			= 'required';
-				$rules['line_warehouse.'.$i]	= 'required|max:11';
-			}
-		}
-        Validator::make($request->all(),$rules)->validate();
+		// if(count($request['line_index']) > 0){
+		// 	for($i=0;$i<count($request['line_index']);$i++){
+		// 		$rules['line_index.'.$i]		= 'required';
+		// 		$rules['line_item.'.$i]			= 'required|max:11';
+		// 		$rules['line_unit.'.$i]			= 'required';
+		// 		$rules['line_qty.'.$i]			= 'required';
+		// 		$rules['line_warehouse.'.$i]	= 'required|max:11';
+		// 	}
+		// }
+        // Validator::make($request->all(),$rules)->validate();
+		// print_r($request->all());exit;
 		try {
 			DB::beginTransaction();
 			$originalDate = $request['trans_date'];
@@ -286,12 +322,12 @@ class DeliveryController extends Controller
 			}
 
 			if(!$id = DB::table('deliveries')->insertGetId($data)){
+				print_r(new \Exception("Stock In[{$i}] not insert."));exit;
 				throw new \Exception("Delivery[{$request->reference_no}] not create.");
 			}
 			
 			if(count($request['line_index']) > 0){
 				for($i=0;$i<count($request['line_index']);$i++){
-
 					$detail = [
 						'del_id'         =>$id,
 						'warehouse_id'   =>$request['line_warehouse'][$i],
@@ -299,8 +335,9 @@ class DeliveryController extends Controller
 						'item_id'        =>$request['line_item'][$i],
 						'unit'           =>$request['line_unit'][$i],
 						'qty'            =>$request['line_qty'][$i],
-						'price'          =>$request['line_price'][$i],
-						'desc'           =>$request['line_reference'][$i]
+						'price'          =>$request['line_cost'][$i],
+						'desc'           =>$request['line_reference'][$i],
+						'order_qty'		 =>$request['order_qty'][$i]
 					];
 
 					$stockIn = [
@@ -321,25 +358,26 @@ class DeliveryController extends Controller
 						'created_by'     =>Auth::user()->id,
 						'created_at'     =>date('Y-m-d H:i:s'),
 					];
-
-					if (getSetting()->is_costing==1) {
+					// if (getSetting()->is_costing==1) {
 						if ($request['line_cost'][$i]) {
-							$qty    = (float)$request['line_qty'][$i];
-							$cost   = (float)$request['line_cost'][$i];
+							$qty    = $request['line_qty'][$i];
+							$cost   = $request['line_cost'][$i];
 							$amount = $qty * $cost;
 							$stockIn = array_merge($stockIn,['cost' => $cost]);
 							$stockIn = array_merge($stockIn,['amount' => $amount]);
 						}
-					}
-
+					// }
+					// print_r($stockIn);
 					// insert delivery items
 					if(!$deliveryItemId = DB::table('delivery_items')->insertGetId($detail)){
 						DB::rollback();
+						print_r(new \Exception("Stock In[{$i}] not insert."));exit;
 						throw new \Exception("DeliveryItem[{$i}] not insert.");
 					}
 					// insert stocks
 					if(!$stockInId = DB::table('stocks')->insertGetId($stockIn)){
 						DB::rollback();
+						print_r(new \Exception("Stock In[{$i}] not insert."));exit;
 						throw new \Exception("Stock In[{$i}] not insert.");
 					}
 					
@@ -372,11 +410,13 @@ class DeliveryController extends Controller
 					$new_qty = (floatval($stock_qty_deliv) / floatval($stock_qty_po)) + floatval($po_deliv_qty);
 					DB::table('order_items')->where(['po_id'=>$request->po_no,'line_no'=>$request['line_index'][$i],'item_id'=>$request['line_item'][$i]])->update(['deliv_qty'=>$new_qty]);
 				}
+				// exit;
 			}
 			DB::commit();
 			if($request->btnSubmit==1){
 				return redirect('stock/deliv')->with('success',trans('lang.save_success'));
 			}
+			print_r(new \Exception("Stock In[{$i}] not insert."));exit;
 			return redirect()->back()->with('success',trans('lang.save_success'));
 		} catch (\Exception $e) {
 			DB::rollback();
@@ -386,22 +426,22 @@ class DeliveryController extends Controller
 
     public function update(Request $request, $id)
     {
-		$rules = [
-			'reference_no' 	=>'required|max:20',
-			'trans_date' 	=>'required|max:20',
-			'supplier' 		=>'required|max:11',
-			'po_no' 		=>'required|max:11',
-		];
-		if(count($request['line_index']) > 0){
-			for($i=0;$i<count($request['line_index']);$i++){
-				$rules['line_index.'.$i]		= 'required';
-				$rules['line_item.'.$i]			= 'required|max:11';
-				$rules['line_unit.'.$i]			= 'required';
-				$rules['line_qty.'.$i]			= 'required';
-				$rules['line_warehouse.'.$i]	= 'required|max:11';
-			}
-		}
-        Validator::make($request->all(),$rules)->validate();
+		// $rules = [
+		// 	'reference_no' 	=>'required|max:20',
+		// 	'trans_date' 	=>'required|max:20',
+		// 	'supplier' 		=>'required|max:11',
+		// 	'po_no' 		=>'required|max:11',
+		// ];
+		// if(count($request['line_index']) > 0){
+		// 	for($i=0;$i<count($request['line_index']);$i++){
+		// 		$rules['line_index.'.$i]		= 'required';
+		// 		$rules['line_item.'.$i]			= 'required|max:11';
+		// 		$rules['line_unit.'.$i]			= 'required';
+		// 		$rules['line_qty.'.$i]			= 'required';
+		// 		$rules['line_warehouse.'.$i]	= 'required|max:11';
+		// 	}
+		// }
+        // Validator::make($request->all(),$rules)->validate();
 		try {
 			DB::beginTransaction();
 
@@ -451,7 +491,8 @@ class DeliveryController extends Controller
 						'unit'           =>$request['line_unit'][$i],
 						'qty'            =>$request['line_qty'][$i],
 						'price'          =>$request['line_price'][$i],
-						'desc'           =>$request['line_reference'][$i]
+						'desc'           =>$request['line_reference'][$i],
+						'order_qty'		 =>$request['order_qty'][$i]
 					];
 
 					$stockIn = [
@@ -540,6 +581,9 @@ class DeliveryController extends Controller
 			}
 
 			DB::commit();
+			if($request->btnSubmit==1){
+				return redirect('stock/deliv')->with('success',trans('lang.save_success'));
+			}
 			return redirect()->back()->with('success',trans('lang.update_success'));
 		} catch (\Exception $e) {
 			DB::rollback();

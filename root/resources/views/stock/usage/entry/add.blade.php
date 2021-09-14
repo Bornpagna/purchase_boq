@@ -170,7 +170,7 @@
 									<tr style="font-size:12px;">
 										<th width="5%" class="text-center all">{{ trans('lang.line_no') }}</th>
 										<th width="15%" class="text-center all">{{ trans('lang.from_warehouse') }}</th>
-										<th width="10%" class="text-center all">{{ trans('lang.street') }}</th>
+										<th width="10%" class="text-center all">{{ trans('lang.building') }}</th>
 										<th width="10%" class="text-center all">{{ trans('lang.on_house') }}</th>
 										<th width="20%" class="text-center all">{{ trans('lang.items') }}</th>
 										<th width="10%" class="text-center all">{{ trans('lang.units') }}</th>
@@ -222,8 +222,12 @@
 		return $.ajax({url:'{{url("/stock/use/GetItem")}}',type:'GET',dataType:'json',data:{q:query},async:false}).responseJSON;
 	}
 
-	function GetHouse(street_id) {
-		return $.ajax({url:'{{url("/stock/use/GetHouse")}}',type:'GET',dataType:'json',data:{id:street_id},async:false}).responseJSON;
+	// function GetHouse(street_id) {
+	// 	return $.ajax({url:'{{url("/stock/use/GetHouse")}}',type:'GET',dataType:'json',data:{id:street_id},async:false}).responseJSON;
+	// }
+
+	function GetHouse(building_id){
+		return $.ajax({url:'{{url("/repository/getHousesByAllTrigger")}}',type:'GET',dataType:'json',data:{building_id:building_id},async:false}).responseJSON;
 	}
 
 	function GetStreet(query) {
@@ -367,6 +371,19 @@
 			});
 		}
 	}
+
+	function onChangeBuilding(field, row){
+		var val = $(field).val();
+		jsonHouse = GetHouse(val);
+		if(val!=null && val!='' && jsonHouse){
+			$('.line_on_house_'+row).empty();
+			$('.line_on_house_'+row).append($('<option></option>').val('').text(''));
+			$('.line_on_house_'+row).select2('val', null);
+			$.each(jsonHouse, function(key ,value){
+				$('.line_on_house_'+row).append($('<option></option>').val(value.id).text(value.house_no));
+			});
+		}
+	}
 	
 	function onChangeHouse(field, row){
 		var val = $(field).val();
@@ -473,12 +490,30 @@
 					'		{{getWarehouse()}}'+
 					'	</select>'+
 					'</td>'+
+					// '<td>'+
+					// '	<select class="form-control line_zone line_zone_'+i+'" onchange="onChangeStreet(this, '+i+')" name="line_street[]">'+
+					// '		<option value=""></option>'+
+					// '		{{getSystemData("ST")}}'+
+					// '	</select>'+
+					// '</td>'+
+					// '<td>'+
+					// '	<select class="form-control line_block line_block_'+i+'" onchange="onChangeStreet(this, '+i+')" name="line_street[]">'+
+					// '		<option value=""></option>'+
+					// '		{{getSystemData("ST")}}'+
+					// '	</select>'+
+					// '</td>'+
 					'<td>'+
-					'	<select class="form-control line_street line_street_'+i+'" onchange="onChangeStreet(this, '+i+')" name="line_street[]">'+
+					'	<select class="form-control line_building line_building_'+i+'" onchange="onChangeStreet(this, '+i+')" name="line_street[]">'+
 					'		<option value=""></option>'+
 					'		{{getSystemData("ST")}}'+
 					'	</select>'+
 					'</td>'+
+					// '<td>'+
+					// '	<select class="form-control line_street line_street_'+i+'" onchange="onChangeStreet(this, '+i+')" name="line_street[]">'+
+					// '		<option value=""></option>'+
+					// '		{{getSystemData("ST")}}'+
+					// '	</select>'+
+					// '</td>'+
 					'<td>'+
 					'	<select class="form-control line_on_house line_on_house_'+i+'" onchange="onChangeHouse(this, '+i+')" name="line_on_house[]">'+
 					'		<option value=""></option>'+

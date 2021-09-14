@@ -362,6 +362,21 @@ class RepositoryController extends Controller
 			$houses = $houses->where('house_type',$houseType);
 		}
 
+		if($request->house_policy){
+			$houseID = DB::table('usage_formulas')->join('usage_formula_details','usage_formulas.id','usage_formula_details.formula_id')
+			->where('usage_formulas.zone_id',$zoneID ? $zoneID : 0)
+			->where('usage_formulas.block_id',$blockID ? $blockID : 0 )
+			->where('usage_formulas.building_id',$buildingID ? $buildingID : 0)
+			->pluck('usage_formula_details.house_id');
+			
+			$houseBoq = DB::table('boqs')->join('boq_houses','boqs.id','boq_houses.boq_id')
+			->where('boqs.zone_id',$zoneID ? $zoneID : 0)
+			->where('boqs.block_id',$blockID ? $blockID : 0)
+			->where('boqs.building_id',$buildingID ? $buildingID : 0)
+			->pluck('boq_houses.house_id');
+			$houses = $houses->whereNotIn('id',$houseID)->whereIn('id',$houseBoq);
+		}
+
 		$houses = $houses->get();
 
 		return response()->json($houses,200); 

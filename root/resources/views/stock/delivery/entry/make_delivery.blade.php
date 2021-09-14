@@ -52,7 +52,7 @@
 													<span class="required"> * </span>
 												</label>
 												<div class="col-md-8">
-													<input class="form-control reference_no" readonly length="20" type="text" id="reference_no" name="reference_no" value="{{$obj->ref_no}}" placeholder="{{ trans('lang.enter_text') }}">
+													<input class="form-control reference_no" length="20" type="text" id="reference_no" name="reference_no" value="" placeholder="{{ trans('lang.enter_text') }}">
 													<span class="help-block font-red bold"></span>
 												</div>
 											</div>
@@ -185,7 +185,7 @@
 	var jsonRecord = [];
 
 	function GetItem(po_id) {
-		return $.ajax({url:'{{url("/stock/deliv/GetItem")}}',type:'GET',dataType:'json',data:{po_id:po_id},async:false}).responseJSON;
+		return $.ajax({url:'{{url("/purch/deliv/GetItem")}}',type:'GET',dataType:'json',data:{po_id:po_id},async:false}).responseJSON;
 	}
 
 	function GetUnit(unit_stock) {
@@ -229,7 +229,7 @@
 
 	$('#save_close').on('click',function(){
 		$(this).prop('disabled', true);
-		if(chkValid([".reference_no",".trans_date",".supplier",".trans_desc",".po_no",".line_item",".line_unit",".line_qty",".line_warehouse",".line_cost"])){
+		if(chkValid([".reference_no",".trans_date",".supplier",".po_no",".line_item",".line_unit",".line_qty",".line_warehouse",".line_cost"])){
 			if(isSave()){
 				$("#btnSubmit").val($(this).val());
 				$('#form-stock-entry').submit();
@@ -292,8 +292,10 @@
 		}
 	}
 
-	function initTable(data){
+	function initTable(data,deliver_address){
+
 		var str = "";
+
 			str += '<tr>';
 			str += '<td class="text-center all" style="vertical-align: middle !important;">';
 			str += '<input type="hidden" class="line_index line_index_'+data.id+'" name="line_index[]" value="'+data.line_no+'" />';
@@ -309,12 +311,12 @@
 			str += '</select>';
 			str += '</td>';
 			str += '<td>';
-				str += '<input type="text" name="order_qty[]" readonly value="'+data.qty+'" class="form-control line_qty_orig line_qty_orig_'+data.id+'"/>';
+				str += '<input type="text" disabled value="'+data.qty+'" class="form-control noscroll line_qty_orig line_qty_orig_'+data.id+'"/>';
 			str += '</td>';
 			str += '<td>';
 			str += '<input type="number" value="'+data.qty+'" length="50" step="any" class="form-control noscroll line_qty line_qty_'+data.id+'" onkeyup="enterQty(this, '+data.id+')"  name="line_qty[]"/>';
 			str += '<input type="hidden" value="'+data.qty+'" class="line_qty_orig line_qty_orig_'+data.id+'"/>';
-			str += '<input type="hidden" value="'+data.price+'" name="line_price[]" class="line_price line_price_'+data.id+'"/>';
+			str += '<input type="hidden" value="'+data.price+'" name="line_cost[]" class="line_price line_price_'+data.id+'"/>';
 			str += '</td>';
 			// if (parseInt("{{getSetting()->is_costing}}")==1) {
 			// 	str += '<td>';
@@ -335,7 +337,7 @@
 		$("#table-income tbody").append(str);
 		$.fn.select2.defaults.set("theme", "classic");
 		$(".line_unit_"+data.id+",.line_warehouse_"+data.id).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
-		$(".line_warehouse_"+data.id).select2('val', data.warehouse_id);
+		$(".line_warehouse_"+data.id).select2('val', deliver_address);
 		$(".line_qty_"+data.id).ForceNumericOnly();
 		$(".label_item_"+data.id).html(data.code+' ('+data.name+')');
 		onSetItem(data, data.id);
@@ -402,7 +404,7 @@
 		$.fn.select2.defaults.set("theme", "classic");
 		$(".supplier,.po_no").select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
 		
-		$('#trans_date').val(formatDate('{{$obj->trans_date}}'));
+		$('#trans_date').val(formatDate('{{date('Y-m-d')}}'));
 		$("#trans_date").datepicker({
 			format: "{{getSetting()->format_date}}",
             autoclose: true,
@@ -412,22 +414,42 @@
 		$(".trans_desc").html('{{$obj->note}}');
 		$('.po_no').empty();
 		$('.po_no').append(new Option('','',false,false));
-		$('.po_no').append(new Option('{{$obj->ref_no}}','{{$obj->po_id}}',true,true));
-		$("#po_no").select2('val','{{$obj->po_id}}');
-		$("#po_no option[value!='{{$obj->po_id}}']").attr('disabled', 'disabled');
+		$('.po_no').append(new Option('{{$obj->ref_no}}','{{$obj->id}}',true,true));
+		$("#po_no").select2('val','{{$obj->id}}');
+		$("#po_no option[value!='{{$obj->id}}']").attr('disabled', 'disabled');
+		console.log("{{$obj->ref_no}}");
 		
 		$("#btnBack, #btnCancel").on("click",function(){
 			var rounte = $(this).attr('rounte');
 			window.location.href=rounte;
 		});
-		
-		if(jsonRecord = GetItem('{{$obj->id}}')){
-			$("#table-income tbody").empty();
-			jsonItems = jsonRecord;
-			$.each(jsonRecord, function(key, val){
-				initTable(val);
+	
+		var val = "{{$obj->id}}";
+		if(val!=null && val!=''){
+			var _token = $("input[name=_token]").val();
+			$.ajax({
+				url :'{{url("purch/order/remotePO")}}',
+				type:'POST',
+				data:{
+					'_token': _token,
+					'po_id': val,
+				},
+				success:function(data){
+					if(data){
+						$(".supplier").select2('val', data.head.sup_id);
+						$("#table-income tbody").empty();
+						jsonItems = data.body;
+						$.each(data.body,function(key, row){
+							initTable(row, data.head.delivery_address);
+						});
+					}
+				},error:function(){
+					console.log('error get PR reference.');
+				}
 			});
 		}
+		
+		
 	});
 </script>
 @endsection()

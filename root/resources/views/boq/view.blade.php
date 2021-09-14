@@ -181,7 +181,7 @@
 			columns: [
 				{ data: 'code', name: 'code' },
 				{ data: 'name', name: 'name' },
-				{ data: 'unit_usage', name: 'unit_usage' },
+				{ data: 'boq_unit', name: 'unit_usage' },
 				{ data: 'qty_std', name: 'qty_std' },
 				{ data: 'qty_add', name: 'qty_add' },
 				{ data: 'cost', name: 'cost' },
@@ -192,7 +192,7 @@
 						'id':aData['id'],
 						'house_id':aData['house_id'],
 						'item_id':aData['item_id'],
-						'unit':aData['unit'],
+						'unit':aData['boq_unit'],
 						'qty_std':aData['qty_std'],
 						'qty_add':aData['qty_add'],
 						'cost':aData['cost'],

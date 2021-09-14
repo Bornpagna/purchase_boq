@@ -101,6 +101,7 @@
 <script type="text/javascript">
 	var objName = [];
 	var jsonUnit = JSON.parse(convertQuot("{{\App\Model\Unit::where(['status'=>1])->get(['id','from_code','from_desc','to_code','to_desc','factor'])}}"));
+	console.log(jsonUnit);
 	$('#my-table').DataTable({
 		"lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
 		processing: true,
@@ -159,7 +160,7 @@
 	}
 	
 	$(function(){
-		/* set value to unit conversion */
+		$('.my-select2').select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
 		$("#unit-stock").on('change',function(){
 			var val = $(this).val();
 			if(val!='' && val!=null && jsonUnit){
@@ -298,7 +299,9 @@
 	}
 	
 	@if(hasRole('item_type_add'))
+	
 		var objItemType = JSON.parse(convertQuot('{{\App\Model\SystemData::where(["type"=>"IT","parent_id"=>Session::get('project')])->get(["name"])}}'));
+		console.log(objItemType)
 		$("#btnAddItemType").on('click', function(event){
 			event.preventDefault();
 			$('.system-modal').children().find('div').children().find('h4').html('{{trans("lang.add_new")}}');
