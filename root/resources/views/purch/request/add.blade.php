@@ -434,7 +434,7 @@
 	}
 
 	function onChangeUnit(field, row){
-		
+		console.log(field);
 		var item_id = $(".line_item_"+row).val();
 		var unit = $(field).val();
 		var _token = $("input[name=_token]").val();
@@ -481,6 +481,7 @@
 				async:false,
 				data:params,
 				success:function(data){
+					console.log(data);
 					$('.line_boq_set_'+row).val(data.boq_set);
 					$('.line_price_'+row).val(data.price);
 					$('.remain_request_'+row).val(data.boq_set);
@@ -549,10 +550,10 @@
 					'	</select>'+
 					'</td>'+
 					'<td>'+
-					'	<input class="form-control qty_in_stock qty_in_stock_'+i+'" name="qty_in_stock[]" />'+
+					'	<input class="form-control qty_in_stock qty_in_stock_'+i+'" readonly="readonly" name="qty_in_stock[]" />'+
 					'</td>'+
 					'<td>'+
-					'	<input class="form-control remain_request remain_request_'+i+'" name="boq_qty_remain[]" />'+
+					'	<input class="form-control remain_request remain_request_'+i+'" readonly="readonly" name="boq_qty_remain[]" />'+
 					'</td>'+
 					'<td>'+
 					'	<input type="number" length="50" step="any" class="form-control noscroll line_qty line_qty_'+i+'" onkeyup="enterQtyRequest(this, '+i+')"  name="line_qty[]" placeholder="{{trans('lang.enter_text')}}"/>'+
@@ -575,7 +576,6 @@
 			
 			var itemSelect = $('.line_item_'+i);
 			var type_id = $('.line_item_type'+i).val();
-			console.log(type_id);
 			itemSelect.select2({
 			  width:'100%',
 			  allowClear:'true',
@@ -825,23 +825,21 @@
 				html+= '<td>'+data.item_type+'<input type="hidden" name="line_item_type[]" class="line_item_type'+index+'" value="'+data.cat_id+'" /></td>';
 				html+= '<td>'+data.item_name+'<input type="hidden" class="line_item line_item_'+index+'" name="line_item[]" value="'+data.item_id+'" /></td>';
 				html+= '<td><input type="text" length="11" class="form-control size line_size line_size_'+index+'" name="line_size[]" placeholder="{{trans("lang.size")}}" /></td>';
-				html+= '<td><select class="form-control select2 select2_'+index+' line_unit line_unit_'+index+'" name="line_unit[]"> onchange="onChangeUnit(this, '+index+')"' 
-					+'<option value=""></option>'
-				+'</select></td>';
-				html+= '<td><input class="form-control qty_in_stock qty_in_stock_'+index+'" name="qty_in_stock[]" value="'+data.stock_qty+'"/></td>';
-				html+= '<td><input class="form-control remain_request remain_request_'+index+'" name="boq_qty_remain[]"/></td>';
+				html+= '<td><select class="form-control select2 select2_'+index+' line_unit line_unit_'+index+'" name="line_unit[]" onchange="onChangeUnit(this, '+index+')"> <option value=""></option></select></td>';
+				html+= '<td><input class="form-control qty_in_stock qty_in_stock_'+index+'" readonly="readonly" name="qty_in_stock[]" value="'+data.stock_qty+'"/></td>';
+				html+= '<td><input class="form-control remain_request remain_request_'+index+'" readonly="readonly" name="boq_qty_remain[]"/></td>';
 				html+= '<td><input type="number" length="11" class="form-control line_qty line_qty_'+index+'" onkeyup="enterQtyRequest(this, '+index+')" name="line_qty[]" placeholder="{{trans("lang.enter_number")}}" /><input type="hidden" class="form-control line_boq_set line_boq_set_'+index+'" name="line_boq_set[]"/>'+
 					'	<input type="hidden" class="form-control line_price line_price_'+index+'" name="line_price[]"/></td>';
-				html += '<td><input type="number" length="11" class="form-control line_reference line_reference_'+index+'" name="line_reference[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
-				html += '<td><input type="number" length="11" class="form-control  line_remark line_remark_'+index+'" name="line_remark[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
+				html += '<td><input type="number" length="11" class="form-control line_reference line_reference_'+index+'" name="line_reference[]" value="" placeholder="{{trans("lang.note")}}" /></td>';
+				html += '<td><input type="number" length="11" class="form-control  line_remark line_remark_'+index+'" name="line_remark[]" value="" placeholder="{{trans("lang.remark")}}" /></td>';
 				html += '<td><a class="row_'+index+' btn btn-sm" onclick="DeleteRowBOQ('+index+')"><i class="fa fa-trash"></i></a></td>';
 			html+='</tr>';
 		table_boq.append(html);
 		
 		$.fn.select2.defaults.set('theme','classic');
 		$('.select2').select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
-		$('.line_unit_'+index).empty();
-		$('.line_unit_'+index).append($('<option></option>').val('').text(''));
+		// $('.line_unit_'+index).empty();
+		// $('.line_unit_'+index).append($('<option></option>').val('').text(''));
 		jsonUnits = GetUnit(data.unit_stock);
 		$.each(jsonUnits, function(k, v){
 			$('.line_unit_'+index).append($('<option></option>').val(v.from_code).text(v.from_code+' ('+v.from_desc+')'));

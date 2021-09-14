@@ -69,6 +69,26 @@
 				</div>
 			</div>
 			<div class="portlet-body">
+				<?php if(Session::has('status')):?>
+					<div class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" id="mi-modal" style="display: block;">
+						<div class="modal-dialog modal-sm raduis-10">
+							<div class="modal-content raduis-10">
+								<div class="modal-header color-white">
+									<button type="button" id="close_modal" onclick="dismissModal()" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+									<h4 class="modal-title" id="myModalLabel">{{ trans('lang.reminder') }}</h4>
+								</div>
+								<div class="modal-body">
+									<span class="confirm_body">{{ trans('lang.order_closed_message') }}</span>
+									<span class="confirm_body">{{ trans('lang.do_you_want_to_make_new_order') }}</span>
+								</div>
+								<div class="modal-footer color-white">
+									<button type="button" class="btn btn-primary" id="modal-btn-no" onclick="dismissModal()">{{ trans('lang.no') }}</button>
+									<button rounte="{{$rounteOrder}}" type="button" class="btn btn-primary" id="modal-btn-yes" onclick="makeOrder(this)">{{ trans('lang.yes') }}</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				<?php endif; ?>
 				<ul class="nav nav-tabs upload-nav-tab" id="myTab" role="tablist">
 					<li class="nav-item active">
 						<a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">{{ trans('lang.pr_list') }}</a>
@@ -79,6 +99,7 @@
 				</ul>
 				<div class="tab-content upload_boq_tab padding-20" id="myTabContent">
 					<div class="tab-pane fade active in padding-20" id="home" role="tabpanel" aria-labelledby="home-tab">
+						
 						<?php if(Session::has('success')):?>
 							<div class="alert alert-success display-show">
 								<button class="close" data-close="alert"></button><strong>{{trans('lang.success')}}!</strong> {{Session::get('success')}} 
@@ -86,6 +107,23 @@
 						<?php elseif(Session::has('error')):?>
 							<div class="alert alert-danger display-show">
 								<button class="close" data-close="alert"></button><strong>{{trans('lang.error')}}!</strong> {{Session::get('error')}} 
+							</div>
+						<?php elseif(Session::has('status')):?>
+							<div class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" id="mi-modal">
+								<div class="modal-dialog modal-sm raduis-10">
+									<div class="modal-content raduis-10">
+										<div class="modal-header color-white">
+										<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+										<h4 class="modal-title" id="myModalLabel">{{ trans('lang.warning') }}</h4>
+										</div>
+										<div class="modal-body">
+											<span class="confirm_body"></span>
+										</div>
+										<div class="modal-footer color-white">
+										<button type="button" class="btn btn-primary" id="modal-btn-no">{{ trans('lang.yes') }}</button>
+										</div>
+									</div>
+								</div>
 							</div>
 						<?php endif; ?>
 						<table class="table table-striped table-bordered table-hover" id="request-table">
@@ -147,9 +185,6 @@
 @section('javascript')
 <script type="text/javascript">	
 	var objApproval = JSON.parse(convertQuot("{{\App\Model\ApproveOrder::select('po_id','role_id','approved_date','reject','approved_by',DB::raw('(SELECT pr_users.`name` FROM pr_users WHERE pr_users.`id`=approved_by)AS approve_name'))->get()}}"));
-
-	
-	
 	function formatRequest (d) {
         var str = '';
         str += '<table class="table table-striped details-table table-responsive"  id="sub-'+d.id+'">';
@@ -160,6 +195,8 @@
                     str += '<th style="width: 10%;">{{trans("lang.size")}}</th>';
                     str += '<th style="width: 10%;">{{trans("lang.units")}}</th>';
                     str += '<th style="width: 10%;">{{trans("lang.qty")}}</th>';
+					str += '<th style="width: 10%;">{{trans("lang.ordered_qty")}}</th>';
+					str += '<th style="width: 10%;">{{trans("lang.closed_qty")}}</th>';
                     str += '<th style="width: 20%;">{{trans("lang.desc")}}</th>';
                     str += '<th style="width: 10%;">{{trans("lang.remark")}}</th>';
                 str += '</tr>';
@@ -223,7 +260,7 @@
 			}
 			
 			$('td:eq(6)',nRow).html($status).addClass("text-center");
-			if(aData['trans_status']==3 && aData['is_ordered'] != 1){
+			if((aData['ordered_qty'] != aData['total_qty'])){
 				$action = '<a onclick="onEdit(this)" title="{{trans("lang.make_order")}}" row_id="'+aData.id+'" row_rounte="{{url("purch/order/makeOrder")}}/'+aData.id+'">{{trans("lang.make_order")}}</a>';
 			}else{
 				$action = '<a class="disabled" title="{{trans("lang.make_order")}}" row_id="'+aData.id+'" >{{trans("lang.make_order")}}</a>';
@@ -235,7 +272,9 @@
 	$('#request-table tbody').on('click', 'td.request-details-control', function () {
 		var tr = $(this).closest('tr');
 		var row = request_table.row(tr);
-		var tableId = 'sub-' + row.data().id;
+		var tableId = "";
+		tableId = 'sub-' + row.data().id;
+		console.log(tableId);
 		if(row.child.isShown()) {
 			row.child.hide();
 			tr.removeClass('shown');
@@ -264,6 +303,8 @@
 				{ data: 'size', name: 'size' },
 				{ data: 'unit', name: 'unit' },
 				{ data: 'qty', name: 'qty' },
+				{ data: 'ordered_qty', name: 'ordered_qty' },
+				{ data: 'closed_qty', name: 'closed_qty' },
 				{ data: 'desc', name: 'desc' },
 				{ data: 'remark', name: 'remark' },
 			],fnCreatedRow:function(nRow, aData, iDataIndex){
@@ -271,7 +312,6 @@
 			}
 		});
 	}
-	
 	////// Order  ///////////
 	function format (d) {
         var str = '';
@@ -299,7 +339,7 @@
             str += '</tr>';
             str += '</thead>';
         str += '</table>';
-        str += '<table class="table table-striped details-table table-responsive"  id="sub-'+d.id+'">';
+        str += '<table class="table table-striped details-table table-responsive"  id="subs-'+d.id+'">';
             str += '<thead>';
                 str += '<tr>';
 					str += '<th style="width: 5%;">{{trans("lang.line_no")}}</th>';
@@ -310,6 +350,8 @@
                     str += '<th style="width: 10%;">{{trans("lang.amount")}}</th>';
                     str += '<th style="width: 10%;">{{trans("lang.discount")}}</th>';
                     str += '<th style="width: 10%;">{{trans("lang.total")}}</th>';
+					str += '<th style="width: 8%;">{{trans("lang.delivery_qty")}}</th>';
+					str += '<th style="width: 8%;">{{trans("lang.closed_qty")}}</th>';
                     str += '<th style="width: 16%;">{{trans("lang.desc")}}</th>';
                 str += '</tr>';
             str += '</thead>';
@@ -372,9 +414,14 @@
 	});
 	
 	$('#my-table tbody').on('click', 'td.details-control', function () {
-		var tr = $(this).closest('tr');
+		var tr = $(this).parents('tr');
 		var row = my_table.row(tr);
-		var tableId = 'sub-' + row.data().id;
+		var rRow = request_table.row(tr);
+		
+		$('#request-table tr').removeClass('shown');
+		var tableId = "";
+		tableId = 'subs-' + row.data().id;
+		
 		if(row.child.isShown()) {
 			row.child.hide();
 			tr.removeClass('shown');
@@ -405,6 +452,8 @@
 				{ data: 'amount', name: 'amount' },
 				{ data: 'disc_usd', name: 'disc_usd' },
 				{ data: 'total', name: 'total' },
+				{ data: 'deliv_qty', name: 'deliv_qty'},
+				{ data: 'closed_qty', name: 'closed_qty'},
 				{ data: 'desc', name: 'desc' }
 			],fnCreatedRow:function(nRow, aData, iDataIndex){
 				$('td:eq(3)',nRow).html(formatNumber(aData['qty']));
@@ -455,10 +504,19 @@
             content:'{{trans("lang.content_close")}}',
             autoClose: 'no|10000',
             buttons:{
+				make_new_order:{
+                    text:'{{trans("lang.close_make_new_order")}}',
+                    btnClass: 'btn-success',
+                    action:function(){
+						console.log(rounte+"/1");
+                        window.location.href=rounte+"/1";
+                    }
+                },
                 yes:{
                     text:'{{trans("lang.yes")}}',
                     btnClass: 'btn-success',
                     action:function(){
+						console.log(rounte);
                         window.location.href=rounte;
                     }
                 },
@@ -548,6 +606,14 @@
                 }
             }
         });
+	}
+	function dismissModal(){
+		$('#mi-modal').hide();
+	}
+	function makeOrder(field){
+		var rounte = $(field).attr('rounte');
+		console.log(rounte);
+		window.location.href=rounte;
 	}
 </script>
 @endsection()

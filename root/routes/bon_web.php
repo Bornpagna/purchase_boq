@@ -129,6 +129,17 @@ Route::group(['prefix' => 'street'], function() {
 	Route::post('excel/upload','StreetController@uploadExcel')->middleware('checkRole:street_upload');
 });
 
+///////////////////// route Working Type ///////////////////////////
+Route::group(['prefix' => 'working_type'], function() {
+	Route::get('','WorkingTypeController@index')->middleware('checkRole:working_type');
+	Route::get('dt','WorkingTypeController@getDt');
+	Route::post('save','WorkingTypeController@save')->middleware('checkRole:working_type_add');
+	Route::post('edit/{id}','WorkingTypeController@update')->middleware('checkRole:working_type_edit');
+	Route::get('delete/{id}','WorkingTypeController@destroy')->middleware('checkRole:working_type_delete');
+	Route::get('excel/download','WorkingTypeController@downloadExcel')->middleware('checkRole:working_type_download');
+	Route::post('excel/upload','WorkingTypeController@uploadExcel')->middleware('checkRole:working_type_upload');
+});
+
 ///////////////////// route item type ///////////////////////////
 Route::group(['prefix' => 'item_type'], function() {
 	Route::get('','ItemTypeController@index')->middleware('checkRole:item_type');
@@ -380,6 +391,7 @@ Route::group(['prefix' => 'stock'], function() {
 		Route::get('add','DeliveryController@add')->middleware('checkRole:delivery_entry_add');
 		Route::get('add2','DeliveryController@add2')->middleware('checkRole:delivery_entry_add');
 		Route::get('edit/{id}','DeliveryController@edit')->middleware('checkRole:delivery_entry_edit');
+		Route::get('make_delivery/{id}','DeliveryController@makeDelivery')->middleware('checkRole:delivery_entry_add');
 		Route::post('save','DeliveryController@save')->middleware('checkRole:delivery_entry_add');
 		Route::post('update/{id}','DeliveryController@update')->middleware('checkRole:delivery_entry_edit');
 		Route::get('delete/{id}','DeliveryController@destroy')->middleware('checkRole:delivery_entry_delete');
@@ -436,14 +448,16 @@ Route::group(['prefix' => 'purch'], function() {
 	
 	Route::group(['prefix' => 'order'], function(){
 		Route::get('','OrderController@index')->middleware('checkRole:purchase_order');
-		Route::get('dt','OrderController@getDt');
+		Route::get('dt/{only_active?}/{delivery_part?}','OrderController@getDt');
 		Route::get('add/{cid?}','OrderController@add')->middleware('checkRole:purchase_order_add');
+		Route::get('addFromClose/{id}/{order_id?}','OrderController@addFromClose');
 		Route::get('edit/{id}','OrderController@edit')->middleware('checkRole:purchase_order_edit');
-		Route::get('makeOrder/{id}','OrderController@makeOrder')->middleware('checkRole:purchase_make_order');
+		Route::get('makeOrder/{id}/{order_id?}','OrderController@makeOrder')->middleware('checkRole:purchase_make_order');
 		Route::post('save','OrderController@save')->middleware('checkRole:purchase_order_add');
+		Route::post('saveCloseOrder/{id}','OrderController@saveCloseOrder')->middleware('checkRole:purchase_order_add');
 		Route::post('update/{id}','OrderController@update')->middleware('checkRole:purchase_order_edit');
 		Route::get('delete/{id}','OrderController@destroy')->middleware('checkRole:purchase_order_delete');
-		Route::get('close/{id}','OrderController@close')->middleware('checkRole:purchase_order_clone');
+		Route::get('close/{id}/{make_order?}','OrderController@close')->middleware('checkRole:purchase_order_clone');
 		Route::get('view/{id}','OrderController@getStepApprove')->middleware('checkRole:purchase_order_view');
 		Route::get('subdt/{id}','OrderController@subDt');
 		Route::post('remotePO', 'OrderController@getOrderDetails');

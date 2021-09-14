@@ -323,7 +323,7 @@ class BoqController extends Controller
 						'referent_id'	=>	$id,
 						'created_by'	=> 	Auth::user()->id,
 						'status'		=>	1,
-						'version'		=>	$oldBoq->version + 1
+						// 'version'		=>	$oldBoq->version + 1
 					];
 					$boq_id = DB::table('boqs')->insertGetId($boq);
 					
@@ -2007,7 +2007,6 @@ class BoqController extends Controller
 	}
 
 	public function reviseBoqHouse(Request $request,$boq_id,$house_id,$working_type){
-		
 		$boq_id = decrypt($boq_id);
 		$house_id = decrypt($house_id);
 		$working_type = decrypt($working_type);
@@ -2017,6 +2016,7 @@ class BoqController extends Controller
 			// get old BOQ
 			$oldBoq = Boq::where('id',$boq_id)->first();
 			$newBoq = $oldBoq->replicate();
+			$newBoq->boq_code = $oldBoq->boq_code."-".$oldBoq->version;
 			$newBoq->version = $oldBoq->version + 1;
 			$newBoq->revise_count = $oldBoq->revise_count + 1;
 			$newBoq->revise_by = Auth::user()->id;
@@ -2029,7 +2029,6 @@ class BoqController extends Controller
 				foreach($boqHouses as $key=>$boqHouse){
 					//Duplicate BOQ
 					$newBoqHouse = $boqHouse->replicate();
-					
 					//Add new Value to BOQ
 					$newBoqHouse->created_at = date('Y-m-d H:i:s');
 					$newBoqHouse->revise_by = Auth::user()->id;
@@ -2037,7 +2036,7 @@ class BoqController extends Controller
 					$newBoqHouse->revise_count = $newBoqHouse->revise_count + 1;
 					$newBoqHouse->status = 1;
 					$newBoqHouse->boq_id = $newBoqID;
-					
+					$newBoqHouse->boq_house_code = $newBoq->boq_code."-HOUSE".$newBoqHouse->house_id;
 					// Save New BOQ
 					$newBoqHouse->save();
 					$newBoqHouseId = $newBoqHouse->id;
@@ -2103,6 +2102,7 @@ class BoqController extends Controller
 									'working_type'	=>	$working_type,
 									'created_at'	=>	date('Y-m-d H:i:s'),
 									'created_at'	=>	Auth::user()->id,
+									'is_closed'		=>	$request['is_close_'.$working_type][$key]
 								];
 								$boq_item = DB::table('boq_items')->insertGetID($item_types);
 							}
@@ -2125,6 +2125,7 @@ class BoqController extends Controller
 		}
 	}
 	public function assignHouse(Request $request,$boq_id){
+		
 		$boq_id = decrypt($boq_id);
 		try{
 			DB::beginTransaction();

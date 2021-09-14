@@ -9,22 +9,26 @@ use Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Excel;
-use App\Model\Item;
+use App\Model\House;
+use App\Model\SystemData;
 
-class ItemTypeController extends Controller
+class WorkingTypeController extends Controller
 {
-    const SYSTEM_TYPE = "IT";
+    const SYSTEM_TYPE = "WK";
     public function __construct()
     {
         $this->middleware('auth');
 		$this->middleware('CheckProject');
+		if(getSetting()->allow_block!=1){
+			return redirect()->back();
+		}
     }
 	
     public function index(){
 		$data = [
-			'title'			=> trans('lang.item_type'),
-			'icon'			=> 'fa fa-pie-chart',
-			'small_title'	=> trans('lang.item_type_list'),
+			'title'			=> trans('lang.working_type'),
+			'icon'			=> 'fa fa-square',
+			'small_title'	=> trans('lang.working_type_list'),
 			'background'	=> '',
 			'link'			=> [
 				'home'	=> [
@@ -32,58 +36,52 @@ class ItemTypeController extends Controller
 						'caption' 	=> trans('lang.home'),
 				],
 				'dashboard'	=> [
-						'caption' 	=> trans('lang.item_type'),
+						'caption' 	=> trans('lang.working_type'),
 				],
 			],			
-			'rounte'		=> url("item_type/dt"),
-			'types'			=> 'item_type',
+			'rounte'		=> url("working_type/dt"),
+			'types'			=> ''
 		];
 		
-		if(hasRole('item_type_add')){
-			$data = array_merge($data, ['rounteSave'=> url('item_type/save')]);
+		if(hasRole('working_type_add')){
+			$data = array_merge($data, ['rounteSave'=> url('working_type/save')]);
 		}
-		if(hasRole('item_type_download')){
-			$data = array_merge($data, ['rounteDownload'=> url('item_type/excel/download')]);
+		if(hasRole('working_type_download')){
+			$data = array_merge($data, ['rounteDownload'=> url('working_type/excel/download')]);
 		}
-		if(hasRole('item_type_upload')){
-			$data = array_merge($data, ['rounteUploade'	=> url('item_type/excel/upload')]);
+		if(hasRole('working_type_upload')){
+			$data = array_merge($data, ['rounteUploade'	=> url('working_type/excel/upload')]);
 		}
 		return view('modal.index',$data);
 	}
 	
-	public function getDt()
+	public function getDt(Request $request)
     {
-		$sql = "SELECT 
-				  `pr_system_datas`.`id`,
-				  `pr_system_datas`.`name`,
-				  `pr_system_datas`.`desc`,
-				  `pr_system_datas`.`status`,
-				  `pr_system_datas`.`type` ,
-				  `pr_system_datas`.`parent` ,
-				  (SELECT parent_table.name FROM pr_system_datas AS parent_table WHERE parent_table.id = pr_system_datas.parent) AS parent_name
-				FROM
-				  `pr_system_datas` 
-				WHERE `pr_system_datas`.`status` = '1' 
-				  AND `pr_system_datas`.`type` = '".self::SYSTEM_TYPE."' order by pr_system_datas.parent";
-        return Datatables::of(DB::select($sql))
+		$pro_id = $request->session()->get('project');
+		$blocks = SystemData::where([
+			'status'=> 1,
+			'parent_id' => $pro_id,
+			'type' => self::SYSTEM_TYPE
+		])->get();
+        return Datatables::of($blocks)
 		->addColumn('action', function ($row) {			
-			$rounte_boq = url('item_type/upload/'.$row->id);
-			$rounte_delete = url('item_type/delete/'.$row->id);
-			$rounte_edit = url('item_type/edit/'.$row->id);
-			$btneEdit = 'onclick="onEdit(this)"';
+			$rounte_boq = url('working_type/upload/'.$row->id);
+			$rounte_delete = url('working_type/delete/'.$row->id);
+			$rounte_edit = url('working_type/edit/'.$row->id);
+			$btnEdit = 'onclick="onEdit(this)"';
 			$btnDelete = 'onclick="onDelete(this)"';
 			
 			if(!hasRole('block_edit')){
-				$btneEdit = "disabled";
+				$btnEdit = "disabled";
 			}
-			if(Item::where(['cat_id'=>$row->id])->exists()){
+			if(House::where(['block_id'=>$row->id])->exists()){
 				$btnDelete = "disabled";
 			}
 			if(!hasRole('block_delete')){
 				$btnDelete = "disabled";
 			}
             return
-				'<a '.$btneEdit.' title="'.trans('lang.edit').'" class="btn btn-xs yellow edit-record" row_id="'.$row->id.'" row_rounte="'.$rounte_edit.'">'.
+				'<a '.$btnEdit.' title="'.trans('lang.edit').'" class="btn btn-xs yellow edit-record" row_id="'.$row->id.'" row_rounte="'.$rounte_edit.'">'.
 				'	<i class="fa fa-edit"></i>'.
 				'</a>'.
 				'<a '.$btnDelete.' title="'.trans('lang.delete').'" class="btn btn-xs red delete-record" row_id="'.$row->id.'" row_rounte="'.$rounte_delete.'">'.
@@ -94,17 +92,17 @@ class ItemTypeController extends Controller
 
     public function save(Request $request){
 		$rules = [
-				'name'	=>'required|max:50',
-				'desc' 	=>'required|max:200',
-			];
+			'name'	=>'required|max:50|unique_system_data:'.self::SYSTEM_TYPE,
+			'desc' 	=>'required|max:200',
+		];
         Validator::make($request->all(),$rules)->validate();
 		DB::beginTransaction();
 		try {
 			$data = [
-				'parent'	=>$request->parent_id == "" ? 0 : $request->parent_id,
 				'name'		=>$request->name,
 				'desc'		=>$request->desc,
 				'type'		=>self::SYSTEM_TYPE,
+				'status'    => 1,
 				'parent_id'	=>$request->session()->get('project'),
 				'created_by'=>Auth::user()->id,
 				'created_at'=>date('Y-m-d H:i:s'),
@@ -124,15 +122,19 @@ class ItemTypeController extends Controller
 
     public function update(Request $request,$id)
     {
+		if($request['name']!=$request['old_name']){
+			$unique='|unique_system_data:'.self::SYSTEM_TYPE;
+		}else{
+			$unique='';
+		}
     	$rules = [
-				'name'	=>'required|max:50',
-				'desc' 	=>'required|max:200',
-			];
+			'name'	=>'required|max:50'.$unique,
+			'desc' 	=>'required|max:200',
+		];
     	Validator::make($request->all(),$rules)->validate();
     	DB::beginTransaction();
 		try {
 			$data = [
-				'parent'	=>$request->parent_id == "" ? 0 : $request->parent_id,
 				'name'		=>$request->name,
 				'desc'		=>$request->desc,
 				'type'		=>self::SYSTEM_TYPE,
@@ -162,23 +164,19 @@ class ItemTypeController extends Controller
 		}
     }
 
-    public function downloadExcel()
+    public function downloadExcel(Request $request)
    	{
-   		Excel::create('item_type.export_'.date('Y_m_d_H_i_s'),function($excel){
+		$pro_id = $request->session()->get('project');
+   		Excel::create('block.export_'.date('Y_m_d_H_i_s'),function($excel)use($pro_id){
    			$excel->setCreator(Auth::user()->name)->setCompany(config('app.name'));
-   			$excel->sheet('Zone Info',function($sheet){
+   			$excel->sheet('Zone Info',function($sheet)use($pro_id){
    				$sheet->cell('A1','Name');
    				$sheet->cell('B1','Description');
-				$sql = "SELECT 
-						  `pr_system_datas`.`id`,
-						  `pr_system_datas`.`name`,
-						  `pr_system_datas`.`desc`,
-						  `pr_system_datas`.`type` 
-						FROM
-						  `pr_system_datas` 
-						WHERE `pr_system_datas`.`status` = '1' 
-						  AND `pr_system_datas`.`type` = '".self::SYSTEM_TYPE."'";
-				$data = DB::select($sql);
+				$data = SystemData::where([
+					'status'=> 1,
+					'parent_id' => $pro_id,
+					'type' => self::SYSTEM_TYPE
+				])->get();
 				if(count($data)>0){
 					$key=0;
    					foreach ($data as $value) {
@@ -196,12 +194,13 @@ class ItemTypeController extends Controller
 		if($request->hasFile('excel')){
 			$path = $request->file('excel')->getRealPath();
 			$data = Excel::load($path, function($reader) {})->get();
+			$pro_id = $request->session()->get('project');
 			$error = '';
 			if(!empty($data) && $data->count()){
 				foreach ($data as $key => $value) {
 					if (count($value)==2) {
 						if (($value->name) && ($value->description)) {
-							if (count(DB::table('system_datas')->where('name','=',$value->name)->where('type','=',self::SYSTEM_TYPE)->get(['id','name'])->toArray())==0) {
+							if (count(DB::table('system_datas')->where('name','=',$value->name)->where('type','=',self::SYSTEM_TYPE)->where('parent_id','=',$pro_id)->get(['id','name'])->toArray())==0) {
 								$insert[] = [
 									'name' 		=> $value->name, 
 									'desc' 		=> $value->description,

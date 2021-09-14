@@ -477,7 +477,8 @@
 	 }
 	 function deleteItem(itemIndex){
 		var row = itemIndex.parentNode.parentNode;
-  		row.parentNode.removeChild(row);
+		row.attr('disabled');
+  		// row.parentNode.removeChild(row);
 		// var itemIndex = "'"+row+"_"+type_id+"'";
 		// $(".tr_"+itemIndex).remove();
 

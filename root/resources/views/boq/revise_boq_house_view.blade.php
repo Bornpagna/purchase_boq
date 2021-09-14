@@ -11,8 +11,17 @@
             background: url("{{url("assets/upload/temps/details_close.png")}}") no-repeat center center !important;
         }
 		.boq-pointer{
-		cursor: pointer;
-	}
+			cursor: pointer;
+		}
+		#table_boq tr.disabled td::after {
+			position: absolute;
+			content: '';
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			background: rgba(0, 0, 0, 0.2);
+		}
 	</style>
 @endsection
 @section('content')
@@ -140,8 +149,11 @@
 																	</td>
 																	<td width="15%"><input type="number" length="11" class="form-control line_qty_std line_qty_std_{{$index_boq}}_{{$type_id}}" name="line_qty_std_{{$type_id}}[]" placeholder="{{trans('lang.enter_number')}}" value="{{$boqItem->qty_std}}" /></td>
 																	<td width="10%"><input type="number" length="11" class="form-control line_qty_add line_qty_add_{{$index_boq}}_{{$type_id}}" name="line_qty_add_{{$type_id}}[]" value="0" placeholder="{{trans('lang.enter_number')}}" value="{{$boqItem->qty_add}}"/></td>
-																	<td width="10%"><input type="number" length="11" class="form-control line_cost line_cost_{{$index_boq}}_{{$type_id}}" name="line_cost_{{$type_id}}[]" value="0" placeholder="{{trans('lang.enter_number')}}" value="{{$boqItem->price}}"/></td>
-																	<td width="2%"><a class="row_{{$index_boq}}_{{$type_id}} btn btn-sm" onclick="DeleteRowBOQ({{$type_id}},{{$index_boq}})"><i class="fa fa-trash"></i></a></td>
+																	<td width="10%">
+																		<input type="number" length="11" class="form-control line_cost line_cost_{{$index_boq}}_{{$type_id}}" name="line_cost_{{$type_id}}[]" value="0" placeholder="{{trans('lang.enter_number')}}" value="{{$boqItem->price}}"/>
+																		<input type="hidden" id="is_close_{{$index_boq}}_{{$type_id}}" name="is_close_{{$type_id}}[]" /> 
+																	</td>
+																	<td width="2%"><a class="row_{{$index_boq}}_{{$type_id}} btn btn-sm" onclick="closeRowBOQ(this,'{{$index_boq}}','{{$type_id}}' )"><i class="fa fa-trash"></i></a></td>
 																</tr>
 															@endif
 														@endforeach
@@ -199,8 +211,15 @@
 	});	
 	getHouses();
 	
-	function DeleteRowBOQ(type,index){
-		$('.row-id-'+type+"-"+index).remove();
+	function closeRowBOQ(field,index,type){
+		// var row = $('.row-id-'+type+"-"+index);
+		$(field).closest('tr').find(":input:not(:first)").attr('readonly', true);
+		$("#is_close_"+index+'_'+type).val(1);
+		console.log($("#is_close_"+index+'_'+type).val());
+		// row.addClass("disabled")
+		// console.log(row);
+		// row.attr('disabled');
+		// row.remove();
 		// var table_boq = $('#table_boq').DataTable();
 		// table_boq.row($('.row_'+id).parents('tr')).remove().draw( false );
 		
@@ -209,6 +228,11 @@
 		// 	$(cell.node()).find(".line").text(lineNo(parseFloat(index_boq)+1,3));
 		// 	$(cell.node()).find(".line_no").val(lineNo(parseFloat(index_boq)+1,3));
 		// });
+	}
+	function DeleteRowBOQ(field){
+		var row = field.parentNode.parentNode;
+		row.remove();
+		
 	}
 	// function ChangeItemTypes(){
 	// 	val = $('#boq-item-type').val();
@@ -371,7 +395,7 @@
 				html+= '<td><input type="number" length="11" class="form-control line_qty_std line_qty_std_'+index_boq+'_'+type_id+'" name="line_qty_std_'+type_id+'[]" placeholder="{{trans("lang.enter_number")}}" /></td>';
 				html += '<td><input type="number" length="11" class="form-control line_qty_add line_qty_add_'+index_boq+'_'+type_id+'" name="line_qty_add_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
 				html += '<td><input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'_'+type_id+'" name="line_cost_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
-				html += '<td><a class="row_'+index_boq+'_'+type_id+' btn btn-sm" onclick="DeleteRowBOQ('+type_id+'_'+index_boq+')"><i class="fa fa-trash"></i></a></td>';
+				html += '<td><a class="row_'+index_boq+'_'+type_id+' btn btn-sm" onclick="DeleteRowBOQ(this)"><i class="fa fa-trash"></i></a></td>';
 			html+='</tr>';
 		table_boq.append(html);
 		$.fn.select2.defaults.set('theme','classic');
@@ -404,7 +428,7 @@
 				html+= '<td><input type="number" length="11" class="form-control line_qty_std line_qty_std_'+index_boq+'_'+type_id+'" name="line_qty_std_'+type_id+'[]" placeholder="{{trans("lang.enter_number")}}" /></td>';
 				html += '<td><input type="number" length="11" class="form-control line_qty_add line_qty_add_'+index_boq+'_'+type_id+'" name="line_qty_add_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
 				html += '<td><input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'_'+type_id+'" name="line_cost_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
-				html += '<td><a class="row_'+index_boq+'_'+type_id+' btn btn-sm" onclick="DeleteRowBOQ('+type_id+','+index_boq+')"><i class="fa fa-trash"></i></a></td>';
+				html += '<td><a class="row_'+index_boq+'_'+type_id+' btn btn-sm" onclick="DeleteRowBOQ(this)"><i class="fa fa-trash"></i></a></td>';
 			html+='</tr>';
 		table_boq.append(html);
 		$.fn.select2.defaults.set('theme','classic');

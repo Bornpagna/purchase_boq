@@ -533,6 +533,7 @@ function getBoqHouseItems($id,$house_id = null ,$working_type=null){
 	$boqItems = BoqItem::select(
 		'items.*',
 		'boq_items.*',
+		'boq_items.unit as boq_unit',
 		'items.cat_id',
 		'system_datas.name as working_type_name',
 		DB::raw('SUM(pr_boq_items.qty_std) as total_qty')

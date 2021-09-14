@@ -500,6 +500,7 @@
 			$('.button-submit').attr('id','btnSaveZone').attr('name','btnSaveZone').attr('onclick','onSubmitZone(this)');
 			$('.button-submit').html('{{trans("lang.save")}}');
 			$('.system-modal').modal('show');
+			$('.parent_id').hide();
 		});
 
 		function onSubmitZone(field){
@@ -546,6 +547,7 @@
 			$('.button-submit').attr('id','btnSaveZoneEdit').attr('name','btnSaveZoneEdit').attr('onclick','onSubmitZoneEdit(this)');
 			$('.button-submit').html('{{trans("lang.save")}}');
 			$('.system-modal').modal('show');
+			$('.parent_id').hide();
 		});
 
 		function onSubmitZoneEdit(field){
@@ -595,6 +597,7 @@
 			$('.button-submit').attr('id','btnSaveBlock').attr('name','btnSaveBlock').attr('onclick','onSubmitBlock(this)');
 			$('.button-submit').html('{{trans("lang.save")}}');
 			$('.system-modal').modal('show');
+			$('.parent_id').hide();
 		});
 
 		function onSubmitBlock(field){
@@ -641,6 +644,7 @@
 			$('.button-submit').attr('id','btnSaveBlockEdit').attr('name','btnSaveBlockEdit').attr('onclick','onSubmitBlockEdit(this)');
 			$('.button-submit').html('{{trans("lang.save")}}');
 			$('.system-modal').modal('show');
+			$('.parent_id').hide();
 		});
 
 		function onSubmitBlockEdit(field){
@@ -690,6 +694,7 @@
 			$('.button-submit').attr('id','btnSaveStreet').attr('name','btnSaveStreet').attr('onclick','onSubmitStreet(this)');
 			$('.button-submit').html('{{trans("lang.save")}}');
 			$('.system-modal').modal('show');
+			$('.parent_id').hide();
 		});
 
 		function onSubmitStreet(field){
@@ -736,6 +741,7 @@
 			$('.button-submit').attr('id','btnSaveStreetEdit').attr('name','btnSaveStreetEdit').attr('onclick','onSubmitStreetEdit(this)');
 			$('.button-submit').html('{{trans("lang.save")}}');
 			$('.system-modal').modal('show');
+			$('.parent_id').hide();
 		});
 
 		function onSubmitStreetEdit(field){
@@ -785,6 +791,7 @@
 			$('.button-submit').attr('id','btnSaveHouseType').attr('name','btnSaveHouseType').attr('onclick','onSubmitHouseType(this)');
 			$('.button-submit').html('{{trans("lang.save")}}');
 			$('.system-modal').modal('show');
+			$('.parent_id').hide();
 		});
 
 		function onSubmitHouseType(field){
@@ -831,6 +838,7 @@
 			$('.button-submit').attr('id','btnSaveHouseTypeEdit').attr('name','btnSaveHouseTypeEdit').attr('onclick','onSubmitHouseTypeEdit(this)');
 			$('.button-submit').html('{{trans("lang.save")}}');
 			$('.system-modal').modal('show');
+			$('.parent_id').hide();
 		});
 
 		function onSubmitHouseTypeEdit(field){

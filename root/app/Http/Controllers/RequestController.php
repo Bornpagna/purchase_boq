@@ -66,6 +66,37 @@ class RequestController extends Controller
     public function GetDetail(Request $request)
     {
     	try {
+			$projectID = $request->session()->get('project');
+			$where = ['boqs.status'=> 1];
+			$whereUsage = 'AND `pr_usages`.`pro_id` = '.$projectID;
+			if(!empty($request["zone_id"])){
+				$where = array_merge($where,['boqs.zone_id'=>$request["zone_id"]]);
+				$whereUsage .= ' AND pr_usages.zone_id = '.$request["zone_id"];
+			}
+			if(!empty($request["block_id"])){
+				$where = array_merge($where,['boqs.block_id'=>$request["block_id"]]);
+				$whereUsage .= ' AND pr_usages.block_id = '.$request["block_id"];
+			}
+			if(!empty($request["building_id"])){
+				$where = array_merge($where,['boqs.building_id'=>$request['building_id']]);
+				$whereUsage .= ' AND pr_usages.building_id = '.$request["building_id"];
+			}
+			if(!empty($request["street_id"])){
+				$where = array_merge($where,['boqs.street_id'=>$request["boqs.street_id"]]);
+				// $whereUsage .= ' AND boqs.street_id = '.$request["street_id"];
+			}
+			if(!empty($request["house_type"])){
+				$where = array_merge($where,['boq_items.working_type'=>$request["house_type"]]);
+			}
+			if(!empty($request["house_id"])){
+				$where = array_merge($where,['boq_houses.house_id'=>$request["house_id"]]);
+			}
+			if(!empty($request["boq_id"])){
+				$where = array_merge($where,['boqs.id'=>$request["boq_id"]]);
+			}
+			if(!empty($request["working_type"])){
+				$where = array_merge($where,['boq_items.working_type'=>$request["working_type"]]);
+			}
 			
 			$select = [
 				'request_items.*',
@@ -76,13 +107,14 @@ class RequestController extends Controller
 				'items.unit_stock',
 				'items.unit_usage',
 				'items.unit_purch',
-				'items.cost_purch'
+				'items.cost_purch',
+				DB::raw("IFNULL((SELECT SUM(`pr_usage_details`.`qty`) FROM `pr_usage_details` JOIN pr_usages ON `pr_usage_details`.`use_id` = `pr_usages`.`id` WHERE `pr_usage_details`.`item_id` = `pr_request_items`.`item_id` {$whereUsage}),0) AS usage_qty"),
+				DB::raw('IFNULL((SELECT SUM(`pr_stocks`.`qty`) FROM `pr_stocks` WHERE `pr_stocks`.`item_id` = `pr_request_items`.`item_id` AND `pr_stocks`.`trans_ref` = "I" AND `pr_stocks`.`pro_id` = 1 ),0) AS stock_qty') 
 			];
 
 			$OrderItem  = RequestItem::select($select)
 						->leftJoin('items','request_items.item_id','items.id')
-						->where('request_items.pr_id',$request->id)
-						->get();
+						->where('request_items.pr_id',$request->id)->get();
 
 			return response()->json($OrderItem,200); 
 
@@ -190,6 +222,9 @@ class RequestController extends Controller
 			'requests.*',
 			DB::raw("(SELECT CONCAT({$prefix}constructors.id_card,' (',{$prefix}constructors.name,')')AS name FROM {$prefix}constructors WHERE {$prefix}constructors.id = {$prefix}requests.request_by) AS request_by"),
 			DB::raw("(SELECT CONCAT({$prefix}system_datas.desc,' (',{$prefix}system_datas.name,')') FROM {$prefix}system_datas WHERE {$prefix}system_datas.id={$prefix}requests.dep_id)AS department"),
+			DB::raw("(SELECT SUM(pr_request_items.ordered_qty) FROM pr_request_items WHERE pr_request_items.pr_id = pr_requests.id) AS ordered_qty"),
+			DB::raw("(SELECT SUM(pr_request_items.closed_qty) FROM pr_request_items WHERE pr_request_items.pr_id = pr_requests.id) AS closed_qty"),
+			DB::raw("(SELECT SUM(pr_request_items.qty) FROM pr_request_items WHERE pr_request_items.pr_id = pr_requests.id) AS total_qty")
 		];
 
 		$requests = Requests::select($columns)->where('pro_id',$pro_id)->where('trans_status','>',0);
@@ -197,6 +232,7 @@ class RequestController extends Controller
 		if(!hasRole('admin') && !hasRole('owner')){
 			$requests = $requests->where('dep_id',$dep_id)->orWhere('created_by',$user_id);
 		}
+		// print_r($requests->toSql());
 
 		$requests = $requests->get();
 		
@@ -286,7 +322,9 @@ class RequestController extends Controller
 	
 	public function subDt(Request $request, $id)
     {
-		$requestItems = RequestItem::where('pr_id',$id)->get();	
+		$requestItems = RequestItem::select(
+			'*'
+		)->where('pr_id',$id)->get();	
 		return Datatables::of($requestItems)
 		->addColumn('item',function($row){
 			if($item = Item::find($row->item_id)){
@@ -448,7 +486,8 @@ class RequestController extends Controller
 				}
 			}
 			DB::commit();
-			return redirect()->back()->with('success',trans('lang.update_success'));
+			return redirect('purch/request')->with('success',trans('lang.save_success'));
+			// return redirect()->back()->with('success',trans('lang.update_success'));
 		} catch (\Exception $e) {
 			DB::rollback();
 			return redirect()->back()->with('error',trans('lang.update_error').' '.$e->getMessage().' '.$e->getLine());
@@ -483,6 +522,7 @@ class RequestController extends Controller
 					DB::table('request_items')->where(['id'=>$row->id])->update(['closed_qty'=>(floatval($row->qty) - floatval($row->ordered_qty))]);
 				}
 			}
+			DB::table('requests')->where('id',$id)->update(['is_closed'=>1]);
 			DB::commit();
 			return redirect()->back()->with('success',trans('lang.close_success'));
 		} catch (\Exception $e) {
@@ -559,7 +599,8 @@ class RequestController extends Controller
 			
 			if($itemBoq){
 				$sql_boq = "SELECT F.item_id, (F.stock_qty / F.boq_qty) AS boq_qty 
-							FROM (SELECT E.item_id, E.stock_qty, (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '$unit'AND pr_units.`to_code` = E.unit_stock) AS boq_qty FROM (SELECT D.item_id, D.unit_stock, SUM(D.stock_qty) AS stock_qty FROM (SELECT C.item_id, C.unit_stock, (C.qty * C.stock_qty) AS stock_qty FROM (SELECT B.*, (CASE WHEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = B.unit AND pr_units.`to_code` = B.unit_stock)!='' THEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = B.unit AND pr_units.`to_code` = B.unit_stock) ELSE 1 END) AS stock_qty FROM (SELECT A.*, (SELECT pr_items.`unit_stock` FROM pr_items WHERE pr_items.`id` = A.item_id) AS unit_stock FROM (SELECT pr_boq_items.`id`, pr_boq_items.`house_id`,pr_boq_items.`boq_house_id`, pr_boq_items.`item_id`, pr_boq_items.`unit`, SUM((pr_boq_items.`qty_std` + pr_boq_items.`qty_add` )) AS qty FROM pr_boq_items WHERE pr_boq_items.`item_id` = $item_id AND pr_boq_items.`boq_house_id` IN ($strHouseId)) AS A ) AS B) AS C) AS D GROUP BY D.item_id, D.unit_stock) AS E) AS F"; 
+							FROM (SELECT E.item_id, E.stock_qty, (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '$unit'AND pr_units.`to_code` = E.unit_stock) AS boq_qty 
+							FROM (SELECT D.item_id, D.unit_stock, SUM(D.stock_qty) AS stock_qty FROM (SELECT C.item_id, C.unit_stock, (C.qty * C.stock_qty) AS stock_qty FROM (SELECT B.*, (CASE WHEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = B.unit AND pr_units.`to_code` = B.unit_stock)!='' THEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = B.unit AND pr_units.`to_code` = B.unit_stock) ELSE 1 END) AS stock_qty FROM (SELECT A.*, (SELECT pr_items.`unit_stock` FROM pr_items WHERE pr_items.`id` = A.item_id) AS unit_stock FROM (SELECT pr_boq_items.`id`, pr_boq_items.`house_id`,pr_boq_items.`boq_house_id`, pr_boq_items.`item_id`, pr_boq_items.`unit`, SUM((pr_boq_items.`qty_std` + pr_boq_items.`qty_add` )) AS qty FROM pr_boq_items WHERE pr_boq_items.`item_id` = $item_id AND pr_boq_items.`boq_house_id` IN ($strHouseId)) AS A ) AS B) AS C) AS D GROUP BY D.item_id, D.unit_stock) AS E) AS F"; 
 				$objBOQ = collect(DB::select($sql_boq))->first();
 				
 				if($objBOQ){

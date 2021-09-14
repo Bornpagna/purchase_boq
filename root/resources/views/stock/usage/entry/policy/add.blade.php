@@ -38,6 +38,10 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+    select[readonly].select2+.select2-container {
+        pointer-events: none;
+        touch-action: none;
+    }
 </style>
 <div class="row">
 	<div class="col-md-12">
@@ -216,7 +220,7 @@
                                 </div>
                             </div>
                             <!-- Street -->
-                            <div class="col-md-4">
+                            {{-- <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="street_id" class="control-label"><strong>{{ trans('lang.street') }}</strong></label>
                                     <select class="form-control select2 street_id" name="street_id">
@@ -224,9 +228,9 @@
                                     </select>
                                     <span class="help-block font-red bold"></span>
                                 </div>
-                            </div>
+                            </div> --}}
                             <!-- House -->
-                            <div class="col-md-4">
+                            {{-- <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="house_id" class="control-label"><strong>{{ trans('lang.house') }}</strong></label>
                                     <select class="form-control select2 house_id" name="house_id">
@@ -234,15 +238,15 @@
                                     </select>
                                     <span class="help-block font-red bold"></span>
                                 </div>
-                            </div>
+                            </div> --}}
 
                             <!-- Load Button -->
-                            <div class="col-md-4">
+                            <div class="col-md-12">
                                 {{-- <div class="form-group">
                                     <label for="load_button" class="control-label"><strong> </strong></label>
                                     <button type="button" class="load_button btn btn-success">{{ trans('lang.load_item') }}</button>
                                 </div> --}}
-                                <div class="form-actions">
+                                <div class="form-actions right">
 									<a class="btn blue bold disabled" id="load-boq-item">{{trans('lang.load_item')}}</a>
 								</div>
                             </div>
@@ -872,10 +876,10 @@
                 //         html+= '{{getSystemData("IT")}}'; 
                 //     html+= '</select>';
                 // html+= '</td>';
-				html+= '<td><select onchange="onItemSelectChanged(this);" index="'+ index +'" id="item_id_'+ index +'" name="item_id[]" class="form-control select2 item_id_"'+index+'><option></option></select></td>';
+				html+= '<td><select onchange="onItemSelectChanged(this);" index="'+ index +'" readonly="readonly" id="item_id_'+ index +'" name="item_id[]" class="form-control select2 item_id_"'+index+'><option></option></select></td>';
 				html+= '<td><input type="text" length="11" class="form-control size line_size line_size_'+index+'" name="size[]" placeholder="{{trans("lang.size")}}" /></td>';
 				html+= '<td>';
-                    html+= '<select class="form-control select2 select2_'+index+' line_unit line_unit_'+index+'" id="unit_id_'+ index +'" name="unit_id[]"> onchange="onChangeUnit(this, '+index+')"'; 
+                    html+= '<select name="line_unit" readonly class="form-control select2 select2_'+index+' line_unit line_unit_'+index+'" disabled="readonly" id="unit_id_'+ index +'" name="unit_id[]"> onchange="onChangeUnit(this, '+index+')"'; 
 					html+= '<option value=""></option>';
                     html+= '</select>';
                     html += '<input type="hidden" id="unit_factor_'+ index +'" name="unit_factor[]" class="form-control unit_factor" />';
@@ -1341,9 +1345,20 @@
             pickerPosition: "bottom-right"
 		});
     }
+    var $S2 = $("select[name=select2]");
+    $S2.attr("readonly", "readonly");
 
     setupSelect2 = function(){
         $(".select2").select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
+        $(".line_unit").select2({readonly:'readonly'});
+        // $('.line_unit').on('click', function() {
+        // //readonly_select($(".select2"), true);
+
+        // $S1.attr("readonly", "readonly");
+    
+            // $S2.attr("readonly", "readonly");
+
+        // });
     }
 
     setupSelect2Autocompleted = function(){
@@ -1470,8 +1485,8 @@
         getEngineers(getEngineers_success,getEngineers_complete);
         getSubcontractors(getSubcontractors_success,getSubcontractors_complete);
         getWarehouses(getWarehouses_success,getWarehouses_complete);
-        getStreets(getStreets_success,getStreets_complete);
-        getHouses(getHouses_success,getHouses_complete);
+        // getStreets(getStreets_success,getStreets_complete);
+        // getHouses(getHouses_success,getHouses_complete);
         @if(getSetting()->allow_zone == 1)
         getZones(getZones_success,getZones_complete);
         
@@ -1483,9 +1498,9 @@
                     getBlocksByZoneID(zoneID,getBlocks_success,getBlocks_complete);
                 @endif
 
-                getStreetsByZoneID(zoneID,getStreets_success,getStreets_complete);
+                // getStreetsByZoneID(zoneID,getStreets_success,getStreets_complete);
                 // getHousesByZoneID(zoneID,getHouses_success,getHouses_complete);
-                getHouseAllTrigger();
+                // getHouseAllTrigger();
             }
         });
         @endif
@@ -1494,9 +1509,9 @@
         $('.block_id').on('change',function(){
             const blockID = $(this).val();
             if(blockID){
-                getStreetsByBlockID(blockID,getStreets_success,getStreets_complete);
+                // getStreetsByBlockID(blockID,getStreets_success,getStreets_complete);
                 // getHousesByBlockID(blockID,getHouses_success,getHouses_complete);
-                getHouseAllTrigger();
+                // getHouseAllTrigger();
             }
         });
         @endif
@@ -1505,7 +1520,7 @@
             const buildingID = $(this).val();
             if(buildingID){
                 $('#load-boq-item').removeClass("disabled");
-                getHouseAllTrigger();
+                // getHouseAllTrigger();
             }
         });
 
@@ -1513,7 +1528,7 @@
             const buildingID = $(this).val();
             if(buildingID){
 
-                getHouseAllTrigger();
+                // getHouseAllTrigger();
             }
         });
 
@@ -1550,12 +1565,14 @@
 			building_id : null,
 			street_id: null,
 			house_type: null,
+            warehouse : null
 		};
 		const zoneID    = $('#zone_id').val();
 		const blockID   = $('#block_id').val();
 		const buildingID    = $('#building_id').val();
 		const streetID  = $('#street_id').val();
 		const houseType = $('#house_type_id').val();
+        const warehouse = $('#warehouse_id').val();
 
 		if(zoneID){
 			params.zone_id = zoneID;
@@ -1575,6 +1592,9 @@
 		if(houseType){
 			params.house_type = houseType;
 		}
+        // if(){
+        //     params.warehouse = warehouse;
+        // }
         var html = "<tr ><td colspan='10'><div class='loader'></div></td></tr>";
         $("#table-income tbody").append(html);
 		$.ajax({
@@ -1606,7 +1626,7 @@
 				html+= '<td>'+data.item_name+'<input type="hidden" class="line_item line_item_'+index+'" id="item_id_'+index+'" name="item_id[]" value="'+data.item_id+'" /></td>';
 				html+= '<td><input type="text" length="11" class="form-control size line_size line_size_'+index+'" name="size[]" placeholder="{{trans("lang.size")}}" /></td>';
 				html+= '<td>';
-                    html+= '<select class="form-control select2 select2_'+index+' line_unit unit_id line_unit_'+index+'" id="unit_id_'+index+'" name="unit_id[]"> onchange="onChangeUnit(this, '+index+')"' 
+                    html+= '<select readonly="readonly" class="form-control select2 select2_'+index+' line_unit unit_id line_unit_'+index+'" id="unit_id_'+index+'" name="unit_id[]"> onchange="onChangeUnit(this, '+index+')"' 
                         html+= '<option value=""></option>';
                     html+= '</select>';
                     html += '<input type="hidden" id="unit_factor_'+ index +'" name="unit_factor[]" class="form-control unit_factor" />';
@@ -1704,7 +1724,6 @@
 	}
 
     function onChangeUnit(field, row){
-		
 		var item_id = $(".line_item_"+row).val();
 		var unit = $(field).val();
 		var _token = $("input[name=_token]").val();

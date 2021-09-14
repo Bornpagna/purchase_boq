@@ -256,9 +256,7 @@ class UsagePolicyController extends Controller
 			$qty =0;
 			
 			if(count($request['line_index']) > 0){
-				
 				for($i=0;$i<count($request['line_index']);$i++){
-					
 					foreach($usagePolicies as $policy){
 						$reqQTY = floatval($request['qty'][$i]);
 						$calQTY = $reqQTY * (floatval($policy->percentage) / 100);
@@ -309,7 +307,6 @@ class UsagePolicyController extends Controller
 								$sql  = "CALL COSTING_LIFO({$request->session()->get('project')},{$request['item_id'][$i]});";
 							}
 							$stocks = DB::select($sql);
-							// print_r(count($stocks));exit;
 							// $columns = [
 							// 	'stocks.ref_id',
 							// 	'stocks.ref_no',
