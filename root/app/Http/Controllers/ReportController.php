@@ -1301,14 +1301,9 @@ class ReportController extends Controller
 		return view('approval.request.print', $data);
     }
 
-    public function print_order(Request $request,$id,$encrypt_except=null)
+    public function print_order(Request $request,$id)
     {
-		if($encrypt_except){
-			$id = $id;
-		}else{
-			$id = decrypt($id);
-		}
-    	
+    	$id = decrypt($id);
 		$prefix = DB::getTablePrefix();
     	$order = Order::select(['*',
     		DB::raw("(select {$prefix}users.position from {$prefix}users where {$prefix}users.id=created_by)AS position"),
@@ -1377,84 +1372,6 @@ class ReportController extends Controller
 			],
 		];
 		return view('approval.order.print', $data);
-    }
-
-	public function print_delivery_note(Request $request,$id,$encrypt_except=null)
-    {
-		if($encrypt_except){
-			$id = $id;
-		}else{
-			$id = decrypt($id);
-		}
-    	
-		$prefix = DB::getTablePrefix();
-    	$order = Order::select(['*',
-    		DB::raw("(select {$prefix}users.position from {$prefix}users where {$prefix}users.id=created_by)AS position"),
-    		DB::raw("(select {$prefix}users.name from {$prefix}users where {$prefix}users.id=created_by)AS user_request"),
-    		DB::raw("(select {$prefix}users.signature from {$prefix}users where {$prefix}users.id=created_by)AS signature"),
-    		DB::raw("(select {$prefix}users.position from {$prefix}users where {$prefix}users.id=ordered_by)AS order_position"),
-    		DB::raw("(select {$prefix}users.name from {$prefix}users where {$prefix}users.id=ordered_by)AS ordered_user"),
-    		DB::raw("(select {$prefix}users.signature from {$prefix}users where {$prefix}users.id=ordered_by)AS ordered_signature"),
-    		DB::raw("(select {$prefix}projects.name from {$prefix}projects where {$prefix}projects.id=pro_id)AS project"),
-    		DB::raw("(select {$prefix}requests.ref_no from {$prefix}requests where {$prefix}requests.id=pr_id)AS pr_no"),
-    		DB::raw("(select {$prefix}system_datas.name from {$prefix}system_datas where {$prefix}system_datas.id=dep_id)AS department")
-    	])->where('id',$id)->get()->first();
-
-    	$orderItems = OrderItem::select(['*',
-			DB::raw("(select {$prefix}items.code from {$prefix}items where {$prefix}items.id=item_id)AS item_code"),
-			DB::raw("(select {$prefix}items.name from {$prefix}items where {$prefix}items.id=item_id)AS item_name"),
-			DB::raw("(select {$prefix}units.from_desc from {$prefix}units where {$prefix}units.from_code=unit limit 1)AS unit_stock")])->where('po_id',$id)->get();
-
-    	$orderApproved = ApproveOrder::select(['*',
-    		DB::raw("(select {$prefix}users.position from {$prefix}users where {$prefix}users.id=approved_by)AS position"),
-    		DB::raw("(select {$prefix}users.name from {$prefix}users where {$prefix}users.id=approved_by)AS approved_people")])->where('po_id',$id)->get();
-
-    	if (!$order) {
-    		exit();
-    	}
-
-    	$supplier = Supplier::find($order->sup_id);
-
-    	if (!$supplier) {
-    		exit();
-    	}
-
-    	if (count($orderItems)==0) {
-    		exit();
-    	}
-
-    	if (count($orderApproved)==0) {
-    		exit();
-    	}
-
-    	$data = [
-			'title'          => trans('lang.po_paper'),
-			'icon'           => 'fa fa-shopping-cart',
-			'small_title'    => trans('lang.report'),
-			'background'     => '',
-			'order'          => $order,
-			'orderItems'     => $orderItems,
-			'orderApproved'  => $orderApproved,
-			'supplier'       => $supplier,
-			'link'        => [
-				'home'	=> [
-						'url' 		=> url('/'),
-						'caption' 	=> trans('lang.home'),
-				],
-				'approval'	=> [
-						'url' 		=> '#',
-						'caption' 	=> trans('lang.approval'),
-				],
-				'order'	=> [
-						'url' 		=> '#',
-						'caption' 	=> trans('lang.order'),
-				],
-				'print'	=> [
-						'caption' 	=> trans('lang.print'),
-				],
-			],
-		];
-		return view('approval.order.print_delivery_note', $data);
     }
 
     public function view_report_purchase_request_detail()
@@ -4407,7 +4324,7 @@ class ReportController extends Controller
 			$np = str_replace(",","','",$house_id);
 			$np .="'";
 			$np = substr($np,2);
-			$house_id = " AND pr_boq_houses.`house_id` IN(".$np.") ";
+			$house_id = "AND boq.`house_id` IN(".$np.") ";
 		}else{
 			$house_id = '';
 		}
@@ -4420,20 +4337,20 @@ class ReportController extends Controller
 			$np = str_replace(",","','",$item_id);
 			$np .="'";
 			$np = substr($np,2);
-			$item_id = " AND boqi.`item_id` IN(".$np.") ";
+			$item_id = "AND boqi.`item_id` IN(".$np.") ";
 		}else{
 			$item_id = '';
 		}
 
-    	$sql = "SELECT (SELECT `pr_projects`.`name` FROM `pr_projects` WHERE `pr_projects`.`id`=$project_id) AS project,boq.`trans_by`, boq.`house_id`,
-		 (SELECT `pr_houses`.`house_no` FROM `pr_houses` WHERE `pr_houses`.id = pr_boq_houses.`house_id`) AS house_no, 
-		 (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_houses`.`house_type` FROM `pr_houses` WHERE `pr_houses`.`id` = pr_boq_houses.`house_id`)) AS house_type, boqi.`item_id`,
-		  (SELECT `pr_items`.`code` FROM `pr_items` WHERE `pr_items`.`id`= boqi.item_id) AS item_code, (SELECT `pr_items`.`name` FROM `pr_items` WHERE `pr_items`.`id` = boqi.item_id) AS item_name, 
-		  (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id` = boqi.`item_id`)) AS item_type,
-		  (SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`= boqi.`item_id`) AS item_type_id,
-		  (SELECT `pr_system_datas`.`desc` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id` = boqi.`item_id`)) AS item_type_desc,
-		  (SELECT `pr_items`.`cost_purch` FROM `pr_items` WHERE `pr_items`.`id` = boqi.`item_id` AND `pr_items`.`unit_purch` = boqi.`unit`) AS item_price, boqi.`qty_std`, boqi.`qty_add`, 
-		  (SELECT `pr_units`.`from_desc` FROM `pr_units` WHERE `pr_units`.`from_code`= boqi.`unit` LIMIT 1) AS unit FROM `pr_boqs` AS boq JOIN pr_boq_houses ON `pr_boq_houses`.boq_id = boq.id
+    	$sql = "SELECT (SELECT `pr_projects`.`name` FROM `pr_projects` WHERE `pr_projects`.`id`=$project_id)AS project,boq.`trans_by`, boq.`house_id`,
+		 (SELECT `pr_houses`.`house_no` FROM `pr_houses` WHERE `pr_houses`.id=pr_boq_houses.`house_id`)AS house_no, 
+		 (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_houses`.`house_type` FROM `pr_houses` WHERE `pr_houses`.`id`=pr_boq_houses.`house_id`))AS house_type, boqi.`item_id`,
+		  (SELECT `pr_items`.`code` FROM `pr_items` WHERE `pr_items`.`id`=boqi.item_id)AS item_code, (SELECT `pr_items`.`name` FROM `pr_items` WHERE `pr_items`.`id`=boqi.item_id)AS item_name, 
+		  (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`))AS item_type,
+		  (SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`)AS item_type_id,
+		  (SELECT `pr_system_datas`.`desc` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`))AS item_type_desc,
+		  (SELECT `pr_items`.`cost_purch` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id` AND `pr_items`.`unit_purch`=boqi.`unit`)AS item_price, boqi.`qty_std`, boqi.`qty_add`, 
+		  (SELECT `pr_units`.`from_desc` FROM `pr_units` WHERE `pr_units`.`from_code`=boqi.`unit` LIMIT 1)AS unit FROM `pr_boqs` AS boq JOIN pr_boq_houses ON `pr_boq_houses`.boq_id = boq.id
 		  INNER JOIN `pr_boq_items` AS boqi ON boqi.`boq_house_id` = pr_boq_houses.`id` AND pr_boq_houses.`house_id` IN(SELECT `pr_houses`.`id` FROM `pr_houses` WHERE `pr_houses`.`house_type`=$house_type) $house_id $item_id ";
 		//   print_r($sql);
 
@@ -6616,55 +6533,54 @@ class ReportController extends Controller
 		$itemType 	= $request->query("product_type");
 		$itemID 	= $request->query("product");
 
-		$report  = BoqItem::select('boq_items.*','boq_houses.house_id as boq_house_id','boqs.*')->leftJoin('boq_houses','boq_houses.id','boq_items.boq_house_id')->join('boqs','boqs.id','boq_houses.boq_id');
+		$report  = BoqItem::leftJoin('boqs','boqs.id','boq_items.boq_id');
 
 		if($zoneID){
 			if($houseIds = House::where('zone_id',$zoneID)->pluck('id')){
-				$report = $report->whereIn('boq_houses.house_id',$houseIds);
+				$report = $report->whereIn('boq_items.house_id',$houseIds);
 			}
 		}
 
 		if($blockID){
 			if($houseIds = House::where('block_id',$blockID)->pluck('id')){
-				$report = $report->whereIn('boq_houses.house_id',$houseIds);
+				$report = $report->whereIn('boq_items.house_id',$houseIds);
 			}
 		}
 
 		if($streetID){
 			if($houseIds = House::where('street_id',$streetID)->pluck('id')){
-				$report = $report->whereIn('boq_houses.house_id',$houseIds);
+				$report = $report->whereIn('boq_items.house_id',$houseIds);
 			}
 		}
 
 		if($houseType){
 			if($houseIds = House::where('house_type',$houseType)->pluck('id')){
-				$report = $report->whereIn('boq_houses.house_id',$houseIds);
+				$report = $report->whereIn('boq_items.house_id',$houseIds);
 			}
 		}
 
 		if($houseID){
-			$report = $report->where('boq_houses.house_id',$houseID);
+			$report = $report->where('boq_items.house_id',$houseID);
 		}
 
 		if($itemType){
 			if($itemIds = Item::where('cat_id',$itemType)->pluck('id')){
-				$report = $report->whereIn('boq_houses.item_id',$itemIds);
+				$report = $report->whereIn('boq_items.item_id',$itemIds);
 			}
 		}
 
 		if($itemID){
-			$report = $report->where('boq_houses.item_id',$itemID);
+			$report = $report->where('boq_items.item_id',$itemID);
 		}
 
 		$report = $report->get();
-		// print_r($report);exit;
 
 		if($version=="datatables"){
 			$response = Datatables::of($report)
 			
 				->addColumn('zone',function($row){
 					if(getSetting()->allow_zone == 1){
-						if($house = House::where(['id'=> $row->boq_house_id])->first()){
+						if($house = House::where(['id'=> $row->house_id])->first()){
 							if($houseType = SystemData::where(['id' => $house->zone_id])->first()){
 								return $houseType->name;
 							}
@@ -6675,7 +6591,7 @@ class ReportController extends Controller
 
 				->addColumn('block',function($row){
 					if(getSetting()->allow_block == 1){
-						if($house = House::where(['id'=> $row->boq_house_id])->first()){
+						if($house = House::where(['id'=> $row->house_id])->first()){
 							if($houseType = SystemData::where(['id' => $house->block_id])->first()){
 								return $houseType->name;
 							}
@@ -6683,17 +6599,9 @@ class ReportController extends Controller
 					}
 					return null;
 				})
-				->addColumn('building',function($row){
-						if($house = House::where(['id'=> $row->boq_house_id])->first()){
-							if($houseType = SystemData::where(['id' => $house->building_id])->first()){
-								return $houseType->name;
-							}
-						}
-					
-					return null;
-				})
+
 				->addColumn('street',function($row){
-					if($house = House::where(['id'=> $row->boq_house_id])->first()){
+					if($house = House::where(['id'=> $row->house_id])->first()){
 						if($houseType = SystemData::where(['id' => $house->street_id])->first()){
 							return $houseType->name;
 						}
@@ -6702,7 +6610,7 @@ class ReportController extends Controller
 				})
 
 				->addColumn('house_type',function($row){
-					if($house = House::select(['id','house_type'])->where(['id'=> $row->boq_house_id])->first()){
+					if($house = House::select(['id','house_type'])->where(['id'=> $row->house_id])->first()){
 						if($houseType = SystemData::where(['id' => $house->house_type])->first()){
 							return $houseType->name;
 						}
@@ -6710,7 +6618,7 @@ class ReportController extends Controller
 					return null;
 				})
 				->addColumn('house_no',function($row){
-					if($house = House::select(['id','house_no'])->where(['id' => $row->boq_house_id])->first()){
+					if($house = House::select(['id','house_no'])->where(['id' => $row->house_id])->first()){
 						return $house->house_no;
 					}
 					return null;
@@ -6744,7 +6652,7 @@ class ReportController extends Controller
 					}
 
 					$usageDetail = $usageDetail->where([
-						'usage_details.house_id' => $row->boq_house_id,
+						'usage_details.house_id' => $row->house_id,
 						'usage_details.item_id'  => $row->item_id,
 						'usage_details.delete'	 => 0
 						])->first();
@@ -6762,7 +6670,7 @@ class ReportController extends Controller
 					}
 
 					$usageDetail = $usageDetail->where([
-						'usage_details.house_id' => $row->boq_house_id,
+						'usage_details.house_id' => $row->house_id,
 						'usage_details.item_id'  => $row->item_id,
 						'usage_details.delete'	 => 0
 						])->groupBy(['usage_details.house_id','usage_details.item_id'])->get();
@@ -6783,7 +6691,7 @@ class ReportController extends Controller
 					}
 
 					$usageDetail = $usageDetail->where([
-						'usage_details.house_id' => $row->boq_house_id,
+						'usage_details.house_id' => $row->house_id,
 						'usage_details.item_id'  => $row->item_id,
 						'usage_details.delete'	 => 0
 						])->first();
@@ -7114,32 +7022,24 @@ class ReportController extends Controller
 				->addColumn('qty_std',function($row){
 					$columns  = [
 						'boq_items.*',
-						// 'units.factor',
-						DB::raw("(CASE WHEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '{$row->unit_stock}' AND pr_units.`to_code` = pr_boq_items.unit)!='' THEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '{$row->unit_stock}' AND pr_units.`to_code` = pr_boq_items.unit) ELSE 1 END) as factor")
+						'units.factor',
 					];
 					$boqItems = BoqItem::select($columns)
-							// ->leftJoin('units',function($join) use($row){
-							// 	$join->on('units.from_code','boq_items.unit')
-							// 		 ->where('units.to_code',$row->unit_purch);
-							// })
+							->leftJoin('units',function($join) use($row){
+								$join->on('units.from_code','boq_items.unit')
+									 ->where('units.to_code',$row->unit_purch);
+							})
 							->where('item_id',$row->item_id)
 							->get();
 					$qtyStd = 0;
 					if(!empty($boqItems) && count($boqItems) > 0){
 						foreach($boqItems as $boqItem){
-							// $factor = DB::table('units')->select('units.factor')->where('units.from_code',$boqItem->unit)->where('units.to_code',$boqItem->unit_stock)->first();
 							$factor = 1;
 							if(!empty($boqItem->factor)){
 								$factor = (float)$boqItem->factor;
 							}
-							// if(!empty($factor)){
-							// 	$factor = (float)$factor->factor;
-							// }else{
-
-							// }
 
 							$qtyStd += (float)$boqItem->qty_std * $factor;
-							// $qtyStd += (float)$boqItem->qty_std;
 						}
 					}
 					return $qtyStd;
@@ -7147,14 +7047,13 @@ class ReportController extends Controller
 				->addColumn('qty_add',function($row){
 					$columns  = [
 						'boq_items.*',
-						// 'units.factor',
-						DB::raw("(CASE WHEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '{$row->unit_stock}' AND pr_units.`to_code` = pr_boq_items.unit)!='' THEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '{$row->unit_stock}' AND pr_units.`to_code` = pr_boq_items.unit) ELSE 1 END) as factor")
+						'units.factor',
 					];
 					$boqItems = BoqItem::select($columns)
-							// ->leftJoin('units',function($join) use($row){
-							// 	$join->on('units.from_code','boq_items.unit')
-							// 		 ->where('units.to_code',$row->unit_purch);
-							// })
+							->leftJoin('units',function($join) use($row){
+								$join->on('units.from_code','boq_items.unit')
+									 ->where('units.to_code',$row->unit_purch);
+							})
 							->where('item_id',$row->item_id)
 							->get();
 					$qtyAdd = 0;
@@ -7165,8 +7064,7 @@ class ReportController extends Controller
 								$factor = (float)$boqItem->factor;
 							}
 
-							// $qtyAdd += (float)$boqItem->qty_add * $factor;
-							$qtyAdd += (float)$boqItem->qty_add;
+							$qtyAdd += (float)$boqItem->qty_add * $factor;
 						}
 					}
 					return $qtyAdd;
@@ -7174,8 +7072,7 @@ class ReportController extends Controller
 				->addColumn('qty_request',function($row){
 					$columns  = [
 						'request_items.*',
-						// 'units.factor',
-						DB::raw("(CASE WHEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = pr_request_items.unit AND pr_units.`to_code` = '{$row->unit}')!='' THEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = pr_request_items.unit AND pr_units.`to_code` = '{$row->unit}') ELSE 1 END) as factor")
+						'units.factor',
 					];
 					$requestItems = RequestItem::select($columns)
 							->leftJoin('units',function($join) use($row){
@@ -8706,6 +8603,55 @@ class ReportController extends Controller
 			$report = DB::select($sql);
 		}
 		return response()->json($report);
+	}
+	public function getBoqprint(Request $request){
+		$report ="";
+		$project_id = Session::get('project');
+		if(!empty($request->house_id)){
+			$sql = "SELECT pr_boq_items.*,
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_boq_items.`working_type`) AS working_type,
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = pr_items.`cat_id`) AS item_type,	
+			(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`house_type`) AS house_type,
+			pr_items.`name`,
+			pr_items.`desc`,
+			pr_items.`code`,
+			pr_houses.`house_no`,
+			pr_houses.`house_desc`	
+			FROM pr_boq_items 
+			JOIN pr_houses
+				ON pr_houses.id = pr_boq_items.`house_id`
+			JOIN pr_boqs
+				ON pr_boqs.id = pr_boq_items.boq_id 
+			JOIN pr_items
+				ON pr_items.id=pr_boq_items.item_id	
+			WHERE pr_boqs.status = 1 AND pr_boq_items.house_id=$request->house_id";
+			$house = DB::select($sql);
+		}
+		$data = [
+			'title'       => trans('lang.tree_view'),
+			'icon'        => 'fa fa-shopping-cart',
+			'house'		  => $house,	
+			'small_title' => trans('lang.report'),
+			'background'  => '',
+			'link'        => [
+				'home'	=> [
+						'url' 		=> url('/'),
+						'caption' 	=> trans('lang.home'),
+				],
+				'report'	=> [
+						'url' 		=> '#',
+						'caption' 	=> trans('lang.report'),
+				],
+				'purchase'	=> [
+						'url' 		=> '#',
+						'caption' 	=> trans('lang.tree_view'),
+				],
+				'request'	=> [
+						'caption' 	=> trans('lang.request'),
+				],
+			],
+		];
+		return view('reports.boq.print_tree')->with($data);
 	}
 	public function getBoqexport(Request $request){
 		$report ="";

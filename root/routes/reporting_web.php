@@ -24,12 +24,12 @@ Route::group(['prefix'=>'report'],function(){
 /////////////////// Tree View //////////////////////
 Route::match(['get','post'],'report/boqTreeView','ReportController@boqTreeView');
 Route::get('report/boqTreeView/getBoq','ReportController@getBoq');
-Route::get('report/boqTreeView/getBoqexport','ReportController@getBoqexport');
+Route::get('report/boqTreeView/getBoqexport','ReportController@getBoqexport'); 
+Route::get('report/boqTreeView/getBoqprint','ReportController@getBoqprint'); 
 /////////////////// End Tree View //////////////////
 /*/////////////////Request Print//////////////////*/
 Route::get('/purch/request/print/{id}','ReportController@print_request')->middleware('checkRole:purchase_request_print');
-Route::get('/purch/order/print/{id}/{encrypt_except?}','ReportController@print_order')->middleware('checkRole:purchase_order_print');
-Route::get('/purch/order/print_deliver_note/{id}/{encrypt_except?}','ReportController@print_delivery_note')->middleware('checkRole:purchase_order_print');
+Route::get('/purch/order/print/{id}','ReportController@print_order')->middleware('checkRole:purchase_order_print');
 Route::match(['get','post'],'/report/delivery','ReportController@delivery')->middleware('checkRole:report_delivery_item');
 Route::get('/report/generate_delivery','ReportController@generate_delivery');
 Route::match(['get','post'],'/report/return','ReportController@returns')->middleware('checkRole:report_return_delivery_item');
