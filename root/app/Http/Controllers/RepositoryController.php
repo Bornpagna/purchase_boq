@@ -107,7 +107,8 @@ class RepositoryController extends Controller
 		];
 
 		$rawBoqs = BoqItem::select($columns)
-				->leftJoin('items','boq_items.item_id','items.id');
+				->join('boqs','boqs.id','boq_items.boq_id')
+				->leftJoin('items','boq_items.item_id','items.id')->whereRaw(DB::raw("{$prefix}boqs.is_revise=0"))->whereRaw(DB::raw("{$prefix}boqs.status=1"));
 
 		////// USAGE DETAIL //////
 		$usageDetailColumns = [
@@ -196,7 +197,7 @@ class RepositoryController extends Controller
 			$transDate = date("Y-m-d", strtotime($originalDate));
 			$rawStocks = $rawStocks->whereRaw(DB::raw("{$prefix}stocks.trans_date <='{$transDate}'"));
 		}
-
+		// ->whereRaw(DB::raw("{$prefix}boqs.status = 1"))->where(DB::raw("{$prefix}boqs.is_revise = 0"))
 		$rawBoqs = $rawBoqs->groupBy(['house_id','item_id','unit'])->toSql();
 		$usageDetails = $usageDetails->groupBy(['house_id','item_id','unit'])->toSql();
 		$rawStocks = $rawStocks->groupBy(['item_id','unit'])->toSql();
@@ -717,13 +718,13 @@ class RepositoryController extends Controller
 			DB::raw('IFNULL(SUM(pr_boq_items.qty_std),0) as total_qty'),
 			DB::raw('(SELECT pr_system_datas.name FROM pr_system_datas WHERE pr_system_datas.id = pr_items.cat_id) as item_type'),
 			DB::raw("IFNULL((SELECT SUM(`pr_usage_details`.`qty`) FROM `pr_usage_details` JOIN pr_usages ON `pr_usage_details`.`use_id` = `pr_usages`.`id` WHERE `pr_usage_details`.`item_id` = `pr_boq_items`.`item_id` {$whereUsage}),0) AS usage_qty"),
-	DB::raw('IFNULL((SELECT SUM(`pr_stocks`.`qty`) FROM `pr_stocks` WHERE `pr_stocks`.`item_id` = `pr_boq_items`.`item_id` AND `pr_stocks`.`trans_ref` = "I" AND `pr_stocks`.`pro_id` = 1 ),0) AS stock_qty') 
+			DB::raw('IFNULL((SELECT SUM(`pr_stocks`.`qty`) FROM `pr_stocks` WHERE `pr_stocks`.`item_id` = `pr_boq_items`.`item_id` AND `pr_stocks`.`trans_ref` = "I" AND `pr_stocks`.`pro_id` = 1 ),0) AS stock_qty') 
 		)->join('boq_houses','boq_houses.id','boq_items.boq_house_id')
 		->join('system_datas','system_datas.id','boq_items.working_type')
 		->join('items','items.id','boq_items.item_id')
 		->join('boqs','boqs.id','boq_houses.boq_id')
 		->where('boqs.pro_id',$projectID);
-		$boqItems = $boqItems->where($where)->groupBy('boq_items.item_id')
+		$boqItems = $boqItems->where($where)->where('boqs.is_revise',0)->groupBy('boq_items.item_id')
 		->orderBy('boq_items.working_type')->get();
 		return response()->json($boqItems,200);
 	}

@@ -4310,6 +4310,7 @@ class ReportController extends Controller
 
     public function generate_sub_boq(Request $request)
     {
+		// print_r($request->all());exit;
 		$start_date   = $request->query("start_date");
 		$end_date     = $request->query("end_date");
 		$project_id   = $request->session()->get('project');
@@ -4494,8 +4495,8 @@ class ReportController extends Controller
 		}else{
 			$item_id = '';
 		}
-
-    	$sql = "SELECT (SELECT `pr_projects`.`name` FROM `pr_projects` WHERE `pr_projects`.`id`=$project_id)AS project,boq.`trans_by`, boq.`house_id`, (SELECT `pr_houses`.`house_no` FROM `pr_houses` WHERE `pr_houses`.id=boq.`house_id`)AS house_no, (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_houses`.`house_type` FROM `pr_houses` WHERE `pr_houses`.`id`=boq.`house_id`))AS house_type, boqi.`item_id`, (SELECT `pr_items`.`code` FROM `pr_items` WHERE `pr_items`.`id`=boqi.item_id)AS item_code, (SELECT `pr_items`.`name` FROM `pr_items` WHERE `pr_items`.`id`=boqi.item_id)AS item_name, (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`))AS item_type,(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`)AS item_type_id,(SELECT `pr_system_datas`.`desc` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`))AS item_type_desc,(SELECT `pr_items`.`cost_purch` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id` AND `pr_items`.`unit_purch`=boqi.`unit`)AS item_price, boqi.`qty_std`, boqi.`qty_add`, (SELECT `pr_units`.`from_desc` FROM `pr_units` WHERE `pr_units`.`from_code`=boqi.`unit` LIMIT 1)AS unit FROM `pr_boqs` AS boq INNER JOIN `pr_boq_items` AS boqi ON boqi.`boq_id` = boq.`id` AND boq.`house_id` IN(SELECT `pr_houses`.`id` FROM `pr_houses` WHERE `pr_houses`.`house_type`=$house_type) $house_id $item_id ";
+		// print_r($request->all());exit;
+    	$sql = "SELECT (SELECT `pr_projects`.`name` FROM `pr_projects` WHERE `pr_projects`.`id`=$project_id)AS project,boq.`trans_by`, boq.`house_id`, (SELECT `pr_houses`.`house_no` FROM `pr_houses` WHERE `pr_houses`.id=boq.`house_id`)AS house_no, (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_houses`.`house_type` FROM `pr_houses` WHERE `pr_houses`.`id`=boq.`house_id`))AS house_type, boqi.`item_id`, (SELECT `pr_items`.`code` FROM `pr_items` WHERE `pr_items`.`id`=boqi.item_id)AS item_code, (SELECT `pr_items`.`name` FROM `pr_items` WHERE `pr_items`.`id`=boqi.item_id)AS item_name, (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`))AS item_type,(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`)AS item_type_id,(SELECT `pr_system_datas`.`desc` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_items`.`cat_id` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id`))AS item_type_desc,(SELECT `pr_items`.`cost_purch` FROM `pr_items` WHERE `pr_items`.`id`=boqi.`item_id` AND `pr_items`.`unit_purch`=boqi.`unit`)AS item_price, boqi.`qty_std`, boqi.`qty_add`, (SELECT `pr_units`.`from_desc` FROM `pr_units` WHERE `pr_units`.`from_code`=boqi.`unit` LIMIT 1)AS unit FROM `pr_boqs` AS boq INNER JOIN `pr_boq_items` AS boqi ON boqi.`boq_id` = boq.`id` AND boq.is_revise = 0 AND boq.`house_id` IN(SELECT `pr_houses`.`id` FROM `pr_houses` WHERE `pr_houses`.`house_type`=$house_type) $house_id $item_id ";
 
     	$report = DB::select($sql);
 
@@ -6122,19 +6123,19 @@ class ReportController extends Controller
 				return null;
 			})
 			->addColumn('boq_unit',function($row){
-				if($boqItem = BoqItem::where(['house_id' => $row->house_id,'item_id' => $row->item_id])->first()){
+				if($boqItem = BoqItem::join('boqs','boqs.id','boq_items.boq_id')->where('boqs.status',1)->where('boqs.is_revise',0)->where(['boq_items.house_id' => $row->house_id,'boq_items.item_id' => $row->item_id])->first()){
 					return $boqItem->unit;
 				}
 				return null;
 			})
 			->addColumn('boq_std',function($row){
-				if($boqItem = BoqItem::where(['house_id' => $row->house_id,'item_id' => $row->item_id])->first()){
+				if($boqItem = BoqItem::join('boqs','boqs.id','boq_items.boq_id')->where('boqs.status',1)->where('boqs.is_revise',0)->where(['boq_items.house_id' => $row->house_id,'boq_items.item_id' => $row->item_id])->first()){
 					return $boqItem->qty_std;
 				}
 				return null;
 			})
 			->addColumn('boq_add',function($row){
-				if($boqItem = BoqItem::where(['house_id' => $row->house_id,'item_id' => $row->item_id])->first()){
+				if($boqItem = BoqItem::join('boqs','boqs.id','boq_items.boq_id')->where('boqs.status',1)->where('boqs.is_revise',0)->where(['boq_items.house_id' => $row->house_id,'boq_items.item_id' => $row->item_id])->first()){
 					return $boqItem->qty_add;
 				}
 				return null;
@@ -6195,19 +6196,19 @@ class ReportController extends Controller
 				return null;
 			})
 			->addColumn('boq_unit',function($row){
-				if($boqItem = BoqItem::where(['house_id' => $row->house_id,'item_id' => $row->item_id])->first()){
+				if($boqItem = BoqItem::join('boqs','boqs.id','boq_items.boq_id')->where('boqs.status',1)->where('boqs.is_revise',0)->where(['house_id' => $row->house_id,'item_id' => $row->item_id])->first()){
 					return $boqItem->unit;
 				}
 				return null;
 			})
 			->addColumn('boq_std',function($row){
-				if($boqItem = BoqItem::where(['house_id' => $row->house_id,'item_id' => $row->item_id])->first()){
+				if($boqItem = BoqItem::join('boqs','boqs.id','boq_items.boq_id')->where('boqs.status',1)->where('boqs.is_revise',0)->where(['house_id' => $row->house_id,'item_id' => $row->item_id])->first()){
 					return $boqItem->qty_std;
 				}
 				return null;
 			})
 			->addColumn('boq_add',function($row){
-				if($boqItem = BoqItem::where(['house_id' => $row->house_id,'item_id' => $row->item_id])->first()){
+				if($boqItem = BoqItem::join('boqs','boqs.id','boq_items.boq_id')->where('boqs.status',1)->where('boqs.is_revise',0)->where(['house_id' => $row->house_id,'item_id' => $row->item_id])->first()){
 					return $boqItem->qty_add;
 				}
 				return null;
@@ -6356,7 +6357,7 @@ class ReportController extends Controller
 							$sheet->cell('N'.($startRows),"N/A");
 						}
 
-						if($boqItem = BoqItem::where(['house_id'=> $dval->house_id, 'item_id' => $dval->item_id])->first()){
+						if($boqItem = BoqItem::join('boqs','boqs.id','boq_items.boq_id')->where('boqs.status',1)->where('boqs.is_revise',0)->where(['house_id'=> $dval->house_id, 'item_id' => $dval->item_id])->first()){
 							$sheet->cell('O'.($startRows),$boqItem->qty_std);
 							$sheet->cell('P'.($startRows),$boqItem->qty_add);
 							$sheet->cell('Q'.($startRows),$boqItem->unit);
@@ -6500,7 +6501,7 @@ class ReportController extends Controller
 				$report = $report->where('boq_items.item_id',$itemID);
 			}
 
-			$report = $report->get();
+			$report = $report->where('boqs.is_revise',0)->where('boqs_status',1)->get();
 			$data = [
 				'request'   => $request->all(),
 				'title' 	=> trans('lang.report_remaining_boq'),
@@ -6524,7 +6525,7 @@ class ReportController extends Controller
 	public function generateRemainingBOQ(Request $request){
 		ini_set('max_execution_time', 0);
 		$version 	= $request->query("version");
-		$endDate 	= $request->query("end_date");
+		$endDate 	= date("Y-m-d H:i:s",strtotime($request->query("end_date")));
 		$zoneID 	= $request->query("zone");
 		$blockID 	= $request->query("block");
 		$streetID 	= $request->query("street");
@@ -6573,7 +6574,8 @@ class ReportController extends Controller
 			$report = $report->where('boq_items.item_id',$itemID);
 		}
 
-		$report = $report->get();
+		$report = $report->where('boqs.is_revise',0)->where('boqs.status',1)->get();
+		// print_r($report);exit;
 
 		if($version=="datatables"){
 			$response = Datatables::of($report)
@@ -7000,7 +7002,7 @@ class ReportController extends Controller
 			'boqs.trans_date',
 		];
 		$report  = BoqItem::select($columns)
-				->leftJoin('boqs','boqs.id','boq_items.boq_id')
+				->join('boqs','boqs.id','boq_items.boq_id')
 				->leftJoin('items','items.id','boq_items.item_id');
 
 		if($endDate){
@@ -7015,7 +7017,7 @@ class ReportController extends Controller
 			$report = $report->where('boq_items.item_id',$itemID);
 		}
 
-		$report = $report->groupBy(['boq_items.item_id'])->get();
+		$report = $report->where('boqs.is_revise',0)->where('boqs.status',1)->groupBy(['boq_items.item_id'])->get();
 
 		if($version=="datatables"){
 			$response = Datatables::of($report)
@@ -7023,13 +7025,17 @@ class ReportController extends Controller
 					$columns  = [
 						'boq_items.*',
 						'units.factor',
+						// DB::raw("(CASE WHEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '{$row->unit_stock}' AND pr_units.`to_code` = pr_boq_items.unit)!='' THEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '{$row->unit_stock}' AND pr_units.`to_code` = pr_boq_items.unit) ELSE 1 END) as factor")
 					];
 					$boqItems = BoqItem::select($columns)
+							->join('boqs','boqs.id','boq_items.boq_id')
 							->leftJoin('units',function($join) use($row){
 								$join->on('units.from_code','boq_items.unit')
 									 ->where('units.to_code',$row->unit_purch);
 							})
 							->where('item_id',$row->item_id)
+							->where('boqs.is_revise',0)
+							->where('boqs.status',1)
 							->get();
 					$qtyStd = 0;
 					if(!empty($boqItems) && count($boqItems) > 0){
@@ -7048,13 +7054,17 @@ class ReportController extends Controller
 					$columns  = [
 						'boq_items.*',
 						'units.factor',
+						// DB::raw("(CASE WHEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '{$row->unit_stock}' AND pr_units.`to_code` = pr_boq_items.unit)!='' THEN (SELECT pr_units.`factor` FROM pr_units WHERE pr_units.`from_code` = '{$row->unit_stock}' AND pr_units.`to_code` = pr_boq_items.unit) ELSE 1 END) as factor")
 					];
 					$boqItems = BoqItem::select($columns)
+							->join('boqs','boqs.id','boq_items.boq_id')
 							->leftJoin('units',function($join) use($row){
 								$join->on('units.from_code','boq_items.unit')
 									 ->where('units.to_code',$row->unit_purch);
 							})
 							->where('item_id',$row->item_id)
+							->where('boqs.is_revise',0)
+							->where('boqs.status',1)
 							->get();
 					$qtyAdd = 0;
 					if(!empty($boqItems) && count($boqItems) > 0){
@@ -7187,11 +7197,14 @@ class ReportController extends Controller
 						$qtyAdd = 0;
 						$qtyStd = 0;
 						$boqItems = BoqItem::select(['boq_items.*','units.factor'])
+								->join('boqs','boqs.id','boq_items.boq_id')
 								->leftJoin('units',function($join) use($dval){
 									$join->on('units.from_code','boq_items.unit')
 										 ->where('units.to_code',$dval->unit_purch);
 								})
 								->where('item_id',$dval->item_id)
+								->where('boqs.status',1)
+								->where('boqs.is_revise',0)
 								->get();
 						
 						if(!empty($boqItems) && count($boqItems) > 0){
@@ -7271,7 +7284,7 @@ class ReportController extends Controller
 			'boqs.trans_date',
 		];
 		$report  = BoqItem::select($columns)
-				->leftJoin('boqs','boqs.id','boq_items.boq_id')
+				->join('boqs','boqs.id','boq_items.boq_id')
 				->leftJoin('items','items.id','boq_items.item_id');
 
 		if($endDate){
@@ -7286,7 +7299,7 @@ class ReportController extends Controller
 			$report = $report->where('boq_items.item_id',$itemID);
 		}
 
-		$report = $report->groupBy(['boq_items.item_id'])->get();
+		$report = $report->where('boqs.status',1)->where('boqs.is_revise',0)->groupBy(['boq_items.item_id'])->get();
 
 		$data = [
 			'title' 	=> trans('lang.report_remaining_boq_total'),
@@ -8593,13 +8606,15 @@ class ReportController extends Controller
 			pr_houses.`house_no`,
 			pr_houses.`house_desc`	
 			FROM pr_boq_items 
-			JOIN pr_houses
-				ON pr_houses.id = pr_boq_items.`house_id`
+			JOIN pr_boq_houses 
+				ON pr_boq_houses.id = boq_items.boq_house_id
 			JOIN pr_boqs
-				ON pr_boqs.id = pr_boq_items.boq_id 
+				ON pr_boqs.id = pr_boq_houses.boq_id 
+			JOIN pr_houses
+				ON pr_houses.id = pr_boq_houses.`house_id`
 			JOIN pr_items
 				ON pr_items.id=pr_boq_items.item_id	
-			WHERE pr_boqs.status = 1 AND pr_boq_items.house_id=$request->house_id";
+			WHERE pr_boqs.status = 1 AND pr_boqs.is_revise = 0 AND pr_boq_items.house_id=$request->house_id";
 			$report = DB::select($sql);
 		}
 		return response()->json($report);
@@ -8667,13 +8682,15 @@ class ReportController extends Controller
 			pr_houses.`house_no`,
 			pr_houses.`house_desc`	
 			FROM pr_boq_items 
-			JOIN pr_houses
-				ON pr_houses.id = pr_boq_items.`house_id`
+			JOIN pr_boq_houses 
+				ON pr_boq_houses.id = boq_items.boq_house_id
 			JOIN pr_boqs
-				ON pr_boqs.id = pr_boq_items.boq_id 
+				ON pr_boqs.id = pr_boq_houses.boq_id 
+			JOIN pr_houses
+				ON pr_houses.id = pr_boq_houses.`house_id`
 			JOIN pr_items
 				ON pr_items.id=pr_boq_items.item_id	
-			WHERE pr_boqs.status = 1 AND pr_boq_items.house_id=$request->house_id";
+			WHERE pr_boqs.status = 1 AND pr_boqs.is_revise = 0 AND pr_boq_items.house_id=$request->house_id";
 			$report = DB::select($sql);
 		}
 		Excel::create('Tree BOQ.export_'.date('Y_m_d_H_i_s'),function($excel) use($report){

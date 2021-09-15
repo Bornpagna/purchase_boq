@@ -77,6 +77,12 @@ class HouseController extends Controller
 			}
 			return '';
 		})
+		->addColumn('building',function($row){
+			if($block = SystemData::find($row->building_id)){
+				return $block->name;
+			}
+			return '';
+		})
 		->addColumn('street',function($row){
 			if($street = SystemData::find($row->street_id)){
 				return $street->name;

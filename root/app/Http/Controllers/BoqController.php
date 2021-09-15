@@ -1013,7 +1013,6 @@ class BoqController extends Controller
 										'created_at'	=>	date('Y-m-d H:i:s'),
 										'created_at'	=>	Auth::user()->id,
 										// 'status'		=>	1,
-
 									];
 									$boq_item = DB::table('boq_items')->insertGetID($item_types);
 									if($house_key == 0){
@@ -2120,7 +2119,7 @@ class BoqController extends Controller
 			return redirect('/boqs')->with('success',trans('lang.save_success'));
 		}catch (\Exception $e) {
 			DB::rollback();
-			print_r($e->getMessage().$e->getLine());exit;
+			print_r($e->getMessage().":Line:".$e->getLine());exit;
 			return redirect()->back()->with('error',trans('lang.save_error').' '.$e->getMessage().' '.$e->getLine());
 		}
 	}

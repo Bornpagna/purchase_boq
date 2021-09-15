@@ -311,7 +311,7 @@
 			str += '</select>';
 			str += '</td>';
 			str += '<td>';
-				str += '<input type="text" disabled value="'+data.qty+'" class="form-control noscroll line_qty_orig line_qty_orig_'+data.id+'"/>';
+				str += '<input type="text" name="order_qty[]" readonly value="'+data.qty+'" class="form-control line_qty_orig line_qty_orig_'+data.id+'"/>';
 			str += '</td>';
 			str += '<td>';
 			str += '<input type="number" value="'+data.qty+'" length="50" step="any" class="form-control noscroll line_qty line_qty_'+data.id+'" onkeyup="enterQty(this, '+data.id+')"  name="line_qty[]"/>';
