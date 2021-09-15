@@ -73,6 +73,17 @@
 												</div>
 											</div>
 											<div class="form-group">
+												<label for="building_id" class="col-md-4 control-label"><strong>{{ trans('lang.building') }}</strong></label>
+												<div class="col-md-8">
+													<select class="form-control building_id" onchange="onChangeBuilding(this)" name="building_id">
+														<option value=""></option>
+														{{getSystemData("BD")}}
+													</select>
+													<span class="help-block font-red bold"></span>
+												</div>
+											</div>
+
+											{{-- <div class="form-group">
 												<label for="street_id" class="col-md-4 control-label"><strong>{{ trans('lang.street') }}</strong></label>
 												<div class="col-md-8">
 													<select class="form-control street_id" onchange="onChangeStreet(this)" name="street_id">
@@ -81,7 +92,7 @@
 													</select>
 													<span class="help-block font-red bold"></span>
 												</div>
-											</div>
+											</div> --}}
 											<div class="form-group">
 												<label for="house_id" class="col-md-4 control-label"><strong>{{ trans('lang.house_no') }}</strong></label>
 												<div class="col-md-8">
@@ -229,8 +240,12 @@
 		return $.ajax({url:'{{url("/stock/use/GetItem")}}',type:'GET',dataType:'json',data:{q:query},async:false}).responseJSON;
 	}
 
-	function GetHouse(street_id) {
-		return $.ajax({url:'{{url("/stock/use/GetHouse")}}',type:'GET',dataType:'json',data:{id:street_id},async:false}).responseJSON;
+	// function GetHouse(street_id) {
+	// 	return $.ajax({url:'{{url("/stock/use/GetHouse")}}',type:'GET',dataType:'json',data:{id:street_id},async:false}).responseJSON;
+	// }
+
+	function GetHouse(building_id){
+		return $.ajax({url:'{{url("/repository/getHousesByAllTrigger")}}',type:'GET',dataType:'json',data:{building_id:building_id},async:false}).responseJSON;
 	}
 
 	function GetStreet(query) {
@@ -336,7 +351,7 @@
 
 	$('#save_close,#save_new').on('click',function(){
 		$(this).prop('disabled', true);
-		if(chkValid([".reference_no",".trans_date",".reference",".trans_desc",".house_id",".street_id",".line_item",".line_unit",".line_use_qty",<?php if(getSetting()->usage_constructor==1){echo '".sub_const",';} ?>".engineer"])){
+		if(chkValid([".reference_no",".trans_date",".reference",".trans_desc",".house_id",".building_id",".line_item",".line_unit",".line_use_qty",<?php if(getSetting()->usage_constructor==1){echo '".sub_const",';} ?>".engineer"])){
 			if(isSave()){
 				objRef = GetRef();
 				if (chkReference(objRef, '#reference')) {
@@ -361,6 +376,19 @@
 		if(val!=null && val!=''){
 			$("#table-income tbody").empty();
 			$('#btnAdd').trigger('click');
+		}
+	}
+
+	function onChangeBuilding(field){
+		var val = $(field).val();
+		jsonHouse = GetHouse(val);
+		if(val!=null && val!='' && jsonHouse){
+			$('.house_id').empty();
+			$('.house_id').append($('<option></option>').val('').text(''));
+			$('.house_id').select2('val', null);
+			$.each(jsonHouse.filter(c=>c.building_id == val), function(key ,value){
+				$('.house_id').append($('<option></option>').val(value.id).text(value.house_no));
+			});
 		}
 	}
 	
@@ -467,7 +495,7 @@
 	$("#btnAdd").on('click',function(){
 
 		var house = $('.house_id').val();
-		var street = $('.street_id').val();
+		var street = $('.building_id').val();
 		var warehouse = $('.warehouse_id').val();
 		if (house!=null && house!='' && street!=null && street!='' && warehouse!=null && warehouse!='') {
 			$('#row-default').remove();
@@ -704,7 +732,7 @@
 	
 	$(document).ready(function(){
 		$.fn.select2.defaults.set("theme", "classic");
-		$(".engineer, .sub_const, .warehouse_id, .street_id, .house_id").select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
+		$(".engineer, .sub_const, .warehouse_id, .building_id, .house_id").select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
 		$('#trans_date').val(formatDate("{{date('Y-m-d')}}"));
 		$("#trans_date").datepicker({
 			format: "{{getSetting()->format_date}}",
@@ -712,7 +740,7 @@
             pickerPosition: "bottom-right"
 		});
 
-		$('#trans_date, .street_id, .house_id, warehouse_id').on('change', function(){
+		$('#trans_date, .building_id, .house_id, warehouse_id').on('change', function(){
 			$('.line_boq_set, .line_stock_qty, .line_use_qty, .line_note').val('');
 
 			$('.line_unit').each(function(){

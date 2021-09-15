@@ -296,7 +296,7 @@
 	var index_boq = 0;
 	var index_work_type = 1;
 	var objName = [];
-	var jsonItem = JSON.parse(convertQuot("{{\App\Model\Item::get(['id','cat_id','code','name','unit_stock','unit_purch','unit_usage'])}}"));
+	var jsonItem = JSON.parse(convertQuot("{{\App\Model\Item::get(['id','cat_id','code','name','unit_stock','unit_purch','unit_usage','cost_purch'])}}"));
 	var jsonUnit = JSON.parse(convertQuot("{{\App\Model\Unit::where(['status'=>1])->get(['id','from_code','from_desc','to_code','to_desc'])}}"));
 	var jsonHouse = JSON.parse(convertQuot("{{\App\Model\House::where(['status'=>1])->get(['id','house_no','street_id','house_type','zone_id','block_id','building_id'])}}"));
 		
@@ -409,6 +409,7 @@
 			$('.line_unit_'+row).append($('<option></option>').val('').text(''));
 			$('.line_unit_'+row).select2('val', null);
 			$.each(jsonItem.filter(c=>c.id==val),function(key, val){
+				$('.line_cost_'+row).val(val.cost_purch);
 				$.each(jsonUnit.filter(d=>d.to_code==val.unit_stock),function(k, v){
 					$('.line_unit_'+row).append($('<option></option>').val(v.from_code).text(v.from_code+' ('+v.from_desc+')'));
 				});
@@ -1042,9 +1043,10 @@
 			$('.boq-street-add').select2('val', null);
 			$("#checkbox-house").click(function(){
 				if($("#checkbox-house").is(':checked') ){
-					// console.log(11); 
-					$(".boq-house > option").prop("selected","selected");
-					$(".boq-house").trigger("change");
+					
+					$(".boq-house-add > option").prop("selected","selected");
+					$(".boq-house-add").trigger("change");
+					console.log(11); 
 				}else{
 					$(".boq-house-add > option").removeAttr("selected");
 					$(".boq-house-add").trigger("change");

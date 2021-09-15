@@ -67,6 +67,7 @@
 							<th width="10%" class="text-center">{{ trans('lang.house_type') }}</th>
 							@if(getSetting()->allow_zone==1)<th width="10%" class="text-center all">{{ trans('lang.zone') }}</th>@endif
 							@if(getSetting()->allow_block==1)<th width="10%" class="text-center all">{{ trans('lang.block') }}</th>@endif
+							<th width="10%" class="text-center all">{{ trans('lang.building') }}</th>
 							<th width="10%" class="text-center all">{{ trans('lang.street') }}</th>
 							<th width="17%" class="text-center all">{{ trans('lang.desc') }}</th>
 							<th width="8%" class="text-center all">{{ trans('lang.status') }}</th>
@@ -239,6 +240,7 @@
 			{data: 'house_type_desc', name:'house_type_desc'},
 			@if(getSetting()->allow_zone==1){data: 'zone', name:'zone'},@endif
 			@if(getSetting()->allow_block==1){data: 'block', name:'block'},@endif
+			{data: 'building', name:'building'},
 			{data: 'street', name:'street'},
 			{data: 'house_desc', name:'house_desc'},
 			{data: 'status', name:'status'},
@@ -251,7 +253,7 @@
 			}else{
 				var str='<span class="label label-danger" style="font-size: smaller;">{{trans("lang.stopped")}}</span>';
 			}
-			$('td:eq(<?php if(getSetting()->allow_zone==1 && getSetting()->allow_block==1){echo "7";}elseif(getSetting()->allow_zone==1){echo "6";}elseif(getSetting()->allow_block==1){echo "6";}else{echo "5";} ?>)',nRow).html(str).addClass("text-center");
+			$('td:eq(8)',nRow).html(str).addClass("text-center");
 			
 			if (objName) {
 				var obj = {
@@ -261,6 +263,7 @@
 					'house_desc':aData['house_desc'],
 					'zone_id':aData['zone_id'],
 					'block_id':aData['block_id'],
+					'building_id':aData['building_id'],
 					'street_id':aData['street_id'],
 					'status':aData['status'],
 				};

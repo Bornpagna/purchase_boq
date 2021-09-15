@@ -66,7 +66,10 @@
 												</div>
 											</div>
 											<div class="form-group">
-												<label for="reference" class="col-md-4 control-label"><strong>{{ trans('lang.reference') }}</strong></label>
+												<label for="reference" class="col-md-4 control-label">
+													<strong>{{ trans('lang.reference') }}</strong>
+													<span class="required"> * </span>
+												</label>
 												<div class="col-md-8">
 													<input class="form-control reference"​​ length="100" type="text" id="reference" name="reference" placeholder="{{ trans('lang.enter_text') }}">
 													<span class="help-block font-red bold"></span>
@@ -74,7 +77,7 @@
 											</div>
 											<div class="form-group">
 												<label for="warehouse_id" class="col-md-4 control-label"><strong>{{ trans('lang.warehouse') }}</strong>
-													<span class="required"> * </span>
+													<span class="required">  </span>
 												</label>
 												<div class="col-md-8">
 													@if(hasRole('warehouse_add'))
@@ -358,7 +361,18 @@
 			$('.line_unit_'+row).select2('val', null);
 		}
 	}
-	
+	function onChangeBuilding(field,row){
+		var val = $(field).val();
+		jsonHouse = GetHouse(val);
+		if(val!=null && val!='' && jsonHouse){
+			$('.line_on_house_'+row).empty();
+			$('.line_on_house_'+row).append($('<option></option>').val('').text(''));
+			$('.line_on_house_'+row).select2('val', null);
+			$.each(jsonHouse, function(key ,value){
+				$('.line_on_house_'+row).append($('<option></option>').val(value.id).text(value.house_no));
+			});
+		}
+	}
 	function onChangeStreet(field, row){
 		var val = $(field).val();
 		jsonHouse = GetHouse(val);
@@ -503,9 +517,9 @@
 					// '	</select>'+
 					// '</td>'+
 					'<td>'+
-					'	<select class="form-control line_building line_building_'+i+'" onchange="onChangeStreet(this, '+i+')" name="line_street[]">'+
+					'	<select class="form-control line_building line_building_'+i+'" onchange="onChangeBuilding(this, '+i+')" name="line_building[]">'+
 					'		<option value=""></option>'+
-					'		{{getSystemData("ST")}}'+
+					'		{{getSystemData("BD")}}'+
 					'	</select>'+
 					'</td>'+
 					// '<td>'+
@@ -542,7 +556,7 @@
 					'</td>'+
 				'</tr>');
 			$.fn.select2.defaults.set("theme", "classic");
-			$(".line_on_house_"+i+",.line_from_warehouse_"+i+",.line_street_"+i+",.line_unit_"+i).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
+			$(".line_on_house_"+i+",.line_from_warehouse_"+i+",.line_building_"+i+",.line_unit_"+i).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:'true'});
 			var warehouse_id = $("#warehouse_id").val();
 
 			var itemSelect = $('.line_item_'+i);

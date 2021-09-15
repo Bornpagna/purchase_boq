@@ -428,7 +428,7 @@
 				html+= '<td><input type="number" length="11" class="form-control line_qty_std line_qty_std_'+index_boq+'_'+type_id+'" name="line_qty_std_'+type_id+'[]" placeholder="{{trans("lang.enter_number")}}" /></td>';
 				html += '<td><input type="number" length="11" class="form-control line_qty_add line_qty_add_'+index_boq+'_'+type_id+'" name="line_qty_add_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
 				html += '<td><input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'_'+type_id+'" name="line_cost_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
-				html += '<td><a class="row_'+index_boq+'_'+type_id+' btn btn-sm" onclick="DeleteRowBOQ(this)"><i class="fa fa-trash"></i></a></td>';
+				html += '<td><input type="hidden" id="is_close_'+index_boq+'_'+type_id+'" name="is_close_'+type_id+'[]" /> <a class="row_'+index_boq+'_'+type_id+' btn btn-sm" onclick="DeleteRowBOQ(this)"><i class="fa fa-trash"></i></a></td>';
 			html+='</tr>';
 		table_boq.append(html);
 		$.fn.select2.defaults.set('theme','classic');
