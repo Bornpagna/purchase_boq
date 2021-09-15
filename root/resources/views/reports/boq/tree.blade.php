@@ -161,32 +161,6 @@
 		</div>
 	</div>
 </div>
-<div class="invoice" style="display: nones;">
-    @include('reports.header')
-    <div class="invoice-items">
-        <div class="div-table">
-            <table class="invoice-table">
-                <thead>
-                    <tr>
-                        <th width="10%" class="all">{{ trans('lang.working_type') }}</th>
-                        <th width="10%" class="all">{{ trans('lang.house_type') }}</th>
-                        <th width="10%" class="all">{{ trans('lang.house_no') }}</th>
-                        <th width="10%" class="all">{{ trans('lang.item_type') }}</th>
-                        <th width="10%" class="all">{{ trans('lang.item_code') }}</th>
-                        <th width="10%" class="all">{{ trans('lang.item_name') }}</th>
-                        <th width="10%" class="all">{{ trans('rep.boq_qty') }}</th>
-                        <th width="10%" class="all">{{ trans('rep.add_qty') }}</th>
-                        <th width="10%" class="all">{{ trans('lang.units') }}</th>
-                        <th width="10%" class="all">{{ trans('lang.price') }}</th>
-                        <!-- <th width="10%" class="all">{{ trans('lang.total') }}</th> -->
-                    </tr>
-                </thead>
-                <tbody class="invoice-table-tbody"></tbody>
-            </table>
-        </div>
-    </div>
-    @include('reports.footer')
-</div>
 <!-- Modal Varian -->
 @endsection()
 @section('javascript')
@@ -284,45 +258,51 @@
                     // formatDollar((parseFloat(DataRow.qty_std+DataRow.qty_add)*parseFloat(DataRow.cost))),
                 ]).draw();
             });
-            var strtb = '';
-            $.each(val,function(index,DataRow){
-                strtb+='<tr>';
-                    strtb+='<td style="text-align: center;">'+DataRow.working_type+'</td>';
-                    strtb+='<td style="text-align: center;">'+DataRow.house_type+'</td>';
-                    strtb+='<td style="text-align: center;">'+DataRow.house_no+'</td>';
-                    strtb+='<td style="text-align: center;">'+DataRow.item_type+'</td>';
-                    strtb+='<td style="text-align: center;">'+DataRow.code+'</td>';
-                    strtb+='<td style="text-align: center;">'+DataRow.name+'</td>';
-                    strtb+='<td style="text-align: center;">'+DataRow.qty_std+'</td>';
-                    strtb+='<td style="text-align: center;">'+DataRow.qty_add+'</td>'; 
-                    strtb+='<td style="text-align: center;">'+DataRow.unit+'</td>'; 
-                    strtb+='<td style="text-align: center;">'+formatDollar(DataRow.cost)+'</td>'; 
-                strtb+='</tr>';
-            });
-            $('.invoice-table-tbody').html();
-            $('.invoice-table-tbody').html(strtb);
+            // var strtb = '';
+            // $.each(val,function(index,DataRow){
+            //     strtb+='<tr>';
+            //         strtb+='<td style="text-align: center;">'+DataRow.working_type+'</td>';
+            //         strtb+='<td style="text-align: center;">'+DataRow.house_type+'</td>';
+            //         strtb+='<td style="text-align: center;">'+DataRow.house_no+'</td>';
+            //         strtb+='<td style="text-align: center;">'+DataRow.item_type+'</td>';
+            //         strtb+='<td style="text-align: center;">'+DataRow.code+'</td>';
+            //         strtb+='<td style="text-align: center;">'+DataRow.name+'</td>';
+            //         strtb+='<td style="text-align: center;">'+DataRow.qty_std+'</td>';
+            //         strtb+='<td style="text-align: center;">'+DataRow.qty_add+'</td>'; 
+            //         strtb+='<td style="text-align: center;">'+DataRow.unit+'</td>'; 
+            //         strtb+='<td style="text-align: center;">'+formatDollar(DataRow.cost)+'</td>'; 
+            //     strtb+='</tr>';
+            // });
+            // $('.invoice-table-tbody').html();
+            // $('.invoice-table-tbody').html(strtb);
         });
     }
     function onPrint(house_id,condition){        
+        // $('.invoice').css('display','block');
         if(condition==1){
-            var strInvioce=$('.invoice').html();
-            var styleInvoice = $('.style-invoice').html();
-            var popupWin = window.open('', '_blank', 'width=714,height=800');
-            var printInvoice = '<html>';
-                printInvoice += '<head>';
-                printInvoice += '<title></title>';
-                printInvoice += styleInvoice;
-                printInvoice += '</head>';
-                printInvoice += '<body>';
-                printInvoice += strInvioce;
-                printInvoice += '</body>';
-                printInvoice += '</html>';
-            popupWin.document.open();
-            popupWin.document.write(printInvoice);
-            popupWin.print();
+            // var strInvioce=$('.invoice').html();
+            // var styleInvoice = $('.style-invoice').html();
+            // var popupWin = window.open('', '_self', 'width=1000,height=800');
+            // var printInvoice = '<html>';
+            //     printInvoice += '<head>';
+            //     printInvoice += '<title></title>';
+            //     printInvoice += styleInvoice;
+            //     printInvoice += '</head>';
+            //     printInvoice += '<body>';
+            //     printInvoice += strInvioce;
+            //     printInvoice += '</body>';
+            //     printInvoice += '</html>';
+            // popupWin.document.open();
+            // popupWin.document.write(printInvoice);
+            // popupWin.print()
+            window.open('{{url("report/boqTreeView/getBoqprint")}}?export=1&house_id='+house_id);
         }else{
             window.location.href ='{{url("report/boqTreeView/getBoqexport")}}?export=1&house_id='+house_id;
         }        
+    }
+    window.onafterprint = function(){
+        window.close();
+        $('.invoice').css('display','none');
     }
 </script>
 @endsection()
