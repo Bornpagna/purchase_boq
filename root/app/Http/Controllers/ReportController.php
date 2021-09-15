@@ -8497,7 +8497,7 @@ class ReportController extends Controller
 				$li_html.='<ul>';
 					$block = DB::table('houses')->select('houses.zone_id','houses.block_id',DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`block_id`) AS block_name'))
 					->where('status',1)->where('houses.zone_id',$row_zone->id)
-					->groupBy('houses.zone_id')->get();
+					->groupBy('houses.block_id')->get();				
 					foreach($block as $blocks){
 						$li_html.='<li>';
 							$li_html.='<a>'.$blocks->block_name.'</a>';
@@ -8514,7 +8514,7 @@ class ReportController extends Controller
 											DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`street_id`) AS street_name'))
 											->where('status',1)->where('houses.zone_id',$row_zone->id)->where('houses.block_id',$blocks->block_id)
 											->where('houses.building_id',$buildings->building_id)
-											->groupBy('houses.building_id')->get();
+											->groupBy('houses.street_id')->get();
 											foreach($street as $streets){
 												$li_html.='<li>';
 													$li_html.='<a>'.$streets->street_name.'</a>';
@@ -8523,7 +8523,7 @@ class ReportController extends Controller
 														DB::raw('(SELECT pr_system_datas.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id` = `pr_houses`.`house_type`) AS house_type_name'))
 														->where('status',1)->where('houses.zone_id',$row_zone->id)->where('houses.block_id',$blocks->block_id)
 														->where('houses.building_id',$buildings->building_id)->where('houses.street_id',$streets->street_id)
-														->groupBy('houses.street_id')->get();
+														->groupBy('houses.house_type')->get();
 														foreach($house_type as $house_types){
 															$li_html.='<li>';
 																$li_html.='<a>'.$house_types->house_type_name.'</a>';
@@ -8550,7 +8550,7 @@ class ReportController extends Controller
 					}		
 				$li_html.='</ul>';	
 			$li_html.='</li>';	
-		}
+		} 
 		$data = [
 			'title'       => trans('lang.tree_view'),
 			'icon'        => 'fa fa-shopping-cart',
@@ -8576,7 +8576,6 @@ class ReportController extends Controller
 				],
 			],
 		];
-		
 		return view('reports.boq.tree')->with($data);
 	}
 	public function getBoq(Request $request){
@@ -8607,7 +8606,7 @@ class ReportController extends Controller
 			pr_houses.`house_desc`	
 			FROM pr_boq_items 
 			JOIN pr_boq_houses 
-				ON pr_boq_houses.id = boq_items.boq_house_id
+				ON pr_boq_houses.id = pr_boq_items.boq_house_id
 			JOIN pr_boqs
 				ON pr_boqs.id = pr_boq_houses.boq_id 
 			JOIN pr_houses
