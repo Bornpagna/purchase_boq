@@ -305,7 +305,7 @@
             building_id : null,
             street_id: null,
             house_type: null,
-            // house_policy : 1
+            house_policy : 1
         };
         const zoneID    = $('.zone_id').val();
         const blockID   = $('.block_id').val();

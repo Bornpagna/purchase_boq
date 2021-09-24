@@ -16,6 +16,28 @@
 		margin-left: 0px !important;
 		margin-right: 0px !important;
 	}
+
+	.loader {
+        margin: 0 auto;
+        border: 8px solid #f3f3f3;
+        border-radius:50% !important;
+        border-top: 8px solid #3498db;
+        width: 60px;
+        height: 60px;
+        -webkit-animation: spin 2s linear infinite; /* Safari */
+        animation: spin 2s linear infinite;
+    }
+
+        /* Safari */
+    @-webkit-keyframes spin {
+        0% { -webkit-transform: rotate(0deg); }
+        100% { -webkit-transform: rotate(360deg); }
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
 <div class="row">
 	<div class="col-md-12">
@@ -216,7 +238,7 @@
 								</div>
 							</div>
 							<div class="col-12">
-								<div class="col-md-4">
+								{{-- <div class="col-md-4">
 									<div class="form-group">
 										<label for="boq-street" class="col-md-12 bold">{{trans('lang.street')}} 
 										</label>
@@ -228,7 +250,7 @@
 											<span class="help-block font-red bold"></span>
 										</div>
 									</div>
-								</div>
+								</div> --}}
 								<div class="col-md-4">
 									<div class="form-group">
 										<label for="boq-house-type" class="col-md-12 bold">{{trans('lang.house_type')}} 
@@ -242,6 +264,7 @@
 										</div>
 									</div>
 								</div>
+								
 								<div class="col-md-4">
 									<div class="form-group">
 										<label for="boq-house" class="col-md-12 bold " id="label-house">{{trans('lang.house_no')}}
@@ -249,6 +272,19 @@
 										<div class="col-md-12 boq-house-wrapper">
 											<select name="house[]" id="boq-house" class="form-control boq-house select2" multiple>
 											
+											</select>
+											<span class="help-block font-red bold"></span>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-4">
+									<div class="form-group">
+										<label for="boq-working-type" class="col-md-12 bold">{{trans('lang.working_type')}} 
+										</label>
+										<div class="col-md-12">
+											<select name="working_type_id" id="boq-working_type" class="form-control boq-working-type select2" multiple>
+												<option value=""></option>
+												{{getSystemData('WK')}}
 											</select>
 											<span class="help-block font-red bold"></span>
 										</div>
@@ -777,12 +813,14 @@
 			building_id : null,
 			street_id: null,
 			house_type: null,
+			working_type:null
 		};
 		const zoneID    = $('#boq-zone').val();
 		const blockID   = $('#boq-block').val();
-		const buildingID    = $('#boq-building').val();
+		const buildingID  = $('#boq-building').val();
 		const streetID  = $('#boq-street').val();
 		const houseType = $('#boq-house-type').val();
+		const workingType = $('#boq-working-type').val();
 
 		if(zoneID){
 			params.zone_id = zoneID;
@@ -802,11 +840,21 @@
 		if(houseType){
 			params.house_type = houseType;
 		}
+
+		if(workingType){
+			params.working_type = workingType;
+		}
+		var table_boq = $('#table-income tbody');
+		table_boq.empty();
+		var html = "<tr ><td colspan='10'><div class='loader'></div></td></tr>";
+        $("#table-income tbody").append(html);
 		$.ajax({
 			url :'{{url("repository/getBoqItems")}}',
 			type:'GET',
 			data:params,
 			success:function(data){
+				var table_boq = $('#table-income tbody');
+				table_boq.empty();
 				$.each(data,function(key, val){
 					loadWorkingTypeItem(val,key);
 					i = key;
@@ -815,10 +863,11 @@
 				
 			}
 		});
+
+
 	});
 
 	function loadWorkingTypeItem(data,index){
-		console.log(data);
 		var table_boq = $('#table-income');
 		html = '<tr>';
 				html+= '<td class="text-center all"><strong>'+lineNo(index+1,3)+'</strong><input type="hidden" class="check_row check_row_'+index+'" value="" /><input type="hidden" class="line_index line_index_'+index+'" name="line_index[]" value="'+lineNo((index+1),3)+'" /><input type="hidden" value="'+lineNo((index+1),3)+'" name="line_no[]" class="line_no line_no_'+index+'" /></td>';
@@ -851,9 +900,6 @@
 			
 		@endif
 	}
-
-	
-
 	function ChangeItemType(val, row){
 		if(val!=null && val!=''){
 			var itemSelect = $('.line_item_'+row);
@@ -892,6 +938,127 @@
 			$(".show-message-error").html('{{trans("lang.not_more_than_100")}}!');
 		}
 	}
+
+	function getBlocks(zone_id){
+
+		var params = {
+			zone_id : null,
+		}
+		const zoneId = $("#boq-zone").val();
+		if(zoneId){
+			params.zone_id = zoneId;
+		}
+		$.ajax({
+			url:"{{url('repository/getBlock')}}",
+			type:'GET',
+			data: params,
+			success: function(result){
+				$("#boq-block").empty();
+				$("#boq-block").append($('<option></option>').val("").text(""));	
+				$.each(result,function(key, val){
+					
+					$("#boq-block").append($('<option></option>').val(val.id).text(val.name));						
+				});
+			}
+		});
+		}
+
+		function getBuildings(zone_id,block_id){
+		var params = {
+			zone_id : null,
+			block_id : null
+		}
+
+		const zoneId = $("#boq-zone").val();
+		const blockID = $("#boq-blocks").val();
+		if(zoneId){
+			params.zone_id = zoneId;
+		}
+		if(blockID){
+			params.block_id = blockID;
+		}
+
+		$.ajax({
+			url:"{{url('repository/getBuilding')}}",
+			type:'GET',
+			data: params,
+			success: function(result){
+				$("#boq-building").empty();
+				$("#boq-building").append($('<option></option>').val("").text(""));
+				$.each(result,function(key, val){
+					$("#boq-building").append($('<option></option>').val(val.id).text(val.name));						
+				});
+			}
+		});
+	}
+
+	$('#boq-zone').on('change', function(){
+		var zoneId = $("#boq-zone").val();
+		getBlocks(zoneId);
+		// getHouses();
+	});
+	$('#boq-block').on('change', function(){
+		var zoneId = $("#boq-zone").val();
+		var blockId = $().val("boq-block");
+		getBuildings(zoneId,blockId);
+		// getHouses();
+	});
+	$('#boq-building').on('change', function(){
+		getHouses();
+	});
+	$('#boq-street').on('change', function(){
+		getHouses();
+	});
+
+	$('#boq-house-type').on('change', function(){
+		var type = $(this).val();
+		getHouses();
+	});
+
+	function getHouses(){
+			var params = {
+				zone_id: null,
+				block_id: null,
+				building_id : null,
+				street_id: null,
+				house_type: null,
+			};
+			const zoneID    = $('#boq-zone').val();
+			const blockID   = $('#boq-block').val();
+			const buildingID    = $('#boq-building').val();
+			const streetID  = $('#boq-street').val();
+			const houseType = $('#boq-house-type').val();
+
+			if(zoneID){
+				params.zone_id = zoneID;
+			}
+
+			if(blockID){
+				params.block_id = blockID;
+			}
+			if(buildingID){
+				params.building_id = buildingID;
+			}
+
+			if(streetID){
+				params.street_id = streetID;
+			}
+
+			if(houseType){
+				params.house_type = houseType;
+			}
+			$.ajax({
+				url:"{{url('repository/getHousesByAllTrigger')}}",
+				type:'GET',
+				data: params,
+				success: function(result){
+					$("#boq-house").empty();
+					$.each(result,function(key, val){
+						$("#boq-house").append($('<option></option>').val(val.id).text(val.house_no));
+					});
+				}
+			});
+		}
 	
 </script>
 @endsection()

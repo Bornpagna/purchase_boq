@@ -172,13 +172,15 @@
 								<thead>
 									<tr style="font-size:12px;">
 										<th width="5%" class="text-center all">{{ trans('lang.line_no') }}</th>
-										<th width="15%" class="text-center all">{{ trans('lang.from_warehouse') }}</th>
+										<th width="10%" class="text-center all">{{ trans('lang.from_warehouse') }}</th>
 										<th width="10%" class="text-center all">{{ trans('lang.building') }}</th>
 										<th width="10%" class="text-center all">{{ trans('lang.on_house') }}</th>
-										<th width="20%" class="text-center all">{{ trans('lang.items') }}</th>
+										<th width="10%" class="text-center all">{{ trans('lang.items') }}</th>
 										<th width="10%" class="text-center all">{{ trans('lang.units') }}</th>
+										<th width="10%" class="text-center all">{{ trans('lang.qty_in_stock') }}</th>
+										<th width="10%" class="text-center all">{{ trans('lang.remain_qty') }}</th>
 										<th width="10%" class="text-center all">{{ trans('lang.qty') }}</th>
-										<th width="15%" class="text-center all">{{ trans('lang.note') }}</th>
+										<th width="10%" class="text-center all">{{ trans('lang.note') }}</th>
 										<th width="5%" class="text-center all"><i class='fa fa-plus btnAdd' id="btnAdd"></i></th>
 									</tr>
 								</thead>
@@ -446,9 +448,13 @@
 				success:function(data){
 					$('.line_stock_qty_'+row).val(data.stock_qty);
 					$('.line_boq_set_'+row).val(data.boq_set);
+					$(".stock_qty_"+row).text(data.stock_qty+" "+unit);
+					$(".remain_qty_"+row).text(data.boq_set+" "+unit);
 				},error:function(){
 					$('.line_stock_qty_'+row).val(0);
 					$('.line_boq_set_'+row).val(0);
+					$(".stock_qty_"+row).text(0);
+					$(".remain_qty_"+row).text(0);
 					console.log('error get qty stock.');
 				}
 			});
@@ -542,6 +548,12 @@
 					'	<select class="form-control line_unit line_unit_'+i+'" name="line_unit[]" onchange="onChangeUnit(this, '+i+')">'+
 					'		<option value=""></option>'+
 					'	</select>'+
+					'</td>'+
+					'<td class="center">'+
+					'	<span class="center stock_qty stock_qty_'+i+'"><span/>'+
+					'</td>'+
+					'<td class="center">'+
+					'	<span class="center remain_qty remain_qty_'+i+'"><span/>'+
 					'</td>'+
 					'<td>'+
 					'	<input type="number" length="50" step="any" class="noscroll form-control line_use_qty line_use_qty_'+i+'" name="line_use_qty[]" onkeyup="enterQtyUsage(this, '+i+')" />'+

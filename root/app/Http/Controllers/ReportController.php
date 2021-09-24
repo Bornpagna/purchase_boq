@@ -4343,7 +4343,7 @@ class ReportController extends Controller
 			$item_id = '';
 		}
 
-    	$sql = "SELECT (SELECT `pr_projects`.`name` FROM `pr_projects` WHERE `pr_projects`.`id`=$project_id)AS project,boq.`trans_by`, boq.`house_id`,
+    	$sql = "SELECT (SELECT `pr_projects`.`name` FROM `pr_projects` WHERE `pr_projects`.`id`=$project_id)AS project,boq.`trans_by`, boq.`house_id`, boqi.cost,
 		 (SELECT `pr_houses`.`house_no` FROM `pr_houses` WHERE `pr_houses`.id=pr_boq_houses.`house_id`)AS house_no, 
 		 (SELECT `pr_system_datas`.`name` FROM `pr_system_datas` WHERE `pr_system_datas`.`id`=(SELECT `pr_houses`.`house_type` FROM `pr_houses` WHERE `pr_houses`.`id`=pr_boq_houses.`house_id`))AS house_type, boqi.`item_id`,
 		  (SELECT `pr_items`.`code` FROM `pr_items` WHERE `pr_items`.`id`=boqi.item_id)AS item_code, (SELECT `pr_items`.`name` FROM `pr_items` WHERE `pr_items`.`id`=boqi.item_id)AS item_name, 
@@ -6534,7 +6534,7 @@ class ReportController extends Controller
 		$itemType 	= $request->query("product_type");
 		$itemID 	= $request->query("product");
 
-		$report  = BoqItem::leftJoin('boqs','boqs.id','boq_items.boq_id');
+		$report  = BoqItem::select('boq_items.*','boq_items.house_id as boq_house_id','boqs.trans_date')->join('boqs','boqs.id','boq_items.boq_id');
 
 		if($zoneID){
 			if($houseIds = House::where('zone_id',$zoneID)->pluck('id')){
@@ -6599,6 +6599,16 @@ class ReportController extends Controller
 							}
 						}
 					}
+					return null;
+				})
+				->addColumn('building',function($row){
+					// if(getSetting()->allow_block == 1){
+						if($house = House::where(['id'=> $row->house_id])->first()){
+							if($houseType = SystemData::where(['id' => $house->building_id])->first()){
+								return $houseType->name;
+							}
+						}
+					// }
 					return null;
 				})
 

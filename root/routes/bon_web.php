@@ -535,5 +535,6 @@ Route::get('repository/fetchCurrentBOQ','RepositoryController@fetchCurrentBOQ');
 Route::get('repository/checkStockQuantity','RepositoryController@checkStockQuantity');
 Route::get('repository/getBoqItems','RepositoryController@getBoqItems');
 Route::get('repository/houseNoBoq','RepositoryController@getHouseNoBoq');
+Route::get('repository/getBlock','RepositoryController@getBlock');
 Route::get('repository/getBuilding','RepositoryController@getBuilding');
 Route::get('repository/getHouseType','RepositoryController@getHouseType');

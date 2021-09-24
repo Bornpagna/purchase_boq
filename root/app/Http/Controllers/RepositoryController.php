@@ -352,7 +352,11 @@ class RepositoryController extends Controller
 			$houses = $houses->where('block_id',$blockID);
 		}
 		if($buildingID = $request->input('building_id')){
-			$houses = $houses->where('building_id',$buildingID);
+			if(is_array($buildingID)){
+				$houses = $houses->whereIn('building_id',$buildingID);
+			}else{
+				$houses = $houses->where('building_id',$buildingID);
+			}
 		}
 
 		if($streetID = $request->input('street_id')){
@@ -399,6 +403,20 @@ class RepositoryController extends Controller
 			$streets = [];
 		}
 		return response()->json($streets,200); 
+	}
+	public function getBlock(Request $request){
+		$zoneID = $request->zone_id;
+		$where = [];
+		if($zoneID){
+			$where = array_merge($where,['zone_id'=>$zoneID]);
+		}
+			$blockID= House::where($where)->pluck('block_id');
+		if($blockID){
+			$blocks = SystemData::whereIn('id',$blockID)->get();
+		}else{
+			$blocks = [];
+		}
+		return response()->json($blocks,200); 
 	}
 	public function getBuilding(Request $request){
 		$zoneID = $request->zone_id;
@@ -697,17 +715,13 @@ class RepositoryController extends Controller
 			// $whereUsage .= ' AND boqs.street_id = '.$request["street_id"];
 		}
 		if(!empty($request["house_type"])){
-			$where = array_merge($where,['boq_items.working_type'=>$request["house_type"]]);
+			$where = array_merge($where,['houses.house_type'=>$request["house_type"]]);
 		}
-		if(!empty($request["house_id"])){
-			$where = array_merge($where,['boq_houses.house_id'=>$request["house_id"]]);
-		}
+		
 		if(!empty($request["boq_id"])){
 			$where = array_merge($where,['boqs.id'=>$request["boq_id"]]);
 		}
-		if(!empty($request["working_type"])){
-			$where = array_merge($where,['boq_items.working_type'=>$request["working_type"]]);
-		}
+		
 		$boqItems = BoqItem::select(
 			'boq_items.*',
 			'items.cat_id',
@@ -723,8 +737,18 @@ class RepositoryController extends Controller
 		->join('system_datas','system_datas.id','boq_items.working_type')
 		->join('items','items.id','boq_items.item_id')
 		->join('boqs','boqs.id','boq_houses.boq_id')
+		->join('houses','boq_houses.house_id','houses.id')
 		->where('boqs.pro_id',$projectID);
-		$boqItems = $boqItems->where($where)->where('boqs.is_revise',0)->groupBy('boq_items.item_id')
+		$boqItems = $boqItems->where($where)->where('boqs.is_revise',0);
+		if(!empty($request["working_type"])){
+			$boqItems = $boqItems->whereIn("boq_items.working_type",$request["working_type"]);
+			// $where = array_merge($where,['boq_items.working_type'=>$request["working_type"]]);
+		}
+		if(!empty($request["house_id"])){
+			$boqItems = $boqItems->whereIn("houses.id",$request["house_id"]);
+			// $where = array_merge($where,['boq_houses.house_id'=>$request["house_id"]]);
+		}
+		$boqItems = $boqItems->groupBy('boq_items.item_id')
 		->orderBy('boq_items.working_type')->get();
 		return response()->json($boqItems,200);
 	}
