@@ -343,15 +343,17 @@
 			$('.house-modal').modal('show');
 			
 			$("#btnSave").on('click',function(){
+				
 				var table_purchase = $('#table_purchase').DataTable();
 				if (!table_purchase.data().count()) {
+					
 					$('.house-modal').modal('hide');
 					return false;
 				}else{
-					if(chkValid([".street",<?php if(getSetting()->allow_zone==1){echo '".zone",';}?><?php if(getSetting()->allow_block==1){echo '".block",';}?>".house_type",".line_house_no",".line_house_desc",".line_status"])){
+					if(chkValid([".street",".zone",".block",".house_type",".line_house_no",".line_house_desc",".line_status"])){
 						var dupArray = [];
 						var isValid = true;
-						var street = $('#street').val();
+						var street = $('#building_id').val();
 						$(".line_house_no").each(function(i){
 							dupArray[i] = $(this).val();
 							if(objName && street!='' && street!=null){
@@ -450,6 +452,7 @@
 				$('#desc-edit').text(val.house_desc);
 				$('#house_no-edit').val(val.house_no);
 				$('#old_house_no').val(val.house_no);
+				$('#building_id-edit').select2('val',val.building_id);
 			});
 		}
 		$('.button-submit-edit').attr('id','btnUpdate').attr('name','btnUpdate');

@@ -151,7 +151,7 @@
 																	<td width="10%"><input type="number" length="11" class="form-control line_qty_add line_qty_add_{{$index_boq}}_{{$type_id}}" name="line_qty_add_{{$type_id}}[]" value="0" placeholder="{{trans('lang.enter_number')}}" value="{{$boqItem->qty_add}}"/></td>
 																	<td width="10%">
 																		<input type="number" length="11" class="form-control line_cost line_cost_{{$index_boq}}_{{$type_id}}" name="line_cost_{{$type_id}}[]" value="0" placeholder="{{trans('lang.enter_number')}}" value="{{$boqItem->price}}"/>
-																		<input type="hidden" id="is_close_{{$index_boq}}_{{$type_id}}" name="is_close_{{$type_id}}[]" /> 
+																		<input type="hidden" id="is_close_{{$index_boq}}_{{$type_id}}" name="is_close_{{$type_id}}[]" value="0"/> 
 																	</td>
 																	<td width="2%"><a class="row_{{$index_boq}}_{{$type_id}} btn btn-sm" onclick="closeRowBOQ(this,'{{$index_boq}}','{{$type_id}}' )"><i class="fa fa-trash"></i></a></td>
 																</tr>
@@ -212,80 +212,22 @@
 	getHouses();
 	
 	function closeRowBOQ(field,index,type){
-		// var row = $('.row-id-'+type+"-"+index);
-		$(field).closest('tr').find(":input:not(:first)").attr('readonly', true);
-		$("#is_close_"+index+'_'+type).val(1);
-		console.log($("#is_close_"+index+'_'+type).val());
-		// row.addClass("disabled")
-		// console.log(row);
-		// row.attr('disabled');
-		// row.remove();
-		// var table_boq = $('#table_boq').DataTable();
-		// table_boq.row($('.row_'+id).parents('tr')).remove().draw( false );
-		
-		// table_boq.rows().eq(0).each(function(index_boq){
-		// 	var cell = table_boq.cell(index_boq,0);
-		// 	$(cell.node()).find(".line").text(lineNo(parseFloat(index_boq)+1,3));
-		// 	$(cell.node()).find(".line_no").val(lineNo(parseFloat(index_boq)+1,3));
-		// });
+		var is_close  = $("#is_close_"+index+'_'+type).val();
+		if(is_close =="" || is_close == 0){
+			$(field).closest('tr').find(":input:not(:first)").attr('readonly', true);
+			$("#is_close_"+index+'_'+type).val(1);
+			$(".select2_"+index+"_"+type).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true,disabled:'readonly'});
+		}else{
+			$(field).closest('tr').find(":input:not(:first)").attr('readonly', false);
+			$("#is_close_"+index+'_'+type).val(0);
+			$(".select2_"+index+"_"+type).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true,disabled:false});
+		}
 	}
 	function DeleteRowBOQ(field){
 		var row = field.parentNode.parentNode;
 		row.remove();
 		
 	}
-	// function ChangeItemTypes(){
-	// 	val = $('#boq-item-type').val();
-	// 	if(val!=null && val!='' && jsonItem){
-	// 		$('#boq-item_name').empty();
-	// 		$('#boq-item_name').append($('<option></option>').val('').text(''));
-	// 		$('#boq-item_name').select2('val', null);
-	// 		$.each(jsonItem.filter(c=>c.cat_id==val),function(key, val){
-	// 			$('#boq-item_name').append($('<option></option>').val(val.id).text(val.code+' ('+val.name+')'));
-	// 		});
-	// 		$('#boq-item_name').on('change', function(){
-	// 			ChangeItems();
-	// 		});
-	// 	}
-	// }
-	// function ChangeItems(){
-	// 	val = $('#boq-item_name').val();
-	// 	item_type = $('#item-item-type').val();
-	// 	if(val != '' ){
-	// 		console.log(val);
-	// 		var table_boq = $('#table_boq').DataTable();
-	// 		var line_no = table_boq.rows().count();
-	// 		if(line_no < 100){
-	// 			$(".show-message-error-boq").empty();
-	// 			table_boq.row.add([
-	// 				'<strong class="line">'+lineNo((line_no+1),3)+'</strong>'
-	// 				+'<input type="hidden" value="'+lineNo((line_no+1),3)+'" name="line_no[]" class="line_no line_no_'+index_boq+'" />',
-	// 				'<select onchange="ChangeItemType('+item_type+', '+index_boq+')" class="form-control select2_'+index_boq+' line_item_type line_item_type_'+index_boq+'" name="line_item_type[]">'
-	// 					+'<option value=""></option>'
-	// 					+'{{getSystemData("IT")}}'
-	// 				+'</select>',
-	// 				'<select onchange="ChangeItem('+val+', '+index_boq+')" class="form-control select2_'+index_boq+' line_item line_item_'+index_boq+'" name="line_item[]">'
-	// 					+'<option value=""></option>'
-	// 				+'</select>',
-	// 				'<select class="form-control select2_'+index_boq+' line_unit line_unit_'+index_boq+'" name="line_unit[]">'
-	// 					+'<option value=""></option>'
-	// 				+'</select>',
-	// 				'<input type="number" length="11" class="form-control line_qty_std line_qty_std_'+index_boq+'" name="line_qty_std[]" placeholder="{{trans("lang.enter_number")}}" />',
-	// 				'<input type="number" length="11" class="form-control line_qty_add line_qty_add_'+index_boq+'" name="line_qty_add[]" value="0" placeholder="{{trans("lang.enter_number")}}" />',
-	// 				'<input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'" name="line_cost[]" value="0" placeholder="{{trans("lang.enter_number")}}" />',
-	// 				'<a class="row_'+index_boq+' btn btn-sm red" onclick="DeleteRowBOQ('+index_boq+')"><i class="fa fa-times"></i></a>',
-	// 			]).draw();
-	// 			$.fn.select2.defaults.set('theme','classic');
-	// 			$(".select2_"+index_boq).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true});
-	// 			index_boq++;
-	// 		}else{
-	// 			$(".show-message-error-boq").html('{{trans("lang.not_more_than_100")}}!');
-	// 		}
-	// 	}
-		
-	// }
-	
-	
 	function ChangeItemType(val, row,item_id=null){
 		if(val!=null && val!='' && jsonItem){
 			$('.line_item_'+row).empty();
@@ -428,75 +370,12 @@
 				html+= '<td><input type="number" length="11" class="form-control line_qty_std line_qty_std_'+index_boq+'_'+type_id+'" name="line_qty_std_'+type_id+'[]" placeholder="{{trans("lang.enter_number")}}" /></td>';
 				html += '<td><input type="number" length="11" class="form-control line_qty_add line_qty_add_'+index_boq+'_'+type_id+'" name="line_qty_add_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
 				html += '<td><input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'_'+type_id+'" name="line_cost_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
-				html += '<td><input type="hidden" id="is_close_'+index_boq+'_'+type_id+'" name="is_close_'+type_id+'[]" /> <a class="row_'+index_boq+'_'+type_id+' btn btn-sm" onclick="DeleteRowBOQ(this)"><i class="fa fa-trash"></i></a></td>';
+				html += '<td><input type="hidden" id="is_close_'+index_boq+'_'+type_id+'" name="is_close_'+type_id+'[]" value="0"/> <a class="row_'+index_boq+'_'+type_id+' btn btn-sm" onclick="DeleteRowBOQ(this)"><i class="fa fa-trash"></i></a></td>';
 			html+='</tr>';
 		table_boq.append(html);
 		$.fn.select2.defaults.set('theme','classic');
 			$(".select2_"+index_boq+'_'+type_id).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true});
 	}
-	// $('.boq-pointer').on('click', function(){
-	// 	var table_boq = $('#table_boq').DataTable();
-	// 	var line_no = table_boq.rows().count();
-	// 	if(line_no < 100){
-	// 		$(".show-message-error-boq").empty();
-	// 		table_boq.row.add([
-	// 			'<strong class="line">'+lineNo((line_no+1),3)+'</strong>'
-	// 			+'<input type="hidden" value="'+lineNo((line_no+1),3)+'" name="line_no[]" class="line_no line_no_'+index_boq+'" />',
-	// 			'<select onchange="ChangeItemType(this.value, '+index_boq+')" class="form-control select2_'+index_boq+' line_item_type line_item_type_'+index_boq+'" name="line_item_type[]">'
-	// 				+'<option value=""></option>'
-	// 				+'{{getSystemData("IT")}}'
-	// 			+'</select>',
-	// 			'<select onchange="ChangeItem(this.value, '+index_boq+')" class="form-control select2_'+index_boq+' line_item line_item_'+index_boq+'" name="line_item[]">'
-	// 				+'<option value=""></option>'
-	// 			+'</select>',
-	// 			'<select class="form-control select2_'+index_boq+' line_unit line_unit_'+index_boq+'" name="line_unit[]">'
-	// 				+'<option value=""></option>'
-	// 			+'</select>',
-	// 			'<input type="number" length="11" class="form-control line_qty_std line_qty_std_'+index_boq+'" name="line_qty_std[]" placeholder="{{trans("lang.enter_number")}}" />',
-	// 			'<input type="number" length="11" class="form-control line_qty_add line_qty_add_'+index_boq+'" name="line_qty_add[]" value="0" placeholder="{{trans("lang.enter_number")}}" />',
-	// 			'<input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'" name="line_cost[]" value="0" placeholder="{{trans("lang.enter_number")}}" />',
-	// 			'<a class="row_'+index_boq+' btn btn-sm red" onclick="DeleteRowBOQ('+index_boq+')"><i class="fa fa-times"></i></a>',
-	// 		]).draw();
-			// $.fn.select2.defaults.set('theme','classic');
-			// $(".select2_"+index_boq).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true});
-			// index_boq++;
-	// 	}else{
-	// 		$(".show-message-error-boq").html('{{trans("lang.not_more_than_100")}}!');
-	// 	}
-	// });
-
-	// $('.boq-pointer').on('click', function(){
-	// 	var table_boq = $('#table_boq');
-	// 	var line_no = table_boq;
-	// 	// if(line_no < 100){
-	// 		$(".show-message-error-boq").empty();
-	// 		html = '<tr>';
-	// 			html+= '<td><strong>'+lineNo(1+1,1)+'</strong><input type="hidden" value="'+lineNo((line_no+1),3)+'" name="line_no[]" class="line_no line_no_'+index_boq+'" /></td>';
-	// 			html+= '<td><select onchange="ChangeItemType(this.value, '+index_boq+')" class="form-control select2_'+index_boq+' line_item_type line_item_type_'+index_boq+'" name="line_item_type[]">'
-	// 				+'<option value=""></option>'
-	// 				+'{{getSystemData("IT")}}'
-	// 				+'</select></td>';
-	// 			html+= '<td><select onchange="ChangeItem(this.value, '+index_boq+')" class="form-control select2_'+index_boq+' line_item line_item_'+index_boq+'" name="line_item[]">'
-	// 				+'<option value=""></option>'
-	// 			+'</select></td>';
-	// 			html+= '<td><select class="form-control select2_'+index_boq+' line_unit line_unit_'+index_boq+'" name="line_unit[]">'
-	// 				+'<option value=""></option>'
-	// 			+'</select></td>';
-	// 			html+= '<td><input type="number" length="11" class="form-control line_qty_std line_qty_std_'+index_boq+'" name="line_qty_std[]" placeholder="{{trans("lang.enter_number")}}" /></td>';
-	// 			html += '<td><input type="number" length="11" class="form-control line_qty_add line_qty_add_'+index_boq+'" name="line_qty_add[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
-	// 			html += '<td><input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'" name="line_cost[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
-	// 			html += '<td><a class="row_'+index_boq+' btn btn-sm red" onclick="DeleteRowBOQ('+index_boq+')"><i class="fa fa-times"></i></a></td>';
-	// 		html+='</tr>';
-	// 		table_boq.append(html);
-			
-	// 		$.fn.select2.defaults.set('theme','classic');
-	// 		$(".select2_"+index_boq).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true});
-	// 		index_boq++;
-	// 	// }else{
-	// 	// 	$(".show-message-error-boq").html('{{trans("lang.not_more_than_100")}}!');
-	// 	// }
-	// });
-	
 	function format (d) {
         var str = '';
         str += '<table class="table table-striped details-table table-responsive"  id="sub-'+d.id+'">';

@@ -30,6 +30,7 @@
 		a.disabled {
 			pointer-events: none;
 			cursor: default;
+			color: #cccccc;
 		}
 	</style>
 @endsection
@@ -288,7 +289,7 @@
 			$action = '';
 			// $action = '<a row_rounte="{{url("purch/order/print_deliver_note")}}/'+aData.id+'/1" onclick="onPrintOrder(this)">{{trans("lang.view")}}</a>';
 			
-			if(aData.is_closed == 0){
+			if(aData.is_closed == 0 && aData['trans_status'] == 3){
 				// console.log(aData.is_closed);
 				$action += '<a href="{{url("stock/deliv/make_delivery")}}/'+aData.id+'">{{trans("lang.make_delivery")}}</a>';
 			}else{

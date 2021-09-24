@@ -74,7 +74,7 @@
 										<span class="required">*</span>
 									</label>
 									<div class="col-md-12">
-										<select name="building_id" id="boq-building" class="form-control boq-building-add my-select2">
+										<select name="building_id[]" id="boq-building" class="form-control boq-building-add my-select2" multiple>
 											<option value=""></option>
 											{{getSystemData('BD')}}
 										</select>

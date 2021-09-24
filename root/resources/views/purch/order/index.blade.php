@@ -504,7 +504,7 @@
             content:'{{trans("lang.content_close")}}',
             autoClose: 'no|10000',
             buttons:{
-				make_new_order:{
+				yes:{
                     text:'{{trans("lang.close_make_new_order")}}',
                     btnClass: 'btn-success',
                     action:function(){
@@ -512,14 +512,14 @@
                         window.location.href=rounte+"/1";
                     }
                 },
-                yes:{
-                    text:'{{trans("lang.yes")}}',
-                    btnClass: 'btn-success',
-                    action:function(){
-						console.log(rounte);
-                        window.location.href=rounte;
-                    }
-                },
+                // yes:{
+                //     text:'{{trans("lang.yes")}}',
+                //     btnClass: 'btn-success',
+                //     action:function(){
+				// 		console.log(rounte);
+                //         window.location.href=rounte;
+                //     }
+                // },
                 no:{
                     text:'{{trans("lang.no")}}',
                     btnClass: 'btn-danger',

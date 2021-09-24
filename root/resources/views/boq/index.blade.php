@@ -844,10 +844,15 @@
 			}
 		});
 		$('#boq-zone').on('change', function(){
-			getHouses();
+			var zoneId = $("#boq-zone").val();
+			getBlocks(zoneId);
+			// getHouses();
 		});
 		$('#boq-block').on('change', function(){
-			getHouses();
+			var zoneId = $("#boq-zone").val();
+			var blockId = $().val("boq-block");
+			getBuildings(zoneId,blockId);
+			// getHouses();
 		});
 		$('#boq-building').on('change', function(){
 			getHouses();
@@ -878,6 +883,59 @@
 			var type = $(this).val();
 			getHousePreView();
 		});
+
+		function getBlocks(zone_id){
+
+			var params = {
+				zone_id : null,
+			}
+			const zoneId = $("#boq-zone").val();
+			if(zoneId){
+				params.zone_id = zoneId;
+			}
+			$.ajax({
+				url:"{{url('repository/getBlock')}}",
+				type:'GET',
+				data: params,
+				success: function(result){
+					$("#boq-block").empty();
+					$("#boq-block").append($('<option></option>').val("").text(""));	
+					$.each(result,function(key, val){
+						
+						$("#boq-block").append($('<option></option>').val(val.id).text(val.name));						
+					});
+				}
+			});
+		}
+
+		function getBuildings(zone_id,block_id){
+			var params = {
+				zone_id : null,
+				block_id : null
+			}
+
+			const zoneId = $("#boq-zone").val();
+			const blockID = $("#boq-blocks").val();
+			if(zoneId){
+				params.zone_id = zoneId;
+			}
+			if(blockID){
+				params.block_id = blockID;
+			}
+
+			$.ajax({
+				url:"{{url('repository/getBuilding')}}",
+				type:'GET',
+				data: params,
+				success: function(result){
+					$("#boq-building").empty();
+					$("#boq-building").append($('<option></option>').val("").text(""));
+					$.each(result,function(key, val){
+						$("#boq-building").append($('<option></option>').val(val.id).text(val.name));						
+					});
+				}
+			});
+		}
 
 		function getHouses(){
 			var params = {
@@ -1043,10 +1101,8 @@
 			$('.boq-street-add').select2('val', null);
 			$("#checkbox-house").click(function(){
 				if($("#checkbox-house").is(':checked') ){
-					
 					$(".boq-house-add > option").prop("selected","selected");
 					$(".boq-house-add").trigger("change");
-					console.log(11); 
 				}else{
 					$(".boq-house-add > option").removeAttr("selected");
 					$(".boq-house-add").trigger("change");
@@ -1062,7 +1118,6 @@
 				if(chkValid([".boq-zone-add",".boq-block-add",".boq-building-add",".line_item_type",".line_item",".line_unit",".line_qty_std"])){
 					$('.enter-boq-form').submit();
 				}else{
-					console.log(123);
 					$('.boq-button-submit').prop('disabled', false);
 					return false;
 				}

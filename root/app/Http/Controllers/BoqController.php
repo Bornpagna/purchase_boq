@@ -205,6 +205,7 @@ class BoqController extends Controller
 		$boqItems = BoqItem::select(
 			'boq_items.*',
 			'items.cat_id',
+			'items.name',
 			'system_datas.name as working_type_name',
 			DB::raw('SUM(pr_boq_items.qty_std) as total_qty')
 		)->join('boq_houses','boq_houses.id','boq_items.boq_house_id')
@@ -229,7 +230,9 @@ class BoqController extends Controller
 		$boqItems = BoqItemDefualt::select(
 			'boq_item_defualts.*',
 			'items.cat_id',
-			'system_datas.name as working_type_name')
+			'items.name',
+			'system_datas.name as working_type_name',
+			DB::raw('(select pr_system_datas.name from pr_system_datas where pr_system_datas.id = pr_items.cat_id) as unit_name'))
 		->join('system_datas','system_datas.id','boq_item_defualts.working_type')
 		->join('items','items.id','boq_item_defualts.item_id')
 		->where('boq_item_defualts.boq_id',$id);
@@ -242,10 +245,10 @@ class BoqController extends Controller
 	}
 
  	public function reviseBoq(Request $request,$id){
+		//  print_r($request->all());exit;
 		try {
 			DB::beginTransaction();
 			// Get old BOQ
-			
 			$rules = [
 				'zone_id'	=> 'required',
 				'block_id' 	=> 'required',
@@ -331,10 +334,10 @@ class BoqController extends Controller
 						$boq_house = [
 							'boq_id'			=>	$boq_id,
 							'house_id'			=>	$house->id,
-							'boq_house_code'	=>$oldBoq->boq_code."-".$oldBoq->version."-HOUSE-".$this->getBoqHouseCode($house->id,3),
+							'boq_house_code'	=>	$oldBoq->boq_code."-".$oldBoq->version."-HOUSE-".$this->getBoqHouseCode($house->id,3),
 							'created_by'		=>	Auth::user()->id,
 							'created_at'		=>	date('Y-m-d H:i:s'),
-							'created_by'		=> Auth::user()->id,
+							'created_by'		=>  Auth::user()->id,
 							'status'			=>	1
 						];
 						$boq_house_id = DB::table('boq_houses')->insertGetId($boq_house);
@@ -356,6 +359,7 @@ class BoqController extends Controller
 											'working_type'	=>	$working_type,
 											'created_at'	=>	date('Y-m-d H:i:s'),
 											'created_at'	=>	Auth::user()->id,
+											'is_closed'		=>	$request["is_close_".$working_type][$key]
 										];
 										$boq_item = DB::table('boq_items')->insertGetID($item_types);
 										if($house_key == 0){
@@ -389,7 +393,7 @@ class BoqController extends Controller
 			return redirect('/boqs');
 		}catch (\Exception $e) {
 			DB::rollback();
-			print_r($e->getMessage());exit;
+			print_r($e->getMessage()."-> Line".$e->getLine());exit;
 			return redirect()->back()->with('error',trans('lang.save_error').' '.$e->getMessage().' '.$e->getLine());
 		}
 	}
@@ -923,45 +927,55 @@ class BoqController extends Controller
 			// 				$rules['line_cost_'.$working_type_id] = 'required|max:11';
 			// 			}
 			// 		}
-					
 			// 	}
 			// }
 			// // exit;
 			// Validator::make($request->all(),$rules)->validate();
-			$where = [];
+			// print_r($request["building_id"]);exit;
+			DB::beginTransaction();
+			if(is_array($request["building_id"])){
+				if(count($request["building_id"]) > 0){
+					foreach($request["building_id"] as $key=>$building){
+						$this->insertBoqHouse($request,$building);
+					}
+				}
+			}else{
+				$this->insertBoqHouse($request,$request["building_id"]);
+			}
+			
+			DB::commit();
+			return redirect()->back()->with('success',trans('lang.save_success'));
+		} catch (\Exception $e) {
+			DB::rollback();
+			print_r($e->getMessage().$e->getLine());
+			return redirect()->back()->with('error',trans('lang.save_error').' '.$e->getMessage().' '.$e->getLine());
+		}
+	}
+
+	function insertBoqHouse(Request $request,$building_id=null){
+		$where = [];
 			if(!empty($request['zone_id'])){
 				$where = array_merge($where, ['zone_id'=>$request['zone_id']]);
 			}
 			if(!empty($request['block_id'])){
 				$where = array_merge($where, ['block_id'=>$request['block_id']]);
 			}
-			if(!empty($request['building_id'])){
-				$where = array_merge($where, ['building_id'=>$request['building_id']]);
+			if(!empty($building_id)){
+				$where = array_merge($where, ['building_id'=>$building_id]);
 			}
 			if(!empty($request['house_type_id'])){
 				$where = array_merge($where, ['house_type'=>$request['house_type_id']]);
 			}
-			
 			if(!empty($request['street_id'])){
 				$where = array_merge($where, ['street_id'=>$request['street_id']]);
 			}
 			if(!empty($request['house']) && count($request['house']) > 0){
-				// print_r($where);exit;
 				$houses = DB::table('houses')->where($where)->whereIn('id',$request['house'])->get();
-				// print_r($houses);exit;
 			}else{
 				$houses = DB::table('houses')->where($where)->get();
 			}			
-			// if(count($request['line_item_type']) > 0){
-			// 	for($i=0;$i<count($request['line_item_type']);$i++){
-			// 		$rules['line_item_type.'.$i] = 'required';
-			// 		$rules['line_item.'.$i] = 'required';
-			// 		$rules['line_unit.'.$i] = 'required';
-			// 		$rules['line_qty_add.'.$i] = 'required|max:11';
-			// 		$rules['line_qty_std.'.$i] = 'required|max:11';
-			// 	}
-			// }			
-			DB::beginTransaction();
+					
+			
 			$pro_id = $request->session()->get('project');
 			$boqCode = 	"BOQ-".$this->getBoqCode();	
 			if(count($houses) > 0){
@@ -969,7 +983,7 @@ class BoqController extends Controller
 					'pro_id'		=>	$pro_id,
 					'zone_id'		=>	$request["zone_id"] ? $request["zone_id"] : 0,
 					'block_id'		=>	$request["block_id"] ? $request["block_id"] : 0,
-					'building_id'	=>	$request["building_id"] ? $request["building_id"] : 0,
+					'building_id'	=>	$building_id ? $building_id : 0,
 					'house_type'	=>	$request["house_type_id"] ? $request["house_type_id"] : 0,
 					'street_id'		=>	$request["street_id"] ? $request["street_id"] : 0,
 					'boq_code'		=> $boqCode,
@@ -982,8 +996,6 @@ class BoqController extends Controller
 					'version'		=>	1,
 				];
 				$boq_id = DB::table('boqs')->insertGetId($boq);
-
-				
 				foreach($houses as $house_key=>$house){
 					$boq_house = [
 						'boq_id'			=>	$boq_id,
@@ -1018,91 +1030,13 @@ class BoqController extends Controller
 									if($house_key == 0){
 										$boq_item_defualt = DB::table('boq_item_defualts')->insertGetID($item_types);
 									}
-									
-									// print_r($boq_item);exit;
 								}
 							}
 						}
 					}
 				}				
-				DB::commit();
-				return redirect()->back()->with('success',trans('lang.save_success'));
+				
 			}
-
-			
-
-			// if($request['option_house']==1){
-			// 	$boq = [
-			// 		'house_id'	=>$request['house'],
-			// 		'line_no'	=>getLineNo($request['house']),
-			// 		'trans_date'=>date('Y-m-d'),
-			// 		'trans_by'	=>Auth::user()->id,
-			// 		'trans_type'=>'Entry'
-			// 	];
-			// 	$boq_id = DB::table('boqs')->insertGetId($boq);
-			// 	for ($i=0;$i<count($request['line_no']);$i++) { 
-			// 		$data[] = [
-			// 			'boq_id'	=>$boq_id,
-			// 			'house_id'	=>$request['house'],
-			// 			'item_id'	=>$request['line_item'][$i],
-			// 			'unit'		=>$request['line_unit'][$i],
-			// 			'qty_std'	=>$request['line_qty_std'][$i],
-			// 			'qty_add'	=>$request['line_qty_add'][$i],
-			// 		]; 
-			// 	}
-			// 	DB::table('boq_items')->insert($data);
-			// 	DB::commit();
-			// 	return redirect()->back()->with('success',trans('lang.save_success'));
-			// }else{
-				
-			// 	$where = ['status'=>1,'house_type'=>$request['house']];
-			// 	if($request['street_id']!=0){
-			// 		$where = array_merge($where, ['street_id'=>$request['street_id']]);
-			// 	}
-			// 	$house = House::where($where)->get(['id']);
-			// 	// print_r($house);exit;
-			// 	if(count($house)>0){
-			// 		foreach($house as $val){
-			// 			$boq = [
-			// 				'house_id'	=>$val->id,
-			// 				'line_no'	=>getLineNo($val->id),
-			// 				'trans_date'=>date('Y-m-d'),
-			// 				'trans_by'	=>Auth::user()->id,
-			// 				'trans_type'=>'Entry'
-			// 			];
-			// 			$boq_id[$val->id] = DB::table('boqs')->insertGetId($boq);
-			// 		}
-			// 		if(!empty($boq_id)){
-			// 			foreach($boq_id as $k=>$row){
-			// 				for ($i=0;$i<count($request['line_no']);$i++) {
-			// 					$data[] = [
-			// 						'boq_id'	=>$row,
-			// 						'house_id'	=>$k,
-			// 						'item_id'	=>$request['line_item'][$i],
-			// 						'unit'		=>$request['line_unit'][$i],
-			// 						'qty_std'	=>$request['line_qty_std'][$i],
-			// 						'qty_add'	=>$request['line_qty_add'][$i],
-			// 					]; 
-			// 				}
-			// 			}
-			// 		}
-			// 	}
-			// 	if(!empty($data)){
-			// 		DB::table('boq_items')->insert($data);
-			// 		DB::commit();
-			// 		return redirect()->back()->with('success',trans('lang.save_success'));
-			// 	}else{
-			// 		DB::rollback();
-			// 		throw new \Exception("UsageDetail[{$i}] not insert.");
-			// 		// return redirect()->back()->with('error',trans('lang.no_house_'));
-			// 	}
-				
-			// }
-		} catch (\Exception $e) {
-			DB::rollback();
-			print_r($e->getMessage().$e->getLine());
-			return redirect()->back()->with('error',trans('lang.save_error').' '.$e->getMessage().' '.$e->getLine());
-		}
 	}
 
     public function update(Request $request,$id)
@@ -1202,7 +1136,6 @@ class BoqController extends Controller
 		return view('boq.viewBoq',$data);
 	}
 	function viewReviseBoq(Request $request, $id, $back){
-		
 		$id = decrypt($id);
 		$back = decrypt($back);
 		$redirect = url('boqs');
@@ -1948,7 +1881,6 @@ class BoqController extends Controller
    	}
 
 	public function reviseBoqHouseView(Request $request,$boq_id,$house_id){
-		
 		try {
 			
 			$type = $request->working_type;

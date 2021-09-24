@@ -85,6 +85,30 @@
 		.file-block{
 			padding: 20px 5px;
 		}
+		/* #table_boq tr.disabled td {
+			position: absolute;
+			content: '';
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			background: rgba(0, 0, 0, 0.2);
+		}
+		*/
+		select[readonly].select2-hidden-accessible + .select2-container {
+			pointer-events: none;
+			touch-action: none;
+		}
+
+		select[readonly].select2-hidden-accessible + .select2-container .select2-selection {
+			background: #eee;
+			box-shadow: none;
+		}
+
+		select[readonly].select2-hidden-accessible + .select2-container .select2-selection__arrow,
+		select[readonly].select2-hidden-accessible + .select2-container .select2-selection__clear {
+			display: none;
+		} 
 	</style>
 @endsection
 @section('content')
@@ -259,6 +283,7 @@
 								</tr>
 							</thead>
 							<tbody>
+								<?php $index_boq = 0; ?>
 								@if($boqItems)
 									<?php
 										$index_work_type = 0;
@@ -275,7 +300,7 @@
 											<tr>
 												<td colspan="8">
 													<table class="table table-hover no-footer item_table" id="working_type_{{$index_work_type}}_{{$boqWorkingType["working_type"]}}">
-														<?php $rowCount =0; $index_boq = 0;?>
+														<?php $rowCount =0; $readOnly = "readonly"; ?>
 														@foreach ($boqItems as $key=>$boqItem)
 														<?php $index_boq++;?>
 															@if ($boqItem->working_type == $boqWorkingType->working_type)
@@ -287,13 +312,15 @@
 																<tr class="row-id-{{$boqItem->working_type}}-{{$index_boq}}">
 																	<td width="2%"><strong>{{$rowCount}}</strong><input type="hidden" value="{{$index_boq}}" name="line_no_{{$boqItem->working_type}}[]" class="line_no line_no_{{$index_boq}}_{{$boqItem->working_type}}" /></td>
 																	<td width="15%">
-																		<select onchange="ChangeItemType(this.value, {{$itemIndex}},$boqItem->item_id)" class="form-control select2_{{$index_boq}}_{{$boqItem->working_type}} line_item_type line_item_type_{{$index_boq}}_{{$type_id}}" name="line_item_type_{{$type_id}}[]">
+																		{{-- <span>{{$boqItem->unit_name}}</span> --}}
+																		<select readonly="readonly" onchange="ChangeItemType(this.value, {{$itemIndex}},$boqItem->item_id)" class="form-control select2_{{$index_boq}}_{{$boqItem->working_type}} line_item_type line_item_type_{{$index_boq}}_{{$type_id}}" name="line_item_type_{{$type_id}}[]">
 																			<option value=""></option>
 																			{{getSystemData("IT",$boqItem->cat_id)}}
 																		</select>
 																	</td>
 																	<td width="20%">
-																		<select onchange="ChangeItem(this.value, {{$itemIndex}})" class="form-control select2_{{$index_boq}}_{{$type_id}} line_item line_item_{{$index_boq}}_{{$type_id}}" name="line_item_{{$type_id}}[]">
+																		{{-- <span>{{$boqItem->name}}</span> --}}
+																		<select readonly="readonly" onchange="ChangeItem(this.value, {{$itemIndex}})" class="form-control select2_{{$index_boq}}_{{$type_id}} line_item line_item_{{$index_boq}}_{{$type_id}}" name="line_item_{{$type_id}}[]">
 																			<option value=""></option>
 																			{{getItems($boqItem->item_id,$boqItem->cat_id)}}
 																		</select>
@@ -304,10 +331,15 @@
 																			{{getUnitPurchItem($boqItem->item_id,$boqItem->unit)}}
 																		</select>
 																	</td>
-																	<td width="15%"><input type="number" length="11" class="form-control line_qty_std line_qty_std_{{$index_boq}}_{{$type_id}}" name="line_qty_std_{{$type_id}}[]" placeholder="{{trans('lang.enter_number')}}" value="{{$boqItem->qty_std}}" /></td>
-																	<td width="10%"><input type="number" length="11" class="form-control line_qty_add line_qty_add_{{$index_boq}}_{{$type_id}}" name="line_qty_add_{{$type_id}}[]" value="0" placeholder="{{trans('lang.enter_number')}}" value="{{$boqItem->qty_add}}"/></td>
-																	<td width="10%"><input type="number" length="11" class="form-control line_cost line_cost_{{$index_boq}}_{{$type_id}}" name="line_cost_{{$type_id}}[]" value="0" placeholder="{{trans('lang.enter_number')}}" value="{{$boqItem->price}}"/></td>
-																	<td width="2%"><a class="row_{{$index_boq}}_{{$type_id}} btn btn-sm" onclick="DeleteRowBOQ({{$type_id}},{{$index_boq}})"><i class="fa fa-trash"></i></a></td>
+																	<td width="15%"><input type="number" length="11" {{$boqItem->is_closed == 1 ? $readOnly :" "}} class="form-control line_qty_std line_qty_std_{{$index_boq}}_{{$type_id}}" name="line_qty_std_{{$type_id}}[]" placeholder="{{trans('lang.enter_number')}}" value="{{$boqItem->qty_std}}" /></td>
+																	<td width="10%">
+																		<input type="number" length="11" {{$boqItem->is_closed == 1 ? $readOnly :" "}} class="form-control line_qty_add line_qty_add_{{$index_boq}}_{{$type_id}}" name="line_qty_add_{{$type_id}}[]" value="0" placeholder="{{trans('lang.enter_number')}}" value="{{$boqItem->qty_add}}"/>
+																	</td>
+																	<td width="10%">
+																		<input type="number" length="11" {{$boqItem->is_closed == 1 ? $readOnly :" "}} class="form-control line_cost line_cost_{{$index_boq}}_{{$type_id}}" name="line_cost_{{$type_id}}[]" value="0" placeholder="{{trans('lang.enter_number')}}" value="{{$boqItem->price}}"/>
+																		<input type="hidden" id="is_close_{{$index_boq}}_{{$type_id}}" name="is_close_{{$type_id}}[]" value="0"/> 
+																	</td>
+																	<td width="2%"><a class="row_{{$index_boq}}_{{$type_id}} btn btn-sm" onclick="closeRowBOQ(this,'{{$index_boq}}','{{$type_id}}' )"><i class="fa fa-trash"></i></a></td>
 																</tr>
 															@endif
 														@endforeach
@@ -343,12 +375,7 @@
 		
 	$('.line_item_type').select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true});
 	$('.line_item').select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true});
-	// $('#table_boq').DataTable({
-	// 	"filter":   false,
-	// 	"paging":   false,
-	// 	"ordering": false,
-	// 	"info":     false
-	// });
+	$('.line_unit').select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true});
 	$("#btnBack, #btnCancel").on("click",function(){
 			var rounte = $(this).attr('rounte');
 			window.location.href=rounte;
@@ -364,70 +391,22 @@
 		});
 	});	
 	getHouses();
-	
+	function closeRowBOQ(field,index,type){
+		var is_close  = $("#is_close_"+index+'_'+type).val();
+		if(is_close =="" || is_close == 0){
+			$(field).closest('tr').find(":input:not(:first)").attr('readonly', true);
+			$("#is_close_"+index+'_'+type).val(1);
+			$(".select2_"+index+"_"+type).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true,readonly:'readonly'});
+		}else{
+			$(field).closest('tr').find(":input:not(:first)").attr('readonly', false);
+			$("#is_close_"+index+'_'+type).val(0);
+			$(".select2_"+index+"_"+type).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true,readonly:'readonly'});
+		}
+		// $(field).closest('tr').hide();
+	}
 	function DeleteRowBOQ(type,index){
 		$('.row-id-'+type+"-"+index).remove();
-		// var table_boq = $('#table_boq').DataTable();
-		// table_boq.row($('.row_'+id).parents('tr')).remove().draw( false );
-		
-		// table_boq.rows().eq(0).each(function(index_boq){
-		// 	var cell = table_boq.cell(index_boq,0);
-		// 	$(cell.node()).find(".line").text(lineNo(parseFloat(index_boq)+1,3));
-		// 	$(cell.node()).find(".line_no").val(lineNo(parseFloat(index_boq)+1,3));
-		// });
 	}
-	// function ChangeItemTypes(){
-	// 	val = $('#boq-item-type').val();
-	// 	if(val!=null && val!='' && jsonItem){
-	// 		$('#boq-item_name').empty();
-	// 		$('#boq-item_name').append($('<option></option>').val('').text(''));
-	// 		$('#boq-item_name').select2('val', null);
-	// 		$.each(jsonItem.filter(c=>c.cat_id==val),function(key, val){
-	// 			$('#boq-item_name').append($('<option></option>').val(val.id).text(val.code+' ('+val.name+')'));
-	// 		});
-	// 		$('#boq-item_name').on('change', function(){
-	// 			ChangeItems();
-	// 		});
-	// 	}
-	// }
-	// function ChangeItems(){
-	// 	val = $('#boq-item_name').val();
-	// 	item_type = $('#item-item-type').val();
-	// 	if(val != '' ){
-	// 		console.log(val);
-	// 		var table_boq = $('#table_boq').DataTable();
-	// 		var line_no = table_boq.rows().count();
-	// 		if(line_no < 100){
-	// 			$(".show-message-error-boq").empty();
-	// 			table_boq.row.add([
-	// 				'<strong class="line">'+lineNo((line_no+1),3)+'</strong>'
-	// 				+'<input type="hidden" value="'+lineNo((line_no+1),3)+'" name="line_no[]" class="line_no line_no_'+index_boq+'" />',
-	// 				'<select onchange="ChangeItemType('+item_type+', '+index_boq+')" class="form-control select2_'+index_boq+' line_item_type line_item_type_'+index_boq+'" name="line_item_type[]">'
-	// 					+'<option value=""></option>'
-	// 					+'{{getSystemData("IT")}}'
-	// 				+'</select>',
-	// 				'<select onchange="ChangeItem('+val+', '+index_boq+')" class="form-control select2_'+index_boq+' line_item line_item_'+index_boq+'" name="line_item[]">'
-	// 					+'<option value=""></option>'
-	// 				+'</select>',
-	// 				'<select class="form-control select2_'+index_boq+' line_unit line_unit_'+index_boq+'" name="line_unit[]">'
-	// 					+'<option value=""></option>'
-	// 				+'</select>',
-	// 				'<input type="number" length="11" class="form-control line_qty_std line_qty_std_'+index_boq+'" name="line_qty_std[]" placeholder="{{trans("lang.enter_number")}}" />',
-	// 				'<input type="number" length="11" class="form-control line_qty_add line_qty_add_'+index_boq+'" name="line_qty_add[]" value="0" placeholder="{{trans("lang.enter_number")}}" />',
-	// 				'<input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'" name="line_cost[]" value="0" placeholder="{{trans("lang.enter_number")}}" />',
-	// 				'<a class="row_'+index_boq+' btn btn-sm red" onclick="DeleteRowBOQ('+index_boq+')"><i class="fa fa-times"></i></a>',
-	// 			]).draw();
-	// 			$.fn.select2.defaults.set('theme','classic');
-	// 			$(".select2_"+index_boq).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true});
-	// 			index_boq++;
-	// 		}else{
-	// 			$(".show-message-error-boq").html('{{trans("lang.not_more_than_100")}}!');
-	// 		}
-	// 	}
-		
-	// }
-	
-	
 	function ChangeItemType(val, row,item_id=null){
 		if(val!=null && val!='' && jsonItem){
 			$('.line_item_'+row).empty();
@@ -470,35 +449,7 @@
 		return roman;
 	}
 	// initailBoqItems();
-	function initailBoqItems(){
-		var items = JSON.parse(convertQuot("{{$boqItemJson}}"));
-		var table_boq = $('#table_boq');
-		var index_work_type = 0;
-		console.log(items);
-		if(items.length > 0){
-			var current_working_type = 0;
-			for(i=0;i < items.length; i++){
-				$('#working_type').val(items[i].working_type);
-				if(current_working_type != items[i].working_type){
-					index_work_type++;
-					// console.log(current_working_type);
-					html = '<tr class="">';
-						html += '<td><strong class="line bold">'+romanize(index_work_type)+'</strong></td>';
-						html += '<td colspan="6"><span class="bold">'+items[i].working_type_name+'</span><input type="hidden" value="'+items[i].working_type+'" name="working_type_no[]" class="working_type_no_'+index_work_type+'" /></td>';
-						html += '<td class="text-right"><a class="add_item_working_type_'+index_work_type+' btn btn-sm" onclick="addWorkingTypeItem('+index_work_type+','+items[i].working_type+')"><i class="fa fa-plus pionter"></i></a></td>';
-					html += '</tr>';
-					html += '<tr><td colspan="8"><table class="table table-hover no-footer item_table" id="working_type_'+index_work_type+'_'+items[i].working_type+'"></table></td></tr>';
-					table_boq.append(html);
-					
-						
-
-				}
-				current_working_type = items[i].working_type;
-				loadWorkingTypeItem(index_work_type,items[i].working_type,items[i].cat_id,items[i].unit);
-				// console.log(index_work_type);
-			}
-		}
-	}
+	
 	$('.boq-button-add-working-type').on('click',function(){
 		var working_type = $("input[name='working_type_no[]']").map(function(){return $(this).val();}).get();
 		var data = $('.boq-working-type').select2('data');
@@ -515,40 +466,7 @@
 			index_work_type++;
 		}
 	});
-	function loadWorkingTypeItem(row,type_id,selected_item_type,selected_item){
-		index_boq++;
-		var table_boq = $('#working_type_'+row+'_'+type_id);
-		var rowCount = $('#working_type_'+row+'_'+type_id+' tr').length;
-		var itemIndex = "'"+index_boq+"_"+type_id+"'";
-		<?php $phpvar="<script>document.writeln(selected_item_type);</script>"; ?> 
-		html = '<tr>';
-				html+= '<td><strong>'+lineNo(rowCount+1,1)+'</strong><input type="hidden" value="'+lineNo((index_boq+1),3)+'" name="line_no_'+type_id+'[]" class="line_no line_no_'+index_boq+'_'+type_id+'" /></td>';
-				html+= '<td><select onchange="ChangeItemType(this.value, '+itemIndex+')" class="form-control select2_'+index_boq+'_'+type_id+' line_item_type line_item_type_'+index_boq+'_'+type_id+'" name="line_item_type_'+type_id+'[]">'
-					+'<option value="{{$phpvar}}"></option>'
-					+'{{getSystemData("IT",$phpvar)}}'
-					+'</select></td>';
-				html+= '<td><select onchange="ChangeItem(this.value, '+itemIndex+')" class="form-control select2_'+index_boq+'_'+type_id+' line_item line_item_'+index_boq+'_'+type_id+'" name="line_item_'+type_id+'[]">'
-					+'<option value=""></option>'
-				+'</select></td>';
-				html+= '<td><select class="form-control select2_'+index_boq+'_'+type_id+' line_unit line_unit_'+index_boq+'_'+type_id+'" name="line_unit_'+type_id+'[]">'
-					+'<option value=""></option>'
-				+'</select></td>';
-				html+= '<td><input type="number" length="11" class="form-control line_qty_std line_qty_std_'+index_boq+'_'+type_id+'" name="line_qty_std_'+type_id+'[]" placeholder="{{trans("lang.enter_number")}}" /></td>';
-				html += '<td><input type="number" length="11" class="form-control line_qty_add line_qty_add_'+index_boq+'_'+type_id+'" name="line_qty_add_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
-				html += '<td><input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'_'+type_id+'" name="line_cost_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
-				html += '<td><a class="row_'+index_boq+'_'+type_id+' btn btn-sm" onclick="DeleteRowBOQ('+type_id+'_'+index_boq+')"><i class="fa fa-trash"></i></a></td>';
-			html+='</tr>';
-		table_boq.append(html);
-		$.fn.select2.defaults.set('theme','classic');
-			$(".select2_"+index_boq+'_'+type_id).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true,select:selected_item_type});
-			
-			$('.line_item_type_'+index_boq+'_'+type_id).select2('data', {id: selected_item_type, text: 'res_data.primary_email'});
-			// $('.line_item_type_'+index_boq+'_'+type_id).select2('selected',selected_item_type);
-			// $('.line_item_type_'+index_boq+'_'+type_id).val(selected_item_type); // Select the option with a value of '1'
-			// $('.line_item_type_'+index_boq+'_'+type_id).trigger('change');
-			// $('.line_item_'+index_boq+'_'+type_id).val(selected_item); // Select the option with a value of '1'
-			// $('.line_item_'+index_boq+'_'+type_id).trigger('change');
-	}
+	
 	function addWorkingTypeItem(row,type_id){
 		index_boq++;
 		var table_boq = $('#working_type_'+row+'_'+type_id);
@@ -568,75 +486,13 @@
 				+'</select></td>';
 				html+= '<td><input type="number" length="11" class="form-control line_qty_std line_qty_std_'+index_boq+'_'+type_id+'" name="line_qty_std_'+type_id+'[]" placeholder="{{trans("lang.enter_number")}}" /></td>';
 				html += '<td><input type="number" length="11" class="form-control line_qty_add line_qty_add_'+index_boq+'_'+type_id+'" name="line_qty_add_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
-				html += '<td><input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'_'+type_id+'" name="line_cost_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
+				html += '<td><input type="hidden" id="is_close_'+index_boq+'_'+type_id+'" name="is_close_'+type_id+'[]" value="0"/> <input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'_'+type_id+'" name="line_cost_'+type_id+'[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
 				html += '<td><a class="row_'+index_boq+'_'+type_id+' btn btn-sm" onclick="DeleteRowBOQ('+type_id+','+index_boq+')"><i class="fa fa-trash"></i></a></td>';
 			html+='</tr>';
 		table_boq.append(html);
 		$.fn.select2.defaults.set('theme','classic');
 			$(".select2_"+index_boq+'_'+type_id).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true});
 	}
-	// $('.boq-pointer').on('click', function(){
-	// 	var table_boq = $('#table_boq').DataTable();
-	// 	var line_no = table_boq.rows().count();
-	// 	if(line_no < 100){
-	// 		$(".show-message-error-boq").empty();
-	// 		table_boq.row.add([
-	// 			'<strong class="line">'+lineNo((line_no+1),3)+'</strong>'
-	// 			+'<input type="hidden" value="'+lineNo((line_no+1),3)+'" name="line_no[]" class="line_no line_no_'+index_boq+'" />',
-	// 			'<select onchange="ChangeItemType(this.value, '+index_boq+')" class="form-control select2_'+index_boq+' line_item_type line_item_type_'+index_boq+'" name="line_item_type[]">'
-	// 				+'<option value=""></option>'
-	// 				+'{{getSystemData("IT")}}'
-	// 			+'</select>',
-	// 			'<select onchange="ChangeItem(this.value, '+index_boq+')" class="form-control select2_'+index_boq+' line_item line_item_'+index_boq+'" name="line_item[]">'
-	// 				+'<option value=""></option>'
-	// 			+'</select>',
-	// 			'<select class="form-control select2_'+index_boq+' line_unit line_unit_'+index_boq+'" name="line_unit[]">'
-	// 				+'<option value=""></option>'
-	// 			+'</select>',
-	// 			'<input type="number" length="11" class="form-control line_qty_std line_qty_std_'+index_boq+'" name="line_qty_std[]" placeholder="{{trans("lang.enter_number")}}" />',
-	// 			'<input type="number" length="11" class="form-control line_qty_add line_qty_add_'+index_boq+'" name="line_qty_add[]" value="0" placeholder="{{trans("lang.enter_number")}}" />',
-	// 			'<input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'" name="line_cost[]" value="0" placeholder="{{trans("lang.enter_number")}}" />',
-	// 			'<a class="row_'+index_boq+' btn btn-sm red" onclick="DeleteRowBOQ('+index_boq+')"><i class="fa fa-times"></i></a>',
-	// 		]).draw();
-			// $.fn.select2.defaults.set('theme','classic');
-			// $(".select2_"+index_boq).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true});
-			// index_boq++;
-	// 	}else{
-	// 		$(".show-message-error-boq").html('{{trans("lang.not_more_than_100")}}!');
-	// 	}
-	// });
-
-	// $('.boq-pointer').on('click', function(){
-	// 	var table_boq = $('#table_boq');
-	// 	var line_no = table_boq;
-	// 	// if(line_no < 100){
-	// 		$(".show-message-error-boq").empty();
-	// 		html = '<tr>';
-	// 			html+= '<td><strong>'+lineNo(1+1,1)+'</strong><input type="hidden" value="'+lineNo((line_no+1),3)+'" name="line_no[]" class="line_no line_no_'+index_boq+'" /></td>';
-	// 			html+= '<td><select onchange="ChangeItemType(this.value, '+index_boq+')" class="form-control select2_'+index_boq+' line_item_type line_item_type_'+index_boq+'" name="line_item_type[]">'
-	// 				+'<option value=""></option>'
-	// 				+'{{getSystemData("IT")}}'
-	// 				+'</select></td>';
-	// 			html+= '<td><select onchange="ChangeItem(this.value, '+index_boq+')" class="form-control select2_'+index_boq+' line_item line_item_'+index_boq+'" name="line_item[]">'
-	// 				+'<option value=""></option>'
-	// 			+'</select></td>';
-	// 			html+= '<td><select class="form-control select2_'+index_boq+' line_unit line_unit_'+index_boq+'" name="line_unit[]">'
-	// 				+'<option value=""></option>'
-	// 			+'</select></td>';
-	// 			html+= '<td><input type="number" length="11" class="form-control line_qty_std line_qty_std_'+index_boq+'" name="line_qty_std[]" placeholder="{{trans("lang.enter_number")}}" /></td>';
-	// 			html += '<td><input type="number" length="11" class="form-control line_qty_add line_qty_add_'+index_boq+'" name="line_qty_add[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
-	// 			html += '<td><input type="number" length="11" class="form-control line_cost line_cost_'+index_boq+'" name="line_cost[]" value="0" placeholder="{{trans("lang.enter_number")}}" /></td>';
-	// 			html += '<td><a class="row_'+index_boq+' btn btn-sm red" onclick="DeleteRowBOQ('+index_boq+')"><i class="fa fa-times"></i></a></td>';
-	// 		html+='</tr>';
-	// 		table_boq.append(html);
-			
-	// 		$.fn.select2.defaults.set('theme','classic');
-	// 		$(".select2_"+index_boq).select2({placeholder:'{{trans("lang.please_choose")}}',width:'100%',allowClear:true});
-	// 		index_boq++;
-	// 	// }else{
-	// 	// 	$(".show-message-error-boq").html('{{trans("lang.not_more_than_100")}}!');
-	// 	// }
-	// });
 	
 	function format (d) {
         var str = '';

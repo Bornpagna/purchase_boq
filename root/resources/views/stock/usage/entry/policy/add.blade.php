@@ -182,7 +182,7 @@
                             </div>
                             <!-- Zone -->
                             @if(getSetting()->allow_zone == 1)
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="zone_id" class="control-label" style="text-align: left;"><strong>{{ trans('lang.zone') }}</strong>
                                         <span class="required"> * </span>
@@ -195,7 +195,7 @@
                             @endif
                             <!-- Block -->
                             @if(getSetting()->allow_block == 1)
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="block_id" class="control-label" style="text-align: left;"><strong>{{ trans('lang.block') }}</strong>
                                         <span class="required"> * </span>
@@ -208,13 +208,24 @@
                             @endif
 
                             <!-- Building -->
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="building_id" class="control-label"><strong>{{ trans('lang.building') }}</strong>
                                         <span class="required"> * </span>
                                     </label>
                                     <select class="form-control select2 building_id" id="building_id" name="building_id">
                                         
+                                    </select>
+                                    <span class="help-block font-red bold"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="working_type_id" class="control-label"><strong>{{ trans('lang.working_type') }}</strong>
+                                        <span class="required"> * </span>
+                                    </label>
+                                    <select class="form-control select2 working_type_id" id="working_type_id" name="working_type_id[]" multiple>
+                                        {{getSystemData("WK")}}
                                     </select>
                                     <span class="help-block font-red bold"></span>
                                 </div>
@@ -1559,20 +1570,23 @@
 
     $("#load-boq-item").on("click",function(){
         
+        
 		var params = {
 			zone_id: null,
 			block_id: null,
 			building_id : null,
 			street_id: null,
 			house_type: null,
-            warehouse : null
+            warehouse : null,
+            working_type : null,
 		};
 		const zoneID    = $('#zone_id').val();
 		const blockID   = $('#block_id').val();
 		const buildingID    = $('#building_id').val();
 		const streetID  = $('#street_id').val();
 		const houseType = $('#house_type_id').val();
-        const warehouse = $('#warehouse_id').val();
+        const wareHouse = $('#warehouse_id').val();
+        const workingType = $("#working_type_id").val();
 
 		if(zoneID){
 			params.zone_id = zoneID;
@@ -1592,26 +1606,33 @@
 		if(houseType){
 			params.house_type = houseType;
 		}
-        // if(){
-        //     params.warehouse = warehouse;
-        // }
-        var html = "<tr ><td colspan='10'><div class='loader'></div></td></tr>";
-        $("#table-income tbody").append(html);
-		$.ajax({
-			url :'{{url("repository/getBoqItems")}}',
-			type:'GET',
-			data:params,
-			success:function(data){
-                $("#table-income tbody").empty();
-				$.each(data,function(key, val){
-                    index++;
-					loadWorkingTypeItem(val,index);
+        if(workingType){
+            params.working_type = workingType;
+        }
+        if(wareHouse){
+            params.warehouse = wareHouse;
+        }
+        if(zoneID && blockID && buildingID && wareHouse){
+            var html = "<tr ><td colspan='10'><div class='loader'></div></td></tr>";
+            $("#table-income tbody").append(html);
+            $.ajax({
+                url :'{{url("repository/getBoqItems")}}',
+                type:'GET',
+                data:params,
+                success:function(data){
+                    $("#table-income tbody").empty();
+                    $.each(data,function(key, val){
+                        index++;
+                        loadWorkingTypeItem(val,index);
+                        
+                    });
+                },error:function(){
                     
-				});
-			},error:function(){
-				
-			}
-		});
+                }
+            });
+        }else{
+            console.log(111);
+        }
 	});
 
     function loadWorkingTypeItem(data,index){
